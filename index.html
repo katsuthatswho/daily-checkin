@@ -65,7 +65,7 @@ function multi(id){
   }
 }
 multi('#wins'); multi('#effects'); multi('#drops');
-function toggleDropoff(){let yes=val('dropoff')==='Yes';$('#dropdetails').classList.toggle('hide',!yes);if(!yes){$('#droptime').value='';$('#drops .sel').forEach(x=>x.classList.remove('sel'))}}
+function toggleDropoff(){let yes=val('dropoff')==='Yes';$('#dropdetails').classList.toggle('hide',!yes);if(!yes){$('#droptime').value='';$$('#drops .sel').forEach(x=>x.classList.remove('sel'))}}
 
 const doses={
 'Vyvanse (lisdexamfetamine)':['20 mg','30 mg','40 mg','50 mg','60 mg','70 mg'],
@@ -111,8 +111,8 @@ $('#sk').onclick=()=>{
   sleep:val('sleep'),treatment_notes:$('#tn').value.trim(),
   getting_started:val('start'),attention_control:val('attention'),side_quest_control:val('sidequests'),
   finishing:val('finish'),switching:val('switching'),impulse_restlessness_control:val('regulation'),
-  life_outside_work:$('#wins .sel').map(x=>x.dataset.v),work_crowding:val('crowd'),
-  dropoff:val('dropoff'),dropoff_time:val('dropoff')==='Yes'?$('#droptime').value:'',dropoff_changes:val('dropoff')==='Yes'?$('#drops .sel').map(x=>x.dataset.v):[],
+  life_outside_work:$$('#wins .sel').map(x=>x.dataset.v),work_crowding:val('crowd'),
+  dropoff:val('dropoff'),dropoff_time:val('dropoff')==='Yes'?$('#droptime').value:'',dropoff_changes:val('dropoff')==='Yes'?$$('#drops .sel').map(x=>x.dataset.v):[],
   side_effect_severity:val('side'),side_effects:$$('#effects .sel').map(x=>x.dataset.v),
   note:$('#kn').value.trim()
  };
