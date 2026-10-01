@@ -93,15 +93,15 @@ $('#med').onchange=()=>{st.medication=$('#med').value;st.dose='';fillDoses();set
 $('#dose').onchange=()=>{st.dose=$('#dose').value;set(S,st)};
 
 const qs=[
-['start_obs','Getting started?'],
-['attention_obs','Staying on track?'],
-['sidequest_obs','Fewer side quests?'],
-['finish_obs','Finishing things?'],
-['switch_obs','Stopping & switching?'],
-['regulation_obs','Pause & restlessness?'],
-['life_obs','Life outside work?']
+['start_obs','Getting going','Did they seem less stuck getting started on ordinary things you could observe?'],
+['attention_obs','Staying present','When you were together, did they seem better able to stay with a conversation or what they were doing?'],
+['sidequest_obs','Getting sidetracked','Did you notice fewer detours, forgotten intentions or things turning into unrelated side quests?'],
+['finish_obs','Following through','On things you could actually see, did they seem more likely to follow through rather than leave them half-done?'],
+['switch_obs','Stopping & switching','When it was time to stop, leave, change plans or move to something else, did they seem able to switch more easily?'],
+['regulation_obs','Reacting & restlessness','Did they seem better able to pause before reacting, or less driven by restlessness or stimulation-seeking?'],
+['life_obs','Everyday life','Did they seem to have more capacity for everyday life — home tasks, meals, plans, people or downtime?']
 ],opts=['Worse','Same','A little better','Clearly better','Not sure'];
-$('#pq').innerHTML=qs.map(([k,q])=>'<div class="card"><div class="label">'+q+'</div><div class="row" data-g="'+k+'">'+opts.map(o=>'<button class="c" data-v="'+o+'">'+o+'</button>').join('')+'</div></div>').join('');
+$('#pq').innerHTML=qs.map(([k,q,help])=>'<div class="card"><div class="label">'+q+' <details class="help"><summary>?</summary><div class="hint">'+help+'</div></details></div><div class="row" data-g="'+k+'">'+opts.map(o=>'<button class="c" data-v="'+o+'">'+o+'</button>').join('')+'</div></div>').join('');
 
 function flash(s){$(s).style.display='block';setTimeout(()=>$(s).style.display='none',1800)}
 $('#sk').onclick=()=>{
