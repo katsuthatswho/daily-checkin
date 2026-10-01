@@ -30,15 +30,20 @@
 
 <div class="card"><div class="label">Did work crowd out things you intended to do outside work?</div><div class="row" data-g="crowd"><button class="c" data-v="0">Not at all</button><button class="c" data-v="1">A little</button><button class="c" data-v="2">Somewhat</button><button class="c" data-v="3">A lot</button><button class="c" data-v="4">Completely</button></div></div>
 
+<div class="card"><div class="label">Noticeable drop-off</div><div class="hint">Did you notice a clear drop in focus, regulation or energy later in the day?</div><div class="row" data-g="dropoff"><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button><button class="c grow" data-v="Yes">Yes</button></div><div id="dropdetails" class="hide" style="margin-top:12px"><div class="hint">About what time?</div><input id="droptime" type="time"><div class="hint" style="margin-top:10px">What changed? Select all that apply.</div><div class="row" id="drops"><button class="c" data-v="Focus">Focus</button><button class="c" data-v="Energy">Energy</button><button class="c" data-v="Irritability / mood">Irritability / mood</button><button class="c" data-v="Restlessness">Restlessness</button><button class="c" data-v="Impulse control">Impulse control</button><button class="c" data-v="Other">Other</button></div></div></div>
+
 <div class="card"><div class="label">Side effects</div><div class="row" data-g="side"><button class="c" data-v="None">None</button><button class="c" data-v="Mild">Mild</button><button class="c" data-v="Moderate">Moderate</button><button class="c" data-v="Significant">Significant</button></div><div class="hint" style="margin-top:12px">Anything specific? Select all that apply.</div><div class="row" id="effects"><button class="c" data-v="Appetite">Appetite</button><button class="c" data-v="Sleep">Sleep</button><button class="c" data-v="Headache">Headache</button><button class="c" data-v="Jittery / anxious">Jittery / anxious</button><button class="c" data-v="Irritable">Irritable</button><button class="c" data-v="Heart / racing feeling">Heart / racing feeling</button><button class="c" data-v="Other">Other</button></div></div>
 
 <div class="card"><div class="label">Anything worth remembering?</div><textarea id="kn" placeholder="Optional. A win, weird side quest, crash, unusually good day..."></textarea></div>
 <button class="save" id="sk">Save today</button>
 
 <details class="card"><summary>Data & export</summary><div id="kh"></div><button class="secondary" id="mk">Copy as Markdown</button><button class="secondary" id="ck">Export my check-ins</button><button class="secondary" id="bk">Export full backup</button></details></section>
-<section id="p" class="hide"><h1>Partner's weekly check-in</h1><div class="sub">Once a week. What did you actually notice?</div><div class="ok" id="po">Saved. Done for this week.</div><div id="pq"></div>
-<div class="card"><div class="label">Still seems like themselves?</div><div class="row" data-g="self"><button class="c grow" data-v="Yes">Yes</button><button class="c grow" data-v="Mostly">Mostly</button><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button></div></div>
-<div class="card"><div class="label">Anything else you noticed?</div><textarea id="pn" placeholder="Optional"></textarea></div><button class="save" id="sp">Save weekly check-in</button><details class="card"><summary>Data & export</summary><div id="ph"></div><button class="secondary" id="mp">Copy as Markdown</button><button class="secondary" id="cp">Export partner check-ins</button></details></section>
+<section id="p" class="hide"><h1>Partner check-in</h1><div class="sub">A quick outside view. Answer based on what you actually noticed, not what you expected to change.</div><div class="ok" id="po">Saved on this device ✓</div>
+<div id="pq"></div>
+<div class="card"><div class="label">Still seemed like themselves?</div><div class="row" data-g="self"><button class="c grow" data-v="Yes">Yes</button><button class="c grow" data-v="Mostly">Mostly</button><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button></div></div>
+<div class="card"><div class="label">Anything else you noticed?</div><textarea id="pn" placeholder="Optional"></textarea></div>
+<button class="save" id="sp">Save partner check-in</button>
+<details class="card"><summary>Data & export</summary><div id="ph"></div><button class="secondary" id="mp">Copy as Markdown</button><button class="secondary" id="cp">Export partner check-ins</button></details></section>
 <footer>Entries stay on this device unless you export them.</footer></main><script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='my_daily_v4',P='partner_weekly_v3',S='tracker_settings_v3';
@@ -50,7 +55,7 @@ document.addEventListener('click',e=>{
   let b=e.target.closest('[data-g] .c'); if(!b)return;
   let g=b.parentElement.dataset.g;
   $$('[data-g="'+g+'"] .c').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
-  if(g==='medtoday') toggleMedication();
+  if(g==='medtoday') toggleMedication(); if(g==='dropoff') toggleDropoff();
 });
 function multi(id){
   $(id).onclick=e=>{
@@ -59,7 +64,8 @@ function multi(id){
     else{let n=$(id+' [data-v="None"]');if(n)n.classList.remove('sel');b.classList.toggle('sel')}
   }
 }
-multi('#wins'); multi('#effects');
+multi('#wins'); multi('#effects'); multi('#drops');
+function toggleDropoff(){let yes=val('dropoff')==='Yes';$('#dropdetails').classList.toggle('hide',!yes);if(!yes){$('#droptime').value='';$('#drops .sel').forEach(x=>x.classList.remove('sel'))}}
 
 const doses={
 'Vyvanse (lisdexamfetamine)':['20 mg','30 mg','40 mg','50 mg','60 mg','70 mg'],
@@ -84,7 +90,15 @@ function toggleMedication(){
 $('#med').onchange=()=>{st.medication=$('#med').value;st.dose='';fillDoses();set(S,st)};
 $('#dose').onchange=()=>{st.dose=$('#dose').value;set(S,st)};
 
-const qs=[['pull','Easier to pull away from work?'],['present','More present with me?'],['everyday','Getting everyday things done more easily?'],['mood','Any noticeable change in mood or reactivity?']],opts=['Worse','Same','A little better','Clearly better','Not sure'];
+const qs=[
+['start_obs','Getting started without getting stuck?'],
+['attention_obs','Staying with what they meant to be doing?'],
+['sidequest_obs','Fewer detours, rabbit holes or side adventures?'],
+['finish_obs','Following through and actually finishing things?'],
+['switch_obs','Stopping or switching when it was time to move on?'],
+['regulation_obs','Pausing before reacting and managing restlessness?'],
+['life_obs','Making room for everyday life outside work?']
+],opts=['Worse','Same','A little better','Clearly better','Not sure'];
 $('#pq').innerHTML=qs.map(([k,q])=>'<div class="card"><div class="label">'+q+'</div><div class="row" data-g="'+k+'">'+opts.map(o=>'<button class="c" data-v="'+o+'">'+o+'</button>').join('')+'</div></div>').join('');
 
 function flash(s){$(s).style.display='block';setTimeout(()=>$(s).style.display='none',1800)}
@@ -97,14 +111,15 @@ $('#sk').onclick=()=>{
   sleep:val('sleep'),treatment_notes:$('#tn').value.trim(),
   getting_started:val('start'),attention_control:val('attention'),side_quest_control:val('sidequests'),
   finishing:val('finish'),switching:val('switching'),impulse_restlessness_control:val('regulation'),
-  life_outside_work:$$('#wins .sel').map(x=>x.dataset.v),work_crowding:val('crowd'),
+  life_outside_work:$('#wins .sel').map(x=>x.dataset.v),work_crowding:val('crowd'),
+  dropoff:val('dropoff'),dropoff_time:val('dropoff')==='Yes'?$('#droptime').value:'',dropoff_changes:val('dropoff')==='Yes'?$('#drops .sel').map(x=>x.dataset.v):[],
   side_effect_severity:val('side'),side_effects:$$('#effects .sel').map(x=>x.dataset.v),
   note:$('#kn').value.trim()
  };
  let a=get(K,[]);a.push(r);set(K,a);flash('#ko');
- $$('#k .sel').forEach(x=>x.classList.remove('sel'));$('#kn').value='';$('#tn').value='';$('#medtime').value='';toggleMedication();render()
+ $$('#k .sel').forEach(x=>x.classList.remove('sel'));$('#kn').value='';$('#tn').value='';$('#medtime').value='';$('#droptime').value='';toggleMedication();toggleDropoff();render()
 };
-$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:new Date().toLocaleDateString('en-CA')};qs.forEach(([k])=>r[k]=val(k));r.still_herself=val('self');r.note=$('#pn').value.trim();let a=get(P,[]);a.push(r);set(P,a);flash('#po');$$('#p .sel').forEach(x=>x.classList.remove('sel'));$('#pn').value='';render()};
+$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:new Date().toLocaleDateString('en-CA')};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();let a=get(P,[]);a.push(r);set(P,a);flash('#po');$$('#p .sel').forEach(x=>x.classList.remove('sel'));$('#pn').value='';render()};
 
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
@@ -119,18 +134,21 @@ function mdMine(rows){
   let fx=Array.isArray(r.side_effects)&&r.side_effects.length?r.side_effects.join(', '):'—';
   return '## '+r.date+'\n- **Medication:** '+tx+'\n- **Sleep:** '+(r.sleep||'—')+
   '\n- **Getting started:** '+(r.getting_started||'—')+'/4\n- **Attention control:** '+(r.attention_control||'—')+'/4\n- **Side-quest control:** '+(r.side_quest_control||'—')+'/4\n- **Finishing:** '+(r.finishing||'—')+'/4\n- **Stopping & switching:** '+(r.switching||'—')+'/4\n- **Impulse/restlessness control:** '+(r.impulse_restlessness_control||'—')+'/4'+
-  '\n- **Life outside work:** '+life+'\n- **Work crowding:** '+(r.work_crowding||'—')+'/4\n- **Side effects:** '+(r.side_effect_severity||'—')+' ('+fx+')'+
+  '\n- **Life outside work:** '+life+'\n- **Work crowding:** '+(r.work_crowding||'—')+'/4\n- **Drop-off:** '+(r.dropoff||'—')+(r.dropoff_time?' at '+r.dropoff_time:'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' ('+r.dropoff_changes.join(', ')+')':'')+'\n- **Side effects:** '+(r.side_effect_severity||'—')+' ('+fx+')'+
   (r.treatment_notes?'\n- **Treatment notes:** '+r.treatment_notes:'')+(r.note?'\n- **Notes:** '+r.note:'')
  }).join('\n\n')
 }
-function mdPartner(rows){if(!rows.length)return '# Partner Check-ins\n\nNo entries yet.';return '# Partner Check-ins\n\n'+rows.map(r=>'## '+r.date+'\n- **Easier to pull away from work:** '+(r.pull||'—')+'\n- **More present:** '+(r.present||'—')+'\n- **Everyday things easier:** '+(r.everyday||'—')+'\n- **Mood / reactivity:** '+(r.mood||'—')+'\n- **Still seems like themselves:** '+(r.still_herself||'—')+(r.note?'\n- **Notes:** '+r.note:'')).join('\n\n')}
+function mdPartner(rows){
+ if(!rows.length)return '# Partner Check-ins\n\nNo entries yet.';
+ return '# Partner Check-ins\n\n'+rows.map(r=>'## '+r.date+'\n'+qs.map(([k,q])=>'- **'+q+'** '+(r[k]||'—')).join('\n')+'\n- **Still seemed like themselves:** '+(r.still_themselves||r.still_herself||'—')+(r.note?'\n- **Notes:** '+r.note:'')).join('\n\n')
+}
 async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}let o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1800)}
 $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
 
 function render(){
  let k=get(K,[]).slice().reverse().slice(0,7);
  $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+(r.getting_started||'—')+'/4 · Attention '+(r.attention_control||'—')+'/4 · Side quests '+(r.side_quest_control||'—')+'/4 · Finish '+(r.finishing||'—')+'/4</span></div>').join(''):'<p class="muted">No entries yet.</p>';
- let p=get(P,[]).slice().reverse().slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Pull away: '+(r.pull||'—')+' · Everyday: '+(r.everyday||'—')+' · Themselves: '+(r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
+ let p=get(P,[]).slice().reverse().slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Start: '+(r.start_obs||'—')+' · Finish: '+(r.finish_obs||'—')+' · Life: '+(r.life_obs||'—')+' · Themselves: '+(r.still_themselves||r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
 }
 render();
 $('#kt').onclick=()=>{$('#k').classList.remove('hide');$('#p').classList.add('hide');$('#kt').classList.add('on');$('#pt').classList.remove('on')};
