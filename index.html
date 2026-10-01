@@ -150,7 +150,7 @@ $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>cop
 
 function render(){
  let k=get(K,[]).slice().reverse().slice(0,7);
- $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+(r.getting_started||'—') · Attention '+(r.attention_control||'—') · Side quests '+(r.side_quest_control||'—') · Finish '+(r.finishing||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>';
+ $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+(r.getting_started||'—')+' · Attention '+(r.attention_control||'—') · Side quests '+(r.side_quest_control||'—') · Finish '+(r.finishing||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>';
  let p=get(P,[]).slice().reverse().slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Start: '+(r.start_obs||'—')+' · Finish: '+(r.finish_obs||'—')+' · Life: '+(r.life_obs||'—')+' · Themselves: '+(r.still_themselves||r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
 }
 render();
