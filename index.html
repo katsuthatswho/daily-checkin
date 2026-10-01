@@ -1,95 +1,139 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111827"><title>Daily Check-in</title><link rel="manifest" href="manifest.webmanifest"><style>
-*{box-sizing:border-box}body{margin:0;background:#f6f7f9;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.w{max-width:560px;margin:auto;padding:12px 14px 80px}.tabs{display:flex;gap:6px;position:sticky;top:0;padding:8px 0;background:#f6f7f9}.tabs button,.c{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:11px;font-size:14px}.tabs button{flex:1;font-weight:750}.on,.sel{background:#111827!important;color:#fff!important;border-color:#111827!important}h1{font-size:26px;margin:12px 0 2px}.sub,.hint{color:#6b7280;font-size:12px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:14px;margin:10px 0}.label{font-weight:750;margin-bottom:9px}.row{display:flex;gap:7px;flex-wrap:wrap}.c{min-height:44px}.grow{flex:1}input[type=range]{width:100%}.scale{display:flex;justify-content:space-between;color:#6b7280;font-size:12px}textarea,input,select{width:100%;border:1px solid #e5e7eb;border-radius:11px;padding:11px;font-size:16px;background:#fff}textarea{min-height:70px}.save{width:100%;border:0;background:#111827;color:white;border-radius:14px;padding:15px;font-size:16px;font-weight:800}.ok{display:none;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:13px;padding:12px;margin:10px 0;font-weight:700}.hide{display:none}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}summary{font-weight:750}.secondary{width:100%;border:1px solid #e5e7eb;background:#fff;border-radius:11px;padding:11px;margin-top:8px;font-weight:700}.hist{font-size:13px;border-top:1px solid #e5e7eb;padding:9px 0}.muted{color:#6b7280}footer{text-align:center;color:#6b7280;font-size:11px;margin-top:18px}
+*{box-sizing:border-box}body{margin:0;background:#f6f7f9;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.w{max-width:560px;margin:auto;padding:12px 14px 80px}.tabs{display:flex;gap:6px;position:sticky;top:0;padding:8px 0;background:#f6f7f9}.tabs button,.c{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:11px;font-size:14px}.tabs button{flex:1;font-weight:750}.on,.sel{background:#111827!important;color:#fff!important;border-color:#111827!important}h1{font-size:26px;margin:12px 0 2px}.sub,.hint{color:#6b7280;font-size:12px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:14px;margin:10px 0}.label{font-weight:750;margin-bottom:9px}.row{display:flex;gap:7px;flex-wrap:wrap}.scale5 .c{flex:1;min-width:42px}.c{min-height:44px}.grow{flex:1}input[type=range]{width:100%}.scale{display:flex;justify-content:space-between;color:#6b7280;font-size:12px}textarea,input,select{width:100%;border:1px solid #e5e7eb;border-radius:11px;padding:11px;font-size:16px;background:#fff}textarea{min-height:70px}.save{width:100%;border:0;background:#111827;color:white;border-radius:14px;padding:15px;font-size:16px;font-weight:800}.ok{display:none;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:13px;padding:12px;margin:10px 0;font-weight:700}.hide{display:none}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}summary{font-weight:750}.secondary{width:100%;border:1px solid #e5e7eb;background:#fff;border-radius:11px;padding:11px;margin-top:8px;font-weight:700}.hist{font-size:13px;border-top:1px solid #e5e7eb;padding:9px 0}.muted{color:#6b7280}footer{text-align:center;color:#6b7280;font-size:11px;margin-top:18px}
 </style></head><body><main class="w"><div class="tabs"><button id="kt" class="on">My check-in</button><button id="pt">Partner</button></div>
-<section id="k"><h1>Daily check-in</h1><div class="sub" id="date"></div><div class="ok" id="ko">Saved. Done for today.</div>
-<div class="card"><div class="label">Stopped work when intended?</div><div class="row" data-g="stop"><button class="c grow" data-v="Yes">Yes</button><button class="c grow" data-v="No">No</button><button class="c grow" data-v="N/A">N/A</button></div></div>
-<div class="card"><div class="label">Starting things today</div><div class="row" data-g="start"><button class="c grow" data-v="Hard">Hard</button><button class="c grow" data-v="Okay">Okay</button><button class="c grow" data-v="Easy">Easy</button></div></div>
-<div class="card"><div class="label">Attention control</div><div class="hint">How easy was it to direct or redirect your attention?</div><input id="att" type="range" min="0" max="10" value="5"><div class="scale"><span>0</span><b id="av">5</b><span>10</span></div></div><div class="card"><div class="label">Restlessness</div><div class="hint">How restless did you feel today?</div><div class="row" data-g="restless"><button class="c grow" data-v="Less than usual">Less than usual</button><button class="c grow" data-v="Usual">Usual</button><button class="c grow" data-v="More than usual">More than usual</button></div></div><div class="card"><div class="label">Pausing before acting or speaking</div><div class="hint">How easy was it to pause before acting or speaking?</div><div class="row" data-g="impulse"><button class="c grow" data-v="Hard">Hard</button><button class="c grow" data-v="Okay">Okay</button><button class="c grow" data-v="Easy">Easy</button></div></div>
-<div class="card"><div class="label">Life outside work</div><div class="row" id="wins"><button class="c" data-v="Dogs">Dogs</button><button class="c" data-v="Cooked">Cooked</button><button class="c" data-v="Exercise">Exercise</button><button class="c" data-v="House stuff">House stuff</button><button class="c" data-v="Social">Social</button><button class="c" data-v="None">None</button></div></div>
-<div class="card"><div class="label">Side effects</div><div class="row" data-g="side"><button class="c" data-v="None">None</button><button class="c" data-v="Mild">Mild</button><button class="c" data-v="Noticeable">Noticeable</button><button class="c" data-v="Significant">Significant</button></div></div>
-<div class="card"><div class="label">Anything unusual?</div><textarea id="kn" placeholder="Optional"></textarea></div><button class="save" id="sk">Save today</button>
-<details class="card"><summary>Treatment details</summary><div style="margin-top:10px"><div class="hint">Phase</div><select id="phase"><option>Baseline</option><option>Medication</option><option>Other</option></select></div><div id="medwrap" style="margin-top:10px"><div class="hint">Medication</div><select id="med"><option value="">Select medication</option><option>Vyvanse (lisdexamfetamine)</option><option>Concerta / long-acting methylphenidate</option><option>Ritalin LA</option><option>Ritalin immediate-release</option><option>Dexamfetamine</option><option>Other</option></select></div><div id="dosewrap" style="margin-top:10px"><div class="hint">Dose</div><select id="dose"><option value="">Select dose</option></select></div><div style="margin-top:10px"><div class="hint">Private treatment notes</div><textarea id="tn" placeholder="Optional"></textarea></div><div class="hint" style="margin-top:8px">Treatment details stay tucked away here and are included in your export.</div></details>
+<section id="k"><h1>Daily check-in</h1><div class="sub" id="date"></div><div class="ok" id="ko">Saved on this device ✓</div>
+
+<details class="card"><summary>Today's context</summary>
+<div style="margin-top:10px"><div class="label">Did you take ADHD medication today?</div><div class="row" data-g="medtoday"><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Yes">Yes</button></div></div>
+<div id="meddetails" class="hide">
+<div style="margin-top:12px"><div class="hint">Medication</div><select id="med"><option value="">Select medication</option><option>Vyvanse (lisdexamfetamine)</option><option>Concerta / long-acting methylphenidate</option><option>Ritalin LA</option><option>Ritalin immediate-release</option><option>Dexamfetamine</option><option>Other</option></select></div>
+<div style="margin-top:10px"><div class="hint">Dose</div><select id="dose"><option value="">Select dose</option></select></div>
+<div style="margin-top:10px"><div class="hint">Time taken</div><input id="medtime" type="time"></div>
+</div>
+<div style="margin-top:12px"><div class="label">Last night's sleep</div><div class="row" data-g="sleep"><button class="c" data-v="Poor">Poor</button><button class="c" data-v="Below usual">Below usual</button><button class="c" data-v="Usual">Usual</button><button class="c" data-v="Good">Good</button><button class="c" data-v="Great">Great</button></div></div>
+<div style="margin-top:10px"><div class="hint">Treatment notes</div><textarea id="tn" placeholder="Optional"></textarea></div>
+</details>
+
+<div class="card"><div class="label">Getting started</div><div class="hint">When you knew what you wanted or needed to do, how easily did you actually start?</div><div class="row scale5" data-g="start"><button class="c" data-v="0">0</button><button class="c" data-v="1">1</button><button class="c" data-v="2">2</button><button class="c" data-v="3">3</button><button class="c" data-v="4">4</button></div><div class="scale"><span>Couldn't get going</span><span>Just started</span></div></div>
+
+<div class="card"><div class="label">Staying on the thing</div><div class="hint">Once you started, how well could you keep your attention on what you meant to be doing?</div><div class="row scale5" data-g="attention"><button class="c" data-v="0">0</button><button class="c" data-v="1">1</button><button class="c" data-v="2">2</button><button class="c" data-v="3">3</button><button class="c" data-v="4">4</button></div><div class="scale"><span>Constantly pulled away</span><span>Stayed with it</span></div></div>
+
+<div class="card"><div class="label">Side quests / rabbit holes</div><div class="hint">How well did you resist one task turning into unrelated tasks, research or adventures?</div><div class="row scale5" data-g="sidequests"><button class="c" data-v="0">0</button><button class="c" data-v="1">1</button><button class="c" data-v="2">2</button><button class="c" data-v="3">3</button><button class="c" data-v="4">4</button></div><div class="scale"><span>Constant detours</span><span>Stayed on course</span></div></div>
+
+<div class="card"><div class="label">Finishing things</div><div class="hint">How well did you follow through and finish what you started, including the boring last bits?</div><div class="row scale5" data-g="finish"><button class="c" data-v="0">0</button><button class="c" data-v="1">1</button><button class="c" data-v="2">2</button><button class="c" data-v="3">3</button><button class="c" data-v="4">4</button></div><div class="scale"><span>Left things unfinished</span><span>Closed the loop</span></div></div>
+
+<div class="card"><div class="label">Stopping & switching</div><div class="hint">When it was time to stop or move on, how easily could you pull yourself away and switch?</div><div class="row scale5" data-g="switching"><button class="c" data-v="0">0</button><button class="c" data-v="1">1</button><button class="c" data-v="2">2</button><button class="c" data-v="3">3</button><button class="c" data-v="4">4</button></div><div class="scale"><span>Couldn't pull away</span><span>Switched when I chose</span></div></div>
+
+<div class="card"><div class="label">Pause & restlessness</div><div class="hint">How manageable were impulses, blurting/reacting, fidgeting or the need to chase stimulation?</div><div class="row scale5" data-g="regulation"><button class="c" data-v="0">0</button><button class="c" data-v="1">1</button><button class="c" data-v="2">2</button><button class="c" data-v="3">3</button><button class="c" data-v="4">4</button></div><div class="scale"><span>Ran the show</span><span>Easy to manage</span></div></div>
+
+<div class="card"><div class="label">Life outside work</div><div class="hint">What did you actually get to today? Select all that apply.</div><div class="row" id="wins"><button class="c" data-v="Caring duties">Caring duties</button><button class="c" data-v="House / laundry">House / laundry</button><button class="c" data-v="Life admin">Life admin</button><button class="c" data-v="Food / cooking">Food / cooking</button><button class="c" data-v="Exercise">Exercise</button><button class="c" data-v="Social">Social</button><button class="c" data-v="Personal / hobby">Personal / hobby</button><button class="c" data-v="None">None</button></div></div>
+
+<div class="card"><div class="label">Did work crowd out things you intended to do outside work?</div><div class="row" data-g="crowd"><button class="c" data-v="0">Not at all</button><button class="c" data-v="1">A little</button><button class="c" data-v="2">Somewhat</button><button class="c" data-v="3">A lot</button><button class="c" data-v="4">Completely</button></div></div>
+
+<div class="card"><div class="label">Side effects</div><div class="row" data-g="side"><button class="c" data-v="None">None</button><button class="c" data-v="Mild">Mild</button><button class="c" data-v="Moderate">Moderate</button><button class="c" data-v="Significant">Significant</button></div><div class="hint" style="margin-top:12px">Anything specific? Select all that apply.</div><div class="row" id="effects"><button class="c" data-v="Appetite">Appetite</button><button class="c" data-v="Sleep">Sleep</button><button class="c" data-v="Headache">Headache</button><button class="c" data-v="Jittery / anxious">Jittery / anxious</button><button class="c" data-v="Irritable">Irritable</button><button class="c" data-v="Heart / racing feeling">Heart / racing feeling</button><button class="c" data-v="Other">Other</button></div></div>
+
+<div class="card"><div class="label">Anything worth remembering?</div><textarea id="kn" placeholder="Optional. A win, weird side quest, crash, unusually good day..."></textarea></div>
+<button class="save" id="sk">Save today</button>
+
 <details class="card"><summary>Data & export</summary><div id="kh"></div><button class="secondary" id="mk">Copy as Markdown</button><button class="secondary" id="ck">Export my check-ins</button><button class="secondary" id="bk">Export full backup</button></details></section>
 <section id="p" class="hide"><h1>Partner's weekly check-in</h1><div class="sub">Once a week. What did you actually notice?</div><div class="ok" id="po">Saved. Done for this week.</div><div id="pq"></div>
 <div class="card"><div class="label">Still seems like themselves?</div><div class="row" data-g="self"><button class="c grow" data-v="Yes">Yes</button><button class="c grow" data-v="Mostly">Mostly</button><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button></div></div>
 <div class="card"><div class="label">Anything else you noticed?</div><textarea id="pn" placeholder="Optional"></textarea></div><button class="save" id="sp">Save weekly check-in</button><details class="card"><summary>Data & export</summary><div id="ph"></div><button class="secondary" id="mp">Copy as Markdown</button><button class="secondary" id="cp">Export partner check-ins</button></details></section>
 <footer>Entries stay on this device unless you export them.</footer></main><script>
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],K='my_daily_v3',P='partner_weekly_v3',S='tracker_settings_v2',get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));$('#date').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-document.addEventListener('click',e=>{let b=e.target.closest('[data-g] .c');if(!b)return;let g=b.parentElement.dataset.g;$$('[data-g="'+g+'"] .c').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')});$('#wins').onclick=e=>{let b=e.target.closest('.c');if(!b)return;if(b.dataset.v==='None'){$$('#wins .c').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')}else{$('#wins [data-v="None"]').classList.remove('sel');b.classList.toggle('sel')}};$('#att').oninput=e=>$('#av').textContent=e.target.value;const val=g=>{let x=$('[data-g="'+g+'"] .sel');return x?x.dataset.v:''};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const K='my_daily_v4',P='partner_weekly_v3',S='tracker_settings_v3';
+const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+$('#date').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+const val=g=>{let x=$('[data-g="'+g+'"] .sel');return x?x.dataset.v:''};
+
+document.addEventListener('click',e=>{
+  let b=e.target.closest('[data-g] .c'); if(!b)return;
+  let g=b.parentElement.dataset.g;
+  $$('[data-g="'+g+'"] .c').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
+  if(g==='medtoday') toggleMedication();
+});
+function multi(id){
+  $(id).onclick=e=>{
+    let b=e.target.closest('.c');if(!b)return;
+    if(b.dataset.v==='None'){$$(id+' .c').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')}
+    else{let n=$(id+' [data-v="None"]');if(n)n.classList.remove('sel');b.classList.toggle('sel')}
+  }
+}
+multi('#wins'); multi('#effects');
+
 const doses={
 'Vyvanse (lisdexamfetamine)':['20 mg','30 mg','40 mg','50 mg','60 mg','70 mg'],
 'Concerta / long-acting methylphenidate':['18 mg','27 mg','36 mg','54 mg'],
 'Ritalin LA':['10 mg','20 mg','30 mg','40 mg','60 mg'],
-'Ritalin immediate-release':['5 mg','10 mg','15 mg','20 mg','Other'],
-'Dexamfetamine':['2.5 mg','5 mg','7.5 mg','10 mg','15 mg','20 mg','Other'],
+'Ritalin immediate-release':['10 mg','Other'],
+'Dexamfetamine':['5 mg','Other'],
 'Other':['Other']
 };
-let st=get(S,{phase:'Baseline',medication:'',dose:''});
-$('#phase').value=st.phase;
+let st=get(S,{medication:'',dose:''});
 $('#med').value=st.medication||'';
 function fillDoses(){
-  let med=$('#med').value, opts=doses[med]||['Other'];
-  $('#dose').innerHTML='<option value="">Select dose</option>'+opts.map(x=>'<option>'+x+'</option>').join('');
-  if(opts.includes(st.dose)) $('#dose').value=st.dose;
+ let med=$('#med').value,opts=doses[med]||['Other'];
+ $('#dose').innerHTML='<option value="">Select dose</option>'+opts.map(x=>'<option>'+x+'</option>').join('');
+ if(opts.includes(st.dose))$('#dose').value=st.dose;
 }
-function ss(){
-  let baseline=$('#phase').value==='Baseline';
-  $('#med').disabled=baseline;$('#dose').disabled=baseline;
-  if(baseline){$('#med').value='';$('#dose').innerHTML='<option value="">Select dose</option>'}
-  else fillDoses();
-  set(S,{phase:$('#phase').value,medication:$('#med').value,dose:$('#dose').value})
+fillDoses();
+function toggleMedication(){
+ let yes=val('medtoday')==='Yes';
+ $('#meddetails').classList.toggle('hide',!yes);
 }
-fillDoses(); if(st.dose) $('#dose').value=st.dose;
-$('#phase').onchange=ss;
-$('#med').onchange=()=>{st.dose='';fillDoses();ss()};
-$('#dose').onchange=ss;
-const qs=[['pull','Easier to pull away from work?'],['present','More present with me?'],['everyday','Getting everyday things done more easily?'],['mood','Any noticeable change in mood or reactivity?']],opts=['Worse','Same','A little better','Clearly better','Not sure'];$('#pq').innerHTML=qs.map(([k,q])=>'<div class="card"><div class="label">'+q+'</div><div class="row" data-g="'+k+'">'+opts.map(o=>'<button class="c" data-v="'+o+'">'+o+'</button>').join('')+'</div></div>').join('');
-function flash(s){$(s).style.display='block';setTimeout(()=>$(s).style.display='none',1800)}$('#sk').onclick=()=>{let r={timestamp:new Date().toISOString(),date:new Date().toLocaleDateString('en-CA'),phase:$('#phase').value,medication:$('#med').value,dose:$('#dose').value,treatment_notes:$('#tn').value.trim(),stopped_work:val('stop'),starting:val('start'),attention_control:Number($('#att').value),restlessness:val('restless'),impulse_control:val('impulse'),life_outside_work:$$('#wins .sel').map(x=>x.dataset.v),side_effects:val('side'),note:$('#kn').value.trim()};let a=get(K,[]);a.push(r);set(K,a);flash('#ko');$$('#k .sel').forEach(x=>x.classList.remove('sel'));$('#att').value=5;$('#av').textContent=5;$('#kn').value='';$('#tn').value='';render()};
+$('#med').onchange=()=>{st.medication=$('#med').value;st.dose='';fillDoses();set(S,st)};
+$('#dose').onchange=()=>{st.dose=$('#dose').value;set(S,st)};
+
+const qs=[['pull','Easier to pull away from work?'],['present','More present with me?'],['everyday','Getting everyday things done more easily?'],['mood','Any noticeable change in mood or reactivity?']],opts=['Worse','Same','A little better','Clearly better','Not sure'];
+$('#pq').innerHTML=qs.map(([k,q])=>'<div class="card"><div class="label">'+q+'</div><div class="row" data-g="'+k+'">'+opts.map(o=>'<button class="c" data-v="'+o+'">'+o+'</button>').join('')+'</div></div>').join('');
+
+function flash(s){$(s).style.display='block';setTimeout(()=>$(s).style.display='none',1800)}
+$('#sk').onclick=()=>{
+ let medicated=val('medtoday')==='Yes';
+ let r={
+  timestamp:new Date().toISOString(),date:new Date().toLocaleDateString('en-CA'),
+  medication_today:val('medtoday')||'Not recorded',
+  medication:medicated?$('#med').value:'',dose:medicated?$('#dose').value:'',time_taken:medicated?$('#medtime').value:'',
+  sleep:val('sleep'),treatment_notes:$('#tn').value.trim(),
+  getting_started:val('start'),attention_control:val('attention'),side_quest_control:val('sidequests'),
+  finishing:val('finish'),switching:val('switching'),impulse_restlessness_control:val('regulation'),
+  life_outside_work:$$('#wins .sel').map(x=>x.dataset.v),work_crowding:val('crowd'),
+  side_effect_severity:val('side'),side_effects:$$('#effects .sel').map(x=>x.dataset.v),
+  note:$('#kn').value.trim()
+ };
+ let a=get(K,[]);a.push(r);set(K,a);flash('#ko');
+ $$('#k .sel').forEach(x=>x.classList.remove('sel'));$('#kn').value='';$('#tn').value='';$('#medtime').value='';toggleMedication();render()
+};
 $('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:new Date().toLocaleDateString('en-CA')};qs.forEach(([k])=>r[k]=val(k));r.still_herself=val('self');r.note=$('#pn').value.trim();let a=get(P,[]);a.push(r);set(P,a);flash('#po');$$('#p .sel').forEach(x=>x.classList.remove('sel'));$('#pn').value='';render()};
-function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-backup.json',JSON.stringify({settings:get(S,{}),mine:get(K,[]),partner:get(P,[])},null,2),'application/json');
+
+function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
+function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
+function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
+$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-backup.json',JSON.stringify({mine:get(K,[]),partner:get(P,[])},null,2),'application/json');
+
 function mdMine(rows){
-  if(!rows.length)return '# Daily Check-ins\n\nNo entries yet.';
-  return '# Daily Check-ins\n\n'+rows.map(r=>{
-    let treatment=r.phase||'';
-    if(r.medication)treatment+=' · '+r.medication;
-    if(r.dose)treatment+=' · '+r.dose;
-    let life=Array.isArray(r.life_outside_work)&&r.life_outside_work.length?r.life_outside_work.join(', '):'—';
-    return '## '+r.date+'\n'+
-      '- **Treatment:** '+(treatment||'—')+'\n'+
-      '- **Stopped work when intended:** '+(r.stopped_work||'—')+'\n'+
-      '- **Starting things:** '+(r.starting||'—')+'\n'+
-      '- **Attention control:** '+(r.attention_control??'—')+'/10\n'+
-      '- **Restlessness:** '+(r.restlessness||'—')+'\n'+
-      '- **Pausing before acting or speaking:** '+(r.impulse_control||'—')+'\n'+
-      '- **Life outside work:** '+life+'\n'+
-      '- **Side effects:** '+(r.side_effects||'—')+
-      (r.treatment_notes?'\n- **Treatment notes:** '+r.treatment_notes:'')+
-      (r.note?'\n- **Notes:** '+r.note:'');
-  }).join('\n\n');
+ if(!rows.length)return '# Daily Check-ins\n\nNo entries yet.';
+ return '# Daily Check-ins\n\n'+rows.map(r=>{
+  let tx=r.medication_today==='Yes'?[r.medication,r.dose,r.time_taken&&('at '+r.time_taken)].filter(Boolean).join(' · '):'No medication';
+  let life=Array.isArray(r.life_outside_work)&&r.life_outside_work.length?r.life_outside_work.join(', '):'—';
+  let fx=Array.isArray(r.side_effects)&&r.side_effects.length?r.side_effects.join(', '):'—';
+  return '## '+r.date+'\n- **Medication:** '+tx+'\n- **Sleep:** '+(r.sleep||'—')+
+  '\n- **Getting started:** '+(r.getting_started||'—')+'/4\n- **Attention control:** '+(r.attention_control||'—')+'/4\n- **Side-quest control:** '+(r.side_quest_control||'—')+'/4\n- **Finishing:** '+(r.finishing||'—')+'/4\n- **Stopping & switching:** '+(r.switching||'—')+'/4\n- **Impulse/restlessness control:** '+(r.impulse_restlessness_control||'—')+'/4'+
+  '\n- **Life outside work:** '+life+'\n- **Work crowding:** '+(r.work_crowding||'—')+'/4\n- **Side effects:** '+(r.side_effect_severity||'—')+' ('+fx+')'+
+  (r.treatment_notes?'\n- **Treatment notes:** '+r.treatment_notes:'')+(r.note?'\n- **Notes:** '+r.note:'')
+ }).join('\n\n')
 }
-function mdPartner(rows){
-  if(!rows.length)return '# Partner Check-ins\n\nNo entries yet.';
-  return '# Partner Check-ins\n\n'+rows.map(r=>
-    '## '+r.date+'\n'+
-    '- **Easier to pull away from work:** '+(r.pull||'—')+'\n'+
-    '- **More present:** '+(r.present||'—')+'\n'+
-    '- **Everyday things easier:** '+(r.everyday||'—')+'\n'+
-    '- **Mood / reactivity:** '+(r.mood||'—')+'\n'+
-    '- **Still seems like themselves:** '+(r.still_herself||'—')+
-    (r.note?'\n- **Notes:** '+r.note:'')
-  ).join('\n\n');
+function mdPartner(rows){if(!rows.length)return '# Partner Check-ins\n\nNo entries yet.';return '# Partner Check-ins\n\n'+rows.map(r=>'## '+r.date+'\n- **Easier to pull away from work:** '+(r.pull||'—')+'\n- **More present:** '+(r.present||'—')+'\n- **Everyday things easier:** '+(r.everyday||'—')+'\n- **Mood / reactivity:** '+(r.mood||'—')+'\n- **Still seems like themselves:** '+(r.still_herself||'—')+(r.note?'\n- **Notes:** '+r.note:'')).join('\n\n')}
+async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}let o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1800)}
+$('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
+
+function render(){
+ let k=get(K,[]).slice().reverse().slice(0,7);
+ $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+(r.getting_started||'—')+'/4 · Attention '+(r.attention_control||'—')+'/4 · Side quests '+(r.side_quest_control||'—')+'/4 · Finish '+(r.finishing||'—')+'/4</span></div>').join(''):'<p class="muted">No entries yet.</p>';
+ let p=get(P,[]).slice().reverse().slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Pull away: '+(r.pull||'—')+' · Everyday: '+(r.everyday||'—')+' · Themselves: '+(r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
 }
-async function copyMD(text,button){
-  try{
-    await navigator.clipboard.writeText(text);
-    let old=button.textContent;button.textContent='Copied ✓';
-    setTimeout(()=>button.textContent=old,1800)
-  }catch(e){
-    let ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
-    let old=button.textContent;button.textContent='Copied ✓';setTimeout(()=>button.textContent=old,1800)
-  }
-}
-$('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));
-$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
-function render(){let k=get(K,[]).slice().reverse().slice(0,7);$('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+r.phase+(r.medication?' · '+r.medication:'')+'<br><span class="muted">Work: '+(r.stopped_work||'—')+' · Start: '+(r.starting||'—')+' · Attention: '+r.attention_control+'/10 · Restlessness: '+(r.restlessness||'—')+' · Pause: '+(r.impulse_control||'—')</span></div>').join(''):'<p class="muted">No entries yet.</p>';let p=get(P,[]).slice().reverse().slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Pull away: '+(r.pull||'—')+' · Everyday: '+(r.everyday||'—')+' · Themselves: '+(r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'}render();$('#kt').onclick=()=>{$('#k').classList.remove('hide');$('#p').classList.add('hide');$('#kt').classList.add('on');$('#pt').classList.remove('on')};$('#pt').onclick=()=>{$('#p').classList.remove('hide');$('#k').classList.add('hide');$('#pt').classList.add('on');$('#kt').classList.remove('on')};if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+render();
+$('#kt').onclick=()=>{$('#k').classList.remove('hide');$('#p').classList.add('hide');$('#kt').classList.add('on');$('#pt').classList.remove('on')};
+$('#pt').onclick=()=>{$('#p').classList.remove('hide');$('#k').classList.add('hide');$('#pt').classList.add('on');$('#kt').classList.remove('on')};
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 </script></body></html>
