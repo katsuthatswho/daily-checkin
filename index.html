@@ -30,21 +30,21 @@
 
 <div class="card"><div class="label">Did work crowd out things you intended to do outside work?</div><div class="row scale5" data-g="crowd"><button class="c" data-v="0" aria-label="Not at all">●</button><button class="c" data-v="1" aria-label="A little">●</button><button class="c" data-v="2" aria-label="Somewhat">●</button><button class="c" data-v="3" aria-label="A lot">●</button><button class="c" data-v="4" aria-label="Completely">●</button></div><div class="scale5-labels"><span>Not at all</span><span>Completely</span></div></div>
 
-<div class="card"><div class="label">Noticeable drop-off</div><div class="hint">Did you notice a clear drop in focus, regulation or energy later in the day?</div><div class="row" data-g="dropoff"><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button><button class="c grow" data-v="Yes">Yes</button></div><div id="dropdetails" class="hide" style="margin-top:12px"><div class="hint">About what time?</div><input id="droptime" type="time"><div class="hint" style="margin-top:10px">What changed? Select all that apply.</div><div class="row" id="drops"><button class="c" data-v="Focus">Focus</button><button class="c" data-v="Energy">Energy</button><button class="c" data-v="Irritability / mood">Irritability / mood</button><button class="c" data-v="Restlessness">Restlessness</button><button class="c" data-v="Impulse control">Impulse control</button><button class="c" data-v="Other">Other</button></div></div></div>
+<div class="card"><div class="label">Noticeable drop-off</div><div class="hint">Did you notice a clear slump or drop-off later in the day?</div><div class="row" data-g="dropoff"><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button><button class="c grow" data-v="Yes">Yes</button></div><div id="dropdetails" class="hide" style="margin-top:12px"><div class="hint">About what time?</div><input id="droptime" type="time"><div class="hint" style="margin-top:10px">What changed? Select all that apply.</div><div class="row" id="drops"><button class="c" data-v="Focus">Focus</button><button class="c" data-v="Energy">Energy</button><button class="c" data-v="Irritability / mood">Irritability / mood</button><button class="c" data-v="Restlessness">Restlessness</button><button class="c" data-v="Impulse control">Impulse control</button><button class="c" data-v="Other">Other</button></div></div></div>
 
 <div class="card"><div class="label">Side effects</div><div class="row" data-g="side"><button class="c" data-v="None">None</button><button class="c" data-v="Mild">Mild</button><button class="c" data-v="Moderate">Moderate</button><button class="c" data-v="Significant">Significant</button></div><div class="hint" style="margin-top:12px">Anything specific? Select all that apply.</div><div class="row" id="effects"><button class="c" data-v="Appetite">Appetite</button><button class="c" data-v="Sleep">Sleep</button><button class="c" data-v="Headache">Headache</button><button class="c" data-v="Jittery / anxious">Jittery / anxious</button><button class="c" data-v="Irritable">Irritable</button><button class="c" data-v="Heart / racing feeling">Heart / racing feeling</button><button class="c" data-v="Other">Other</button></div></div>
 
 <div class="card"><div class="label">Anything worth remembering?</div><textarea id="kn" placeholder="Optional. A win, weird side quest, crash, unusually good day..."></textarea></div>
 <button class="save" id="sk">Save today</button>
 
-<details class="card"><summary>Data & export</summary><div id="kh"></div><button class="secondary" id="mk">Copy as Markdown</button><button class="secondary" id="ck">Export my check-ins</button><button class="secondary" id="bk">Export full backup</button></details></section>
-<section id="p" class="hide"><h1>Partner check-in</h1><div class="sub">A quick outside view. Answer based on what you actually noticed, not what you expected to change.</div><div class="ok" id="po">Saved on this device ✓</div>
+<details class="card"><summary>Data & export</summary><div id="kh"></div><button class="secondary" id="mk">Copy as Markdown</button><button class="secondary" id="ck">Export my check-ins</button><button class="secondary" id="bk">Export data from this device</button></details></section>
+<section id="p" class="hide"><h1>Partner check-in</h1><div class="sub">A quick outside view. Answer based on what you actually noticed, not what you expected to change. Responses are saved only on this device.</div><div class="ok" id="po">Saved on this device ✓</div>
 <div id="pq"></div>
 <div class="card"><div class="label">Still seemed like themselves?</div><div class="row" data-g="self"><button class="c grow" data-v="Yes">Yes</button><button class="c grow" data-v="Mostly">Mostly</button><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button></div></div>
 <div class="card"><div class="label">Anything else you noticed?</div><textarea id="pn" placeholder="Optional"></textarea></div>
 <button class="save" id="sp">Save partner check-in</button>
 <details class="card"><summary>Data & export</summary><div id="ph"></div><button class="secondary" id="mp">Copy as Markdown</button><button class="secondary" id="cp">Export partner check-ins</button></details></section>
-<footer>Entries stay on this device unless you export them.</footer></main><script>
+<footer>Your entries stay on this device. Another device has its own separate data.</footer></main><script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='my_daily_v4',P='partner_weekly_v3',S='tracker_settings_v3';
 const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -124,7 +124,7 @@ $('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:new Date().
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
 function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
-$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-backup.json',JSON.stringify({mine:get(K,[]),partner:get(P,[])},null,2),'application/json');
+$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-device-data.json',JSON.stringify({daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[])},null,2),'application/json');
 
 function mdMine(rows){
  if(!rows.length)return '# Daily Check-ins\n\nNo entries yet.';
@@ -133,8 +133,8 @@ function mdMine(rows){
   let life=Array.isArray(r.life_outside_work)&&r.life_outside_work.length?r.life_outside_work.join(', '):'—';
   let fx=Array.isArray(r.side_effects)&&r.side_effects.length?r.side_effects.join(', '):'—';
   return '## '+r.date+'\n- **Medication:** '+tx+'\n- **Sleep:** '+(r.sleep||'—')+
-  '\n- **Getting started:** '+(r.getting_started||'—')+'/4\n- **Attention control:** '+(r.attention_control||'—')+'/4\n- **Side-quest control:** '+(r.side_quest_control||'—')+'/4\n- **Finishing:** '+(r.finishing||'—')+'/4\n- **Stopping & switching:** '+(r.switching||'—')+'/4\n- **Impulse/restlessness control:** '+(r.impulse_restlessness_control||'—')+'/4'+
-  '\n- **Life outside work:** '+life+'\n- **Work crowding:** '+(r.work_crowding||'—')+'/4\n- **Drop-off:** '+(r.dropoff||'—')+(r.dropoff_time?' at '+r.dropoff_time:'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' ('+r.dropoff_changes.join(', ')+')':'')+'\n- **Side effects:** '+(r.side_effect_severity||'—')+' ('+fx+')'+
+  '\n- **Getting started:** '+(r.getting_started||'—')\n- **Attention control:** '+(r.attention_control||'—')\n- **Side-quest control:** '+(r.side_quest_control||'—')\n- **Finishing:** '+(r.finishing||'—')\n- **Stopping & switching:** '+(r.switching||'—')\n- **Impulse/restlessness control:** '+(r.impulse_restlessness_control||'—')'+
+  '\n- **Life outside work:** '+life+'\n- **Work crowding:** '+(r.work_crowding||'—')\n- **Drop-off:** '+(r.dropoff||'—')+(r.dropoff_time?' at '+r.dropoff_time:'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' ('+r.dropoff_changes.join(', ')+')':'')+'\n- **Side effects:** '+(r.side_effect_severity||'—')+' ('+fx+')'+
   (r.treatment_notes?'\n- **Treatment notes:** '+r.treatment_notes:'')+(r.note?'\n- **Notes:** '+r.note:'')
  }).join('\n\n')
 }
@@ -147,7 +147,7 @@ $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>cop
 
 function render(){
  let k=get(K,[]).slice().reverse().slice(0,7);
- $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+(r.getting_started||'—')+'/4 · Attention '+(r.attention_control||'—')+'/4 · Side quests '+(r.side_quest_control||'—')+'/4 · Finish '+(r.finishing||'—')+'/4</span></div>').join(''):'<p class="muted">No entries yet.</p>';
+ $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+(r.getting_started||'—') · Attention '+(r.attention_control||'—') · Side quests '+(r.side_quest_control||'—') · Finish '+(r.finishing||'—')</span></div>').join(''):'<p class="muted">No entries yet.</p>';
  let p=get(P,[]).slice().reverse().slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Start: '+(r.start_obs||'—')+' · Finish: '+(r.finish_obs||'—')+' · Life: '+(r.life_obs||'—')+' · Themselves: '+(r.still_themselves||r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
 }
 render();
