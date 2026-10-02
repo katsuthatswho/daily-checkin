@@ -122,16 +122,17 @@ $('#sk').onclick=()=>{
   side_effect_severity:val('side'),side_effects:$$('#effects .sel').map(x=>x.dataset.v),
   note:$('#kn').value.trim()
  };
- let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(K,a);$('#ko').textContent=i>=0?'Today’s check-in updated ✓':'Saved on this device ✓';flash('#ko');
+ let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(K,a);$('#ko').textContent=(i>=0?'Today’s check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');
  $$('#k .sel').forEach(x=>x.classList.remove('sel'));$('#kn').value='';$('#tn').value='';$('#medtime').value='';$('#droptime').value='';toggleMedication();toggleDropoff();toggleEffects();progress();render()
 };
-$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:new Date().toLocaleDateString('en-CA')};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k]))return;let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=i>=0?'Today’s partner check-in updated ✓':'Saved on this device ✓';flash('#po');$$('#p .sel').forEach(x=>x.classList.remove('sel'));$('#pn').value='';render()};
+$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:new Date().toLocaleDateString('en-CA')};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k]))return;let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Today’s partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');$$('#p .sel').forEach(x=>x.classList.remove('sel'));$('#pn').value='';render()};
 
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
 function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
 $('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-device-data.json',JSON.stringify({daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[])},null,2),'application/json');
 
+const frac=v=>v===''||v==null?'—':(Number(v)+1)+'/5';
 function mdMine(rows){
  if(!rows.length)return '# Daily Check-ins\n\nNo entries yet.';
  return '# Daily Check-ins\n\n'+rows.map(r=>{
@@ -139,8 +140,8 @@ function mdMine(rows){
   let life=Array.isArray(r.life_outside_work)&&r.life_outside_work.length?r.life_outside_work.join(', '):'—';
   let fx=Array.isArray(r.side_effects)&&r.side_effects.length?r.side_effects.join(', '):'—';
   return '## '+r.date+'\n- **Medication:** '+tx+'\n- **Sleep:** '+(r.sleep||'—')+
-  '\n- **Getting started:** '+(r.getting_started||'—')+'\n- **Attention control:** '+(r.attention_control||'—')+'\n- **Side-quest control:** '+(r.side_quest_control||'—')+'\n- **Finishing:** '+(r.finishing||'—')+'\n- **Stopping & switching:** '+(r.switching||'—')+'\n- **Impulse/restlessness control:** '+(r.impulse_restlessness_control||'—')+
-  '\n- **Life outside work:** '+life+'\n- **Work crowding:** '+(r.work_crowding||'—')+'\n- **Drop-off:** '+(r.dropoff||'—')+(r.dropoff_time?' at '+r.dropoff_time:'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' ('+r.dropoff_changes.join(', ')+')':'')+'\n- **Side effects:** '+(r.side_effect_severity||'—')+' ('+fx+')'+
+  '\n- **Getting started:** '+frac(r.getting_started)+'\n- **Attention control:** '+frac(r.attention_control)+'\n- **Side-quest control:** '+frac(r.side_quest_control)+'\n- **Finishing:** '+frac(r.finishing)+'\n- **Stopping & switching:** '+frac(r.switching)+'\n- **Impulse/restlessness control:** '+frac(r.impulse_restlessness_control)+
+  '\n- **Life outside work:** '+life+'\n- **Work crowding:** '+frac(r.work_crowding)+'\n- **Drop-off:** '+(r.dropoff||'—')+(r.dropoff_time?' at '+r.dropoff_time:'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' ('+r.dropoff_changes.join(', ')+')':'')+'\n- **Side effects:** '+(r.side_effect_severity||'—')+' ('+fx+')'+
   (r.treatment_notes?'\n- **Treatment notes:** '+r.treatment_notes:'')+(r.note?'\n- **Notes:** '+r.note:'')
  }).join('\n\n')
 }
