@@ -388,3 +388,37 @@ test('optional life quality and appetite survive draft, save and clinician repor
  expect(report).toContain('APPETITE: skipped meals or difficulty eating on 1 of 1 recorded days');
  expect(report).toContain('How life felt: Good day');
 });
+
+test('saving self check-in retains unfinished partner note and observation',async({page})=>{
+ await page.locator('#pt').click();
+ await page.locator('#pn').fill('Unfinished partner perspective');
+ await page.locator('[data-g=start_obs] [data-v="A little better"]').click();
+ await page.locator('#kt').click();
+ for(const group of ['start','attention','sidequests','finish','switching','regulation']){
+  await page.locator('[data-g='+group+'] [data-v="2"]').click();
+ }
+ await page.locator('[data-g=medtoday] [data-v="No"]').click();
+ await page.locator('#sk').click();
+ await page.reload();
+ await page.locator('#pt').click();
+ await expect(page.locator('#pn')).toHaveValue('Unfinished partner perspective');
+ await expect(page.locator('[data-g=start_obs] [data-v="A little better"]')).toHaveClass(/sel/);
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')||'[]'));
+ expect(saved.length).toBe(1);
+});
+test('full device backup includes unfinished drafts and behavioural experiments',async({page})=>{
+ await page.locator('#kn').fill('Unfinished backup note');
+ const result=await page.evaluate(()=>{
+  const drafts=JSON.parse(localStorage.getItem('daily_checkin_drafts_v1')||'{}');
+  return {drafts,day:document.querySelector('#entrydate').value};
+ });
+ expect(result.drafts[result.day].fields.kn).toBe('Unfinished backup note');
+ const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#bk').click()]);
+ const text=await download.createReadStream().then(async stream=>{
+  const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks).toString('utf8');
+ });
+ const backup=JSON.parse(text);
+ expect(backup.format).toBe('daily-checkin-device-backup-v2');
+ expect(backup.unfinished_drafts_on_this_device[result.day].fields.kn).toBe('Unfinished backup note');
+ expect(backup).toHaveProperty('behavioural_experiments_on_this_device');
+});
