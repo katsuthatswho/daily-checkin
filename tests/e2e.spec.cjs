@@ -167,3 +167,17 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
  await page.locator('#journal-panel summary').click();
  await expect(page.locator('#journal-status')).toContainText('Changes to back up');
 });
+
+test('doctor report is readable plain text with dates and both perspectives',async({page})=>{
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#kn').fill('Doctor note');await page.locator('#sk').click();
+ await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
+ const report=await page.evaluate(()=>doctorReport());
+ expect(report).toContain('Doctor note');
+ expect(report).toContain('Partner observations');
+ expect(report).toContain('How to read this');
+ expect(report).toContain(await page.locator('#entrydate').inputValue());
+ expect(report).not.toMatch(/(^|\\n)#{1,3} |\\*\\*/);
+ expect(report).toContain('\\n');
+});
