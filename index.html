@@ -140,7 +140,7 @@ function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Objec
 function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
 $('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-device-data.json',JSON.stringify({daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[])},null,2),'application/json');
 
-const frac=v=>v===''||v==null?'Not recorded':(Number(v)+1)+'/5';
+const frac=v=>v===''||v==null||!Number.isInteger(Number(v))||Number(v)<0||Number(v)>4?'Not recorded':(Number(v)+1)+'/5';
 const noted=v=>v===undefined||v===null||v===''?'Not recorded':String(v);
 const summary=(rows,label)=>{let dates=rows.map(r=>r.date).filter(Boolean).sort();return '# '+label+'\n\n**Entries:** '+rows.length+' | **Period:** '+(dates.length?dates[0]+' to '+dates[dates.length-1]:'Not recorded')+'\n\n'};
 function mdMine(rows){
@@ -179,9 +179,9 @@ function restoreToday(){
 }
 restoreToday();
 function render(){
- let k=get(K,[]).slice().reverse().slice(0,7);
+ let k=get(K,[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,7);
  $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+frac(r.getting_started)+' · Attention '+frac(r.attention_control)+' · Side quests '+frac(r.side_quest_control)+' · Finish '+frac(r.finishing)+'</span></div>').join(''):'<p class="muted">No entries yet.</p>';
- let p=get(P,[]).slice().reverse().slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Start: '+(r.start_obs||'—')+' · Finish: '+(r.finish_obs||'—')+' · Life: '+(r.life_obs||'—')+' · Themselves: '+(r.still_themselves||r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
+ let p=get(P,[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Start: '+(r.start_obs||'—')+' · Finish: '+(r.finish_obs||'—')+' · Life: '+(r.life_obs||'—')+' · Themselves: '+(r.still_themselves||r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
 }
 render();
 $('#kt').onclick=()=>{document.body.classList.remove('partner-mode');$('#k').classList.remove('hide');$('#p').classList.add('hide');$('#kt').classList.add('on');$('#pt').classList.remove('on')};
