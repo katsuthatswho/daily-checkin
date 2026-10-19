@@ -18,7 +18,7 @@ test('self form conditional controls, validation, save, update, history and expo
  await page.locator('[data-g=medtoday] [data-v=Yes]').click();await expect(page.locator('#meddetails')).toBeVisible();
  await page.locator('#med').selectOption('Vyvanse (lisdexamfetamine)');await page.locator('#dose').selectOption('20 mg');
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="0"]').click();
- await page.locator('#more-details summary').click();await page.locator('[data-g=side] [data-v=Mild]').click();await expect(page.locator('#effectdetails')).toBeVisible();
+ await page.locator('#more-details > summary').click();await page.locator('[data-g=side] [data-v=Mild]').click();await expect(page.locator('#effectdetails')).toBeVisible();
  await page.locator('#effects [data-v=Headache]').click();await page.locator('[data-g=side] [data-v=None]').click();await expect(page.locator('#effectdetails')).toBeHidden();
  await page.locator('[data-g=dropoff] [data-v=Yes]').click();await expect(page.locator('#dropdetails')).toBeVisible();
  await page.locator('[data-g=dropoff] [data-v=No]').click();await expect(page.locator('#dropdetails')).toBeHidden();
@@ -106,11 +106,11 @@ test('history escapes user-controlled HTML and does not execute it',async({page}
 test('tabs have consistent hierarchy and partner progress updates',async({page})=>{
  await expect(page.locator('#checkin-title')).toBeVisible();
  await page.locator('#pt').click();
- await expect(page.locator('#partnerdate')).not.toBeEmpty();
- await expect(page.locator('#partnerprogress')).toContainText('A quick look');
+ await expect(page.locator('#entrydate')).toHaveValue(/^\d{4}-\d{2}-\d{2}$/);
+ await expect(page.locator('#partnerprogress')).toContainText('Choose any observation');
  await expect(page.locator('#p .section-kicker')).toHaveCount(2);
  await page.locator('[data-g=start_obs] [data-v=Same]').click();
- await expect(page.locator('#partnerprogress')).toContainText('1 of 7');
+ await expect(page.locator('#partnerprogress')).toContainText('1 observations recorded');
  await expect(page.locator('#p .save')).toHaveCount(1);
  await page.locator('#kt').click();
  await expect(page.locator('#k .section-kicker')).toHaveCount(3);
@@ -253,7 +253,7 @@ test('save feedback is visible at button position for success, update and valida
  await expect(page.locator('#save-toast')).toContainText('Partner check-in saved');
 });
 
-test('iOS home screen icon is PNG and manifest references real PNG',async({page,request})=>{const icon=await request.get('/apple-touch-icon.png');expect(icon.ok()).toBeTruthy();expect(icon.headers()['content-type']).toContain('image/png');const bytes=await icon.body();expect(bytes.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',/apple-touch-icon\\.png/);const manifest=await (await request.get('/manifest.webmanifest')).json();expect(manifest.icons.some(x=>x.type==='image/png')).toBe(true)});
+test('iOS home screen icon is PNG and manifest references real PNG',async({page,request})=>{const icon=await request.get('http://127.0.0.1:8765/apple-touch-icon.png');expect(icon.ok()).toBeTruthy();expect(icon.headers()['content-type']).toContain('image/png');const bytes=await icon.body();expect(bytes.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',/apple-touch-icon\\.png/);const manifest=await (await request.get('http://127.0.0.1:8765/manifest.webmanifest')).json();expect(manifest.icons.some(x=>x.type==='image/png')).toBe(true)});
 
 test('ADHD-friendly short form, optional details, sticky save and pencil icon',async({page,request})=>{
  await expect(page.locator('#more-details')).not.toHaveAttribute('open','');
@@ -265,11 +265,11 @@ test('ADHD-friendly short form, optional details, sticky save and pencil icon',a
  await expect(page.locator('#progress')).toContainText('Ready to save');
  await page.locator('#sk').click();await expect(page.locator('#save-toast')).toContainText('Check-in saved');
  await page.reload();await expect(page.locator('#progress')).toContainText('Ready to save');
- await page.locator('#more-details summary').click();await expect(page.locator('#kn')).toBeVisible();
+ await page.locator('#more-details > summary').click();await expect(page.locator('#kn')).toBeVisible();
  await page.locator('#kn').fill('Optional entry');await page.locator('#sk').click();
  await page.reload();await expect(page.locator('#more-details')).toHaveAttribute('open','');
  await expect(page.locator('#kn')).toHaveValue('Optional entry');
  const manifest=await (await request.get('/manifest.webmanifest')).json();
  expect(manifest.icons.some(i=>i.type==='image/png')).toBeTruthy();
- const svg=await (await request.get('/icon.svg')).text();expect(svg).toContain('stroke');
+ const svg=await (await request.get('http://127.0.0.1:8765/icon.svg')).text();expect(svg).toContain('stroke');
 });
