@@ -6,7 +6,7 @@ test('both tabs share layout, partner is indigo, and every partner scale stays o
  await expect(page.locator('#k')).toBeVisible();
  const sleep=await page.locator('[data-g=sleep] .c').evaluateAll(bs=>({count:bs.length,rows:new Set(bs.map(b=>Math.round(b.getBoundingClientRect().top))).size,overflow:bs.some(b=>b.scrollWidth>b.clientWidth)}));expect(sleep.count).toBe(5);expect(sleep.rows).toBe(1);expect(sleep.overflow).toBe(false);
  await page.locator('#pt').click();await expect(page.locator('#p')).toBeVisible();
- const info=await page.evaluate(()=>({accent:getComputedStyle(document.body).getPropertyValue('--accent').trim(),scales:[...document.querySelectorAll('.partner-scale')].map(el=>({buttons:el.querySelectorAll('button').length,rows:new Set([...el.querySelectorAll('button')].map(b=>Math.round(b.getBoundingClientRect().top))).size,overflow:el.scrollWidth>el.clientWidth}))}));
+ const info=await page.evaluate(()=>({accent:getComputedStyle(document.querySelector('#p')).getPropertyValue('--accent').trim(),scales:[...document.querySelectorAll('.partner-scale')].map(el=>({buttons:el.querySelectorAll('button').length,rows:new Set([...el.querySelectorAll('button')].map(b=>Math.round(b.getBoundingClientRect().top))).size,overflow:el.scrollWidth>el.clientWidth}))}));
  expect(info.accent).toBe('#56518b');expect(info.scales).toHaveLength(7);for(const s of info.scales){expect(s.buttons).toBe(5);expect(s.rows).toBe(1);expect(s.overflow).toBe(false)}
  await page.screenshot({path:'test-results/partner-mobile.png',fullPage:true});
  await page.locator('#kt').click();await expect(page.locator('#k')).toBeVisible();
@@ -42,7 +42,7 @@ test('partner observation, uncertainty, save, update and export',async({page})=>
  const [file]=await Promise.all([page.waitForEvent('download'),page.locator('#cp').click()]);expect(file.suggestedFilename()).toBe('partner-checkins.csv');expect(errors).toEqual([]);
 });
 test('offline shell works after initial online load',async({page,context})=>{
- await page.waitForFunction(()=>navigator.serviceWorker.controller!==null,{timeout:20000});
+ await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();await page.waitForFunction(()=>navigator.serviceWorker.controller!==null,null,{timeout:25000});
  await context.setOffline(true);await page.reload();await expect(page.locator('#kt')).toBeVisible();await page.locator('#pt').click();await expect(page.locator('#p')).toBeVisible();
 });
 
@@ -86,7 +86,7 @@ test('clinician notes exports explain scales and preserve current fields',async(
 });
 
 test('service worker uses current cache and removes obsolete cache',async({page})=>{
- await page.waitForFunction(()=>navigator.serviceWorker.controller!==null,{timeout:20000});
+ await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();await page.waitForFunction(()=>navigator.serviceWorker.controller!==null,null,{timeout:25000});
  const result=await page.evaluate(async()=>{
   const old=await caches.open('daily-checkin-offline-v1');await old.put('./old-marker',new Response('old'));
   const reg=await navigator.serviceWorker.getRegistration();await reg.update();
@@ -208,4 +208,28 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
  await expect(page.locator('#k')).toBeVisible();
  await expect(page.locator('#kn')).toHaveValue('<img src=x onerror=alert(1)>');
  expect(errors).toEqual([]);
+});
+
+test('headings, date and navigation remain in consistent order across every section',async({page})=>{
+ const states=[['k','How was your day?'],['p','What did you notice?'],['insights','The bigger picture.'],['journal-view','Your journal.']];
+ for(const [view,title] of states){
+  if(view==='k')await page.locator('#kt').click();
+  else if(view==='p'){await page.locator('#kt').click();await page.locator('#pt').click()}
+  else if(view==='insights')await page.locator('#it').click();
+  else await page.locator('#jt').click();
+  const visible=await page.evaluate(()=>[...document.querySelectorAll('h1')].filter(x=>x.getBoundingClientRect().height>0).map(x=>x.textContent));
+  expect(visible).toEqual([title]);
+  const header=await page.locator('.app-head').boundingBox(),nav=await page.locator('.tabs').boundingBox();
+  expect(header.y+header.height).toBeLessThan(nav.y+1);
+  if(view==='k'||view==='p'){
+   const heading=await page.locator('#checkin-title').boundingBox(),switcher=await page.locator('#checkin-switch').boundingBox(),date=await page.locator('.date-control').boundingBox();
+   expect(nav.y+nav.height).toBeLessThan(heading.y);
+   expect(heading.y+heading.height).toBeLessThan(switcher.y);
+   expect(switcher.y+switcher.height).toBeLessThan(date.y);
+  }else{
+   await expect(page.locator('#checkin-head')).toBeHidden();
+   await expect(page.locator('.date-control')).toBeHidden();
+  }
+ }
+ await page.reload();await expect(page.locator('#checkin-title')).toHaveText('How was your day?');
 });
