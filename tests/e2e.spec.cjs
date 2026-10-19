@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v46');
+ expect(result.keys).toContain('daily-checkin-offline-v47');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -252,3 +252,5 @@ test('save feedback is visible at button position for success, update and valida
  await page.locator('#sp').click();
  await expect(page.locator('#save-toast')).toContainText('Partner check-in saved');
 });
+
+test('iOS home screen icon is PNG and manifest references real PNG',async({page,request})=>{const icon=await request.get('/apple-touch-icon.png');expect(icon.ok()).toBeTruthy();expect(icon.headers()['content-type']).toContain('image/png');const bytes=await icon.body();expect(bytes.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',/apple-touch-icon\\.png/);const manifest=await (await request.get('/manifest.webmanifest')).json();expect(manifest.icons.some(x=>x.type==='image/png')).toBe(true)});
