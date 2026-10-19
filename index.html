@@ -12,8 +12,8 @@
 #p .section-kicker,#k .section-kicker{margin:27px 0 5px}
 #p .save,#k .save{margin-top:20px}
 #p .partner-scale .c{overflow:hidden;text-overflow:clip}
-</style></head><body><main class="w"><div class="tabs"><button id="kt" class="on">My check-in</button><button id="pt">Partner</button></div>
-<div class="card" style="padding:8px 0 15px;margin-bottom:10px"><label class="label" for="entrydate" style="display:block;margin-bottom:6px">Check-in date</label><input id="entrydate" type="date" style="max-width:220px"><div class="hint" id="datehint">Today by default. Select a past date to catch up or edit.</div></div><section id="k"><h1>My daily check-in</h1><div class="sub" id="date"></div><div class="sub" id="progress" style="margin-top:4px">A quick look at how today went.</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
+.journal-panel{border:1px solid var(--line);border-radius:15px;padding:14px!important;margin:0 0 15px;background:#fff}.journal-panel>summary{cursor:pointer;font-weight:700;font-size:14px;list-style-position:inside}.journal-pill{float:right;font-size:11px;font-weight:650;color:var(--accent)}.journal-panel .secondary{margin-top:10px}</style></head><body><main class="w"><div class="tabs"><button id="kt" class="on">My check-in</button><button id="pt">Partner</button></div>
+<details id="journal-panel" class="card journal-panel"><summary>Journal backup <span id="journal-status" class="journal-pill">Checking…</span></summary><div class="hint" style="margin-top:10px">Your check-ins are saved on this device. Keep one dated Markdown journal in iCloud Drive as a second copy.</div><p id="journal-detail" class="hint" role="status" aria-live="polite"></p><button type="button" class="secondary" id="journal-export">Save full journal to Files (.md)</button><div class="hint" style="margin-top:7px">Choose iCloud Drive in Files and <strong>replace</strong> your previous <code>daily-checkin-journal.md</code>. Each export is a complete, deduplicated snapshot, not an extra set of entries.</div><div id="journal-confirm" class="hide" style="padding:12px 0"><div class="label">Did you replace the existing journal file in Files?</div><div class="hint">Only confirm after checking it was saved. Downloading alone does not back up your data.</div><button type="button" class="secondary" id="journal-done">Yes, the file is saved</button><button type="button" class="secondary" id="journal-cancel">Not yet</button></div><div id="journal-message" class="hint" role="status" aria-live="polite"></div></details><div class="card" style="padding:8px 0 15px;margin-bottom:10px"><label class="label" for="entrydate" style="display:block;margin-bottom:6px">Check-in date</label><input id="entrydate" type="date" style="max-width:220px"><div class="hint" id="datehint">Today by default. Select a past date to catch up or edit.</div></div><section id="k"><h1>My daily check-in</h1><div class="sub" id="date"></div><div class="sub" id="progress" style="margin-top:4px">A quick look at how today went.</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
 <div class="card"><div class="label">Medication today</div><div class="row" data-g="medtoday"><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Yes">Yes</button></div>
 <div id="meddetails" class="hide">
@@ -138,9 +138,9 @@ $('#sk').onclick=()=>{
   note:$('#kn').value.trim()
  };
  let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(K,a);$('#ko').textContent=(i>=0?'Check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');
- progress();render()
+ progress();render();refreshJournalStatus()
 };
-$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:selectedDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');render()};
+$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:selectedDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');render();refreshJournalStatus()};
 
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
@@ -170,6 +170,51 @@ function mdPartner(rows){
 }
 async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}let o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1800)}
 $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
+
+const JOURNAL_KEY='daily_checkin_journal_backup_v1';
+const JOURNAL_NAME='daily-checkin-journal.md';
+let pendingJournal=null;
+function journalRows(){return {mine:get(K,[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))),partner:get(P,[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)))}}
+function journalCanonical(rows){const clean=r=>Object.fromEntries(Object.entries(r).filter(([key])=>key!=='timestamp').sort(([a],[b])=>a.localeCompare(b)));return JSON.stringify({mine:rows.mine.map(clean),partner:rows.partner.map(clean)})}
+async function journalFingerprint(rows){const bytes=new TextEncoder().encode(journalCanonical(rows));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('')}
+function journalMarkdown(rows){const n=rows.mine.length+rows.partner.length;const dates=[...rows.mine,...rows.partner].map(r=>r.date).filter(Boolean).sort();return '# Daily Check-in Journal\n\n'+
+ '**Records:** '+n+' ('+rows.mine.length+' personal, '+rows.partner.length+' partner)\n'+
+ '**Date range:** '+(dates.length?dates[0]+' to '+dates[dates.length-1]:'No entries')+'\n\n'+
+ 'This file is a full snapshot. Replace the previous file rather than appending it. Entries are identified by check-in date within each section.\n\n---\n\n'+
+ mdMine(rows.mine)+'\n\n---\n\n'+mdPartner(rows.partner)+'\n'}
+async function refreshJournalStatus(){
+ const rows=journalRows(),total=rows.mine.length+rows.partner.length,previous=get(JOURNAL_KEY,null);
+ const current=await journalFingerprint(rows);
+ const clean=!!previous&&previous.fingerprint===current;
+ $('#journal-status').textContent=total===0?'No entries':clean?'Backed up':previous?'Changes to back up':'Not backed up';
+ $('#journal-detail').textContent=total===0?'No saved entries yet.':clean?'Last confirmed '+new Date(previous.confirmedAt).toLocaleString()+' · '+total+' dated entries.':previous?'Your journal has new or edited entries since the last confirmed backup. Export a full replacement.':'You have '+total+' saved entries without a confirmed Files backup.';
+}
+$('#journal-export').onclick=async()=>{
+ const rows=journalRows(),total=rows.mine.length+rows.partner.length;
+ if(!total){$('#journal-message').textContent='Save a check-in before exporting.';return}
+ const fingerprint=await journalFingerprint(rows);
+ pendingJournal={fingerprint,count:total};
+ const content=journalMarkdown(rows);
+ const blob=new Blob([content],{type:'text/markdown'});
+ const file=new File([blob],JOURNAL_NAME,{type:'text/markdown'});
+ // iOS Safari uses the native share sheet when supported. Other browsers download the same complete file.
+ try{
+  if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'Daily Check-in Journal'});}
+  else dl(JOURNAL_NAME,content,'text/markdown');
+ }catch(e){if(e.name==='AbortError'){$('#journal-message').textContent='Share cancelled. Nothing marked as backed up.';pendingJournal=null;return}dl(JOURNAL_NAME,content,'text/markdown')}
+ $('#journal-confirm').classList.remove('hide');
+ $('#journal-message').textContent='Check Files: save to iCloud Drive and replace the old journal. Then confirm below.';
+};
+$('#journal-done').onclick=async()=>{
+ if(!pendingJournal)return;
+ const now=await journalFingerprint(journalRows());
+ if(now!==pendingJournal.fingerprint){$('#journal-message').textContent='A check-in changed since export. Export the latest journal again.';pendingJournal=null;$('#journal-confirm').classList.add('hide');await refreshJournalStatus();return}
+ set(JOURNAL_KEY,{fingerprint:now,confirmedAt:new Date().toISOString(),count:pendingJournal.count});
+ pendingJournal=null;$('#journal-confirm').classList.add('hide');$('#journal-message').textContent='Backup confirmed. Keep the file in iCloud Drive.';await refreshJournalStatus();
+};
+$('#journal-cancel').onclick=()=>{pendingJournal=null;$('#journal-confirm').classList.add('hide');$('#journal-message').textContent='Not marked as backed up.'};
+refreshJournalStatus();
+
 
 function restoreGroup(g,v){if(v===undefined||v===null||v==='')return;const b=$$('[data-g="'+g+'"] .c').find(x=>x.dataset.v===String(v));if(b)b.classList.add('sel')}
 function restoreMulti(id,values){if(!Array.isArray(values))return;$$(id+' .c').forEach(b=>b.classList.toggle('sel',values.includes(b.dataset.v)))}
