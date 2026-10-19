@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v38');
+ expect(result.keys).toContain('daily-checkin-offline-v39');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
