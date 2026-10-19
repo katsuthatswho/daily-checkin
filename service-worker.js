@@ -1,10 +1,34 @@
-const C='daily-checkin-v22',A=['./','./index.html','./manifest.webmanifest'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{
- if(e.request.mode==='navigate'){
-  e.respondWith(fetch(e.request).then(r=>{let copy=r.clone();caches.open(C).then(c=>c.put('./index.html',copy));return r}).catch(()=>caches.match('./index.html')));
-  return;
- }
- e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+// Network-first app shell. Offline cache is fallback only; never cache personal entries.
+const CACHE='daily-checkin-offline-v23';
+const SHELL=new URL('./index.html',self.registration.scope).href;
+self.addEventListener('install',event=>{
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.add(new Request(SHELL,{cache:'reload'}))).then(()=>self.skipWaiting()));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('daily-checkin-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',event=>{
+  const request=event.request;
+  if(request.method!=='GET')return;
+  const url=new URL(request.url);
+  if(url.origin!==self.location.origin)return;
+  if(request.mode==='navigate'){
+    event.respondWith((async()=>{
+      try{
+        const response=await fetch(new Request(request,{cache:'no-store'}));
+        if(response.ok){
+          const cache=await caches.open(CACHE);
+          await cache.put(SHELL,response.clone());
+        }
+        return response;
+      }catch(err){
+        const cached=await caches.match(SHELL);
+        if(cached)return cached;
+        throw err;
+      }
+    })());
+    return;
+  }
+  // Other resources are always network-first too, with an offline fallback.
+  event.respondWith(fetch(new Request(request,{cache:'no-store'})).catch(()=>caches.match(request)));
 });
