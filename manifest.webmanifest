@@ -1,1 +1,1 @@
-{"name":"Daily Check-in","short_name":"Check-in","start_url":"./","display":"standalone","background_color":"#f6f7f9","theme_color":"#111827","description":"A simple privacy-first daily treatment and partner check-in."}
+{"name":"Daily Check-in","short_name":"Check-in","start_url":"./","display":"standalone","background_color":"#f7faf8","theme_color":"#28634f","description":"A simple privacy-first daily treatment and partner check-in.","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
