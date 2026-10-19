@@ -18,7 +18,7 @@ test('self form conditional controls, validation, save, update, history and expo
  await page.locator('[data-g=medtoday] [data-v=Yes]').click();await expect(page.locator('#meddetails')).toBeVisible();
  await page.locator('#med').selectOption('Vyvanse (lisdexamfetamine)');await page.locator('#dose').selectOption('20 mg');
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="0"]').click();
- await page.locator('[data-g=side] [data-v=Mild]').click();await expect(page.locator('#effectdetails')).toBeVisible();
+ await page.locator('#more-details summary').click();await page.locator('[data-g=side] [data-v=Mild]').click();await expect(page.locator('#effectdetails')).toBeVisible();
  await page.locator('#effects [data-v=Headache]').click();await page.locator('[data-g=side] [data-v=None]').click();await expect(page.locator('#effectdetails')).toBeHidden();
  await page.locator('[data-g=dropoff] [data-v=Yes]').click();await expect(page.locator('#dropdetails')).toBeVisible();
  await page.locator('[data-g=dropoff] [data-v=No]').click();await expect(page.locator('#dropdetails')).toBeHidden();
@@ -50,7 +50,7 @@ test('offline shell works after initial online load',async({page,context})=>{
 test('saved answers restore after reload and can be corrected without re-entering',async({page})=>{
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await page.locator('#kn').fill('Remember this');await page.locator('#sk').click();
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('Remember this');await page.locator('#sk').click();
  await page.reload();
  await expect(page.locator('[data-g=start] [data-v="2"]')).toHaveClass(/sel/);
  await expect(page.locator('#kn')).toHaveValue('Remember this');
@@ -135,7 +135,7 @@ test('backfill date saves separately, reloads edits and exports accurate dates',
 test('single journal backup is deduplicated, dated, confirmed and detects edits',async({page})=>{
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await page.locator('#kn').fill('First journal note');
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('First journal note');
  await page.locator('#sk').click();
  await page.locator('#pt').click();
  await page.locator('[data-g=start_obs] [data-v=Same]').click();
@@ -156,7 +156,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
  await page.locator('#journal-done').click();
  await expect(page.locator('#journal-status')).toContainText('Backed up');
  await page.locator('#kt').click();
- await page.locator('#kn').fill('Edited journal note');
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('Edited journal note');
  await page.locator('#sk').click();
  await expect(page.locator('#journal-status')).toContainText('Changes to back up');
  const revised=await page.evaluate(()=>journalMarkdown(journalRows()));
@@ -171,7 +171,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
 test('doctor report is readable plain text with dates and both perspectives',async({page})=>{
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await page.locator('#kn').fill('Doctor note');await page.locator('#sk').click();
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('Doctor note');await page.locator('#sk').click();
  await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
  const report=await page.evaluate(()=>doctorReport());
  expect(report).toContain('Doctor note');
@@ -189,7 +189,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
  await page.locator('#kt').click();
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await page.locator('#kn').fill('<img src=x onerror=alert(1)>');
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('<img src=x onerror=alert(1)>');
  await page.locator('#sk').click();
  await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
  await page.locator('#it').click();
@@ -254,3 +254,22 @@ test('save feedback is visible at button position for success, update and valida
 });
 
 test('iOS home screen icon is PNG and manifest references real PNG',async({page,request})=>{const icon=await request.get('/apple-touch-icon.png');expect(icon.ok()).toBeTruthy();expect(icon.headers()['content-type']).toContain('image/png');const bytes=await icon.body();expect(bytes.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',/apple-touch-icon\\.png/);const manifest=await (await request.get('/manifest.webmanifest')).json();expect(manifest.icons.some(x=>x.type==='image/png')).toBe(true)});
+
+test('ADHD-friendly short form, optional details, sticky save and pencil icon',async({page,request})=>{
+ await expect(page.locator('#more-details')).not.toHaveAttribute('open','');
+ await expect(page.locator('#sk')).toBeVisible();
+ await expect(page.locator('#progress')).toContainText('0 of 7');
+ const before=await page.locator('#sk').boundingBox();expect(before.height).toBeGreaterThan(30);
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await expect(page.locator('#progress')).toContainText('Ready to save');
+ await page.locator('#sk').click();await expect(page.locator('#save-toast')).toContainText('Check-in saved');
+ await page.reload();await expect(page.locator('#progress')).toContainText('Ready to save');
+ await page.locator('#more-details summary').click();await expect(page.locator('#kn')).toBeVisible();
+ await page.locator('#kn').fill('Optional entry');await page.locator('#sk').click();
+ await page.reload();await expect(page.locator('#more-details')).toHaveAttribute('open','');
+ await expect(page.locator('#kn')).toHaveValue('Optional entry');
+ const manifest=await (await request.get('/manifest.webmanifest')).json();
+ expect(manifest.icons.some(i=>i.type==='image/png')).toBeTruthy();
+ const svg=await (await request.get('/icon.svg')).text();expect(svg).toContain('stroke');
+});
