@@ -26,7 +26,7 @@ test('self form conditional controls, validation, save, update, history and expo
  let data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(data).toHaveLength(1);expect(data[0].getting_started).toBe('0');expect(data[0].side_effects).toEqual([]);
  await page.locator('[data-g=medtoday] [data-v=No]').click();for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="4"]').click();await page.locator('#sk').click();
  data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(data).toHaveLength(1);expect(data[0].getting_started).toBe('4');
- await page.locator('#k details.card').last().locator('summary').click();await expect(page.locator('#kh')).toContainText('Start 5/5');
+ await page.locator('#jt').click();await page.locator('#kh').locator('xpath=..').locator('summary').click();await expect(page.locator('#kh')).toContainText('Start 5/5');
  const [file]=await Promise.all([page.waitForEvent('download'),page.locator('#ck').click()]);expect(file.suggestedFilename()).toBe('my-checkins.csv');expect(errors).toEqual([]);
 });
 test('partner observation, uncertainty, save, update and export',async({page})=>{
@@ -38,7 +38,7 @@ test('partner observation, uncertainty, save, update and export',async({page})=>
  await page.locator('[data-g=start_obs] [data-v="A little better"]').click();await page.locator('#sp').click();
  let data=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(data).toHaveLength(1);expect(data[0].start_obs).toBe('A little better');
  await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();data=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(data).toHaveLength(1);expect(data[0].start_obs).toBe('Same');
- await page.locator('#p details.card').last().locator('summary').click();await expect(page.locator('#ph')).toContainText('Same');
+ await page.locator('#jt').click();await page.locator('#ph').locator('xpath=..').locator('summary').click();await expect(page.locator('#ph')).toContainText('Same');
  const [file]=await Promise.all([page.waitForEvent('download'),page.locator('#cp').click()]);expect(file.suggestedFilename()).toBe('partner-checkins.csv');expect(errors).toEqual([]);
 });
 test('offline shell works after initial online load',async({page,context})=>{
@@ -147,7 +147,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
  expect(journal).toContain('Partner observation');
  expect(journal).toContain('## '+date);
  expect((journal.match(new RegExp('## '+date,'g'))||[])).toHaveLength(2);
- await page.locator('#journal-panel summary').click();
+ await page.locator('#jt').click();await page.locator('#journal-panel summary').click();
  await expect(page.locator('#journal-status')).toContainText('Not backed up');
  await page.evaluate(()=>{navigator.share=async()=>{};navigator.canShare=()=>true});
  await page.locator('#journal-export').click();
@@ -164,7 +164,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
  expect(revised).not.toContain('First journal note');
  expect((revised.match(new RegExp('## '+date,'g'))||[])).toHaveLength(2);
  await page.reload();
- await page.locator('#journal-panel summary').click();
+ await page.locator('#jt').click();await page.locator('#journal-panel summary').click();
  await expect(page.locator('#journal-status')).toContainText('Changes to back up');
 });
 
@@ -180,4 +180,32 @@ test('doctor report is readable plain text with dates and both perspectives',asy
  expect(report).toContain(await page.locator('#entrydate').inputValue());
  expect(report).not.toMatch(/(^|\\n)#{1,3} |\\*\\*/);
  expect(report).toContain('\\n');
+});
+
+test('unified navigation, factual insights, journal edit and XSS safety',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#it').click();await expect(page.locator('#insights')).toBeVisible();
+ await expect(page.locator('#insight-body')).toContainText('Nothing to summarise');
+ await page.locator('#kt').click();
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#kn').fill('<img src=x onerror=alert(1)>');
+ await page.locator('#sk').click();
+ await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
+ await page.locator('#it').click();
+ await expect(page.locator('#insight-body')).toContainText('1 shared date');
+ await expect(page.locator('#insight-body')).toContainText('<img src=x');
+ await expect(page.locator('#insight-body img')).toHaveCount(0);
+ await page.locator('[data-period="7"]').click();
+ const result=await page.evaluate(()=>insightFacts());
+ expect(result).toContain('Personal entries: 1');
+ expect(result).toContain('Partner entries: 1');
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-list .journal-item')).toHaveCount(2);
+ await page.locator('[data-jfilter="mine"]').click();
+ await expect(page.locator('#journal-list .journal-item')).toHaveCount(1);
+ await page.locator('#journal-list [data-editwho="mine"]').click();
+ await expect(page.locator('#k')).toBeVisible();
+ await expect(page.locator('#kn')).toHaveValue('<img src=x onerror=alert(1)>');
+ expect(errors).toEqual([]);
 });
