@@ -348,6 +348,21 @@ function insightFacts(){
  return lines.join('\n')
 }
 function insightCard(kicker,title,body,foot=''){return '<article class="insight-card"><div class="insight-kicker">'+htmlSafe(kicker)+'</div><h2>'+htmlSafe(title)+'</h2><p>'+body+'</p>'+(foot?'<p class="hint">'+htmlSafe(foot)+'</p>':'')+'</article>'}
+function changeSignals(rows,dims){
+ const observations=dims.map(([name,key])=>{
+  const v=rows.filter(r=>r[key]!==''&&r[key]!=null&&Number.isInteger(Number(r[key]))&&Number(r[key])>=0&&Number(r[key])<=4).map(r=>Number(r[key])+1);
+  if(v.length<6)return null;
+  const recent=v.slice(-3),earlier=v.slice(-6,-3),avg=a=>a.reduce((s,n)=>s+n,0)/a.length;
+  return {name,delta:avg(recent)-avg(earlier),latest:avg(recent)};
+ }).filter(Boolean);
+ if(!observations.length)return '<p class="insight-muted">Once you have six answers in a particular area, this section can compare your latest three with the three before them. No need to fill in missed days.</p>';
+ const sorted=observations.slice().sort((a,b)=>a.delta-b.delta),down=sorted.find(x=>x.delta<=-0.65),up=sorted.slice().reverse().find(x=>x.delta>=0.65);
+ let parts=[];
+ if(down)parts.push('<p><strong>'+htmlSafe(down.name)+'</strong> was lower by '+Math.abs(down.delta).toFixed(1)+' points on average in the latest three answers. It may be worth looking at what changed around those dates.</p>');
+ if(up)parts.push('<p><strong>'+htmlSafe(up.name)+'</strong> was higher by '+up.delta.toFixed(1)+' points on average. Check your notes for anything that made those days easier.</p>');
+ if(!parts.length)parts.push('<p>There is no clear shift of roughly one point or more across the last two sets of three answers. Individual days still vary.</p>');
+ return parts.join('')+'<p class="insight-foot">These are small, descriptive comparisons between answered days, not trends across equal calendar periods or evidence of a treatment effect.</p>';
+}
 function renderInsights(){
  const {mine,partner,shared}=insightData();
  const dims=[['Getting started','getting_started'],['Staying focused','attention_control'],['Staying on track','side_quest_control'],['Following through','finishing'],['Switching gears','switching'],['Pausing & regulating','impulse_restlessness_control']];
@@ -357,6 +372,7 @@ function renderInsights(){
  if(mine.length){
   const latest=mine[mine.length-1];
   body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">01 / MOST RECENT</div><h2>Where you left off</h2></div><p class="insight-muted">'+htmlSafe(latest.date)+' · Your most recent saved check-in in this period</p><div class="insight-dim-grid">'+dims.map(([name,key])=>'<div class="insight-dim"><span>'+htmlSafe(name)+'</span><strong>'+htmlSafe(frac(latest[key]))+'</strong></div>').join('')+'</div></section>';
+  body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">WHAT STANDS OUT</div><h2>Worth a closer look</h2></div>'+changeSignals(mine,dims)+'</section>';
   body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">02 / OVER TIME</div><h2>How your days varied</h2></div><p class="insight-muted">Each dot is one recorded answer, in date order. Higher means less difficulty. Gaps are not filled in.</p><div class="trend-list">'+dims.map(([name,key])=>{
     const values=mine.filter(r=>r[key]!==''&&r[key]!=null&&Number.isInteger(Number(r[key]))&&Number(r[key])>=0&&Number(r[key])<=4).map(r=>({date:r.date,v:Number(r[key])+1}));
     if(!values.length)return '<div class="trend-row"><div class="trend-label"><strong>'+htmlSafe(name)+'</strong><span>No answers</span></div></div>';
