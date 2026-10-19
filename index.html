@@ -174,8 +174,8 @@ $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>cop
 function doctorReport(){
  const mine=get(K,[]),partner=get(P,[]);
  if(!mine.length&&!partner.length)return '';
- const convert=s=>s.replace(/^#{1,3} /gm,'').replace(/\\*\\*(.*?)\\*\\*/g,'$1').replace(/^---$/gm,'────────────────────');
- return 'DAILY CHECK-IN — REPORT FOR CLINICIAN\\nGenerated: '+localDay()+'\\nBased on self-reported check-ins and optional partner observations. Not a clinical assessment.\\n\\n'+convert(mdMine(mine))+'\\n\\n'+convert(mdPartner(partner))+'\\n';
+ const convert=s=>s.replace(/^#{1,3} /gm,'').replace(/\*\*(.*?)\*\*/g,'$1').replace(/^---$/gm,'────────────────────');
+ return 'DAILY CHECK-IN — REPORT FOR CLINICIAN\nGenerated: '+localDay()+'\nBased on self-reported check-ins and optional partner observations. Not a clinical assessment.\n\n'+convert(mdMine(mine))+'\n\n'+convert(mdPartner(partner))+'\n';
 }
 $('#doctor-copy').onclick=async()=>{const report=doctorReport();if(!report){$('#doctor-message').textContent='No saved entries to copy yet.';return}await copyMD(report,$('#doctor-copy'));$('#doctor-message').textContent='Readable report copied. Paste into Notes, email or a document.'};
 $('#doctor-share').onclick=async()=>{
