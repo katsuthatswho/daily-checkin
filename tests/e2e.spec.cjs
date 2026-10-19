@@ -178,7 +178,7 @@ test('doctor report is readable plain text with dates and both perspectives',asy
  expect(report).toContain('Partner observations');
  expect(report).toContain('How to read this');
  expect(report).toContain(await page.locator('#entrydate').inputValue());
- expect(report).not.toMatch(/(^|\\n)#{1,3} |\\*\\*/);
+ expect(report).not.toContain('**');expect(report.split('\n').some(line=>/^#{1,3} /.test(line))).toBe(false);
  expect(report).toContain('\\n');
 });
 
