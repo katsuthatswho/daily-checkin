@@ -160,5 +160,14 @@ function render(){
 render();
 $('#kt').onclick=()=>{$('#k').classList.remove('hide');$('#p').classList.add('hide');$('#kt').classList.add('on');$('#pt').classList.remove('on')};
 $('#pt').onclick=()=>{$('#p').classList.remove('hide');$('#k').classList.add('hide');$('#pt').classList.add('on');$('#kt').classList.remove('on')};
-if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+if('serviceWorker' in navigator)addEventListener('load',async()=>{
+ try{
+  const reg=await navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'});
+  await reg.update();
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+   if(!refreshing){refreshing=true;location.reload()}
+  });
+ }catch(e){console.warn('Offline support unavailable',e)}
+});
 </script></body></html>
