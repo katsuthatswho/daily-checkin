@@ -407,6 +407,7 @@ test('saving self check-in retains unfinished partner note and observation',asyn
  expect(saved.length).toBe(1);
 });
 test('full device backup includes unfinished drafts and behavioural experiments',async({page})=>{
+ await page.locator('#more-details').evaluate(el=>el.open=true);
  await page.locator('#kn').fill('Unfinished backup note');
  const result=await page.evaluate(()=>{
   const drafts=JSON.parse(localStorage.getItem('daily_checkin_drafts_v1')||'{}');
