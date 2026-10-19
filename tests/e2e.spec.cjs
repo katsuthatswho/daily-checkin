@@ -363,6 +363,8 @@ test('draft capture persists multiple selections and scores without losing previ
  await page.locator('#kn').fill('Keep this note');
  await page.locator('[data-g=start] [data-v="3"]').click();
  await page.locator('#wins [data-v="Exercise"]').click();
+ const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('daily_checkin_drafts_v1')||'{}'));
+ expect(stored[await page.locator('#entrydate').inputValue()]?.fields?.kn).toBe('Keep this note');
  await page.reload();
  await expect(page.locator('#kn')).toHaveValue('Keep this note');
  await expect(page.locator('[data-g=start] [data-v="3"]')).toHaveClass(/sel/);
