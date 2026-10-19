@@ -45,3 +45,26 @@ test('offline shell works after initial online load',async({page,context})=>{
  await page.waitForFunction(()=>navigator.serviceWorker.controller!==null,{timeout:20000});
  await context.setOffline(true);await page.reload();await expect(page.locator('#kt')).toBeVisible();await page.locator('#pt').click();await expect(page.locator('#p')).toBeVisible();
 });
+
+
+test('saved answers restore after reload and can be corrected without re-entering',async({page})=>{
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#kn').fill('Remember this');await page.locator('#sk').click();
+ await page.reload();
+ await expect(page.locator('[data-g=start] [data-v="2"]')).toHaveClass(/sel/);
+ await expect(page.locator('#kn')).toHaveValue('Remember this');
+ await page.locator('[data-g=start] [data-v="4"]').click();await page.locator('#sk').click();
+ let mine=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(mine).toHaveLength(1);expect(mine[0].getting_started).toBe('4');
+ await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#pn').fill('Partner note');await page.locator('#sp').click();await page.reload();await page.locator('#pt').click();
+ await expect(page.locator('[data-g=start_obs] [data-v=Same]')).toHaveClass(/sel/);await expect(page.locator('#pn')).toHaveValue('Partner note');
+});
+test('mobile options remain on one row at multiple widths',async({page})=>{
+ for(const width of [320,360,375,390,430]){
+  await page.setViewportSize({width,height:800});
+  for(const selector of ['[data-g=sleep]','.partner-scale']){
+   const items=await page.locator(selector).first().locator('.c').evaluateAll(bs=>({rows:new Set(bs.map(b=>Math.round(b.getBoundingClientRect().top))).size,overflow:bs.some(b=>b.scrollWidth>b.clientWidth)}));
+   expect(items.rows).toBe(1);expect(items.overflow).toBe(false);
+  }
+ }
+});
