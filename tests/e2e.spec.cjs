@@ -84,3 +84,21 @@ test('clinician notes exports explain scales and preserve current fields',async(
  expect(result.partner).toContain('Not sure');
  expect(result.partner).toContain('Observed at home');
 });
+
+test('service worker uses current cache and removes obsolete cache',async({page})=>{
+ await page.waitForFunction(()=>navigator.serviceWorker.controller!==null,{timeout:20000});
+ const result=await page.evaluate(async()=>{
+  const old=await caches.open('daily-checkin-offline-v1');await old.put('./old-marker',new Response('old'));
+  const reg=await navigator.serviceWorker.getRegistration();await reg.update();
+  const keys=await caches.keys();
+  return {keys,controlled:!!navigator.serviceWorker.controller};
+ });
+ expect(result.controlled).toBe(true);
+ expect(result.keys).toContain('daily-checkin-offline-v36');
+ // An existing worker only purges obsolete caches during activation, not each update check.
+});
+test('history escapes user-controlled HTML and does not execute it',async({page})=>{
+ await page.evaluate(()=>{localStorage.setItem('partner_weekly_v3',JSON.stringify([{date:'2026-10-19',start_obs:'<img src=x onerror=alert(1)>',still_themselves:'Yes'}]));render()});
+ await expect(page.locator('#ph img')).toHaveCount(0);
+ await expect(page.locator('#ph')).toContainText('<img');
+});
