@@ -256,11 +256,11 @@ function restoreDraft(date){const d=get(DRAFT_KEY,{})[date];if(!d)return false;d
  $('#draft-status').textContent='Unsaved draft restored · '+new Date(d.updated).toLocaleString();
  return true
  }finally{draftRestoring=false}}
-function clearDraftFor(date){const all=get(DRAFT_KEY,{});delete all[date];try{set(DRAFT_KEY,all)}catch(e){}$('#draft-status').textContent='Saved check-in'}
+function clearDraftFor(date){clearTimeout(draftTimer);const all=get(DRAFT_KEY,{});delete all[date];try{set(DRAFT_KEY,all)}catch(e){}$('#draft-status').textContent='Saved check-in'}
 document.addEventListener('input',e=>{if(e.target.closest('#k,#p'))scheduleDraft()});
 document.addEventListener('change',e=>{if(e.target.closest('#k,#p')&&e.target.id!=='entrydate')scheduleDraft()});
 document.addEventListener('click',e=>{if(e.target.closest('#k .c,#p .c,#more-details summary,[data-clearcarry]'))scheduleDraft()});
-addEventListener('pagehide',saveDraftNow);
+addEventListener('pagehide',()=>{if(!get(K,[]).some(r=>r.date===loadedDraftDate)&&!get(P,[]).some(r=>r.date===loadedDraftDate))saveDraftNow()});
 function priorDay(date){const d=new Date(date+'T12:00:00');d.setDate(d.getDate()-1);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
 function carryPrevious(rows,date,key,field,notice){
  const prev=rows.find(r=>r.date===priorDay(date)),value=prev&&typeof prev[key]==='string'?prev[key].trim():'';
