@@ -307,3 +307,20 @@ test('Insights gives all six dimensions, trend marks and original dated notes',a
  await expect(page.locator('#insight-body')).toContainText('A distinct original observation');
  await expect(page.locator('#insight-body')).toContainText('not a diagnosis');
 });
+
+test('unsaved notes survive changing dates, reload and navigation',async({page})=>{
+ const today=await page.locator('#entrydate').inputValue();
+ const yesterday=await page.evaluate(()=>{const d=new Date();d.setDate(d.getDate()-1);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
+ await page.locator('#more-details').evaluate(el=>el.open=true);
+ await page.locator('#kn').fill('Draft note must not disappear');
+ await page.locator('#tn').fill('Medication context must persist');
+ await page.locator('#entrydate').fill(yesterday);
+ await page.locator('#entrydate').fill(today);
+ await expect(page.locator('#kn')).toHaveValue('Draft note must not disappear');
+ await expect(page.locator('#tn')).toHaveValue('Medication context must persist');
+ await page.reload();
+ await expect(page.locator('#kn')).toHaveValue('Draft note must not disappear');
+ await page.locator('#it').click();
+ await page.locator('#kt').click();
+ await expect(page.locator('#kn')).toHaveValue('Draft note must not disappear');
+});
