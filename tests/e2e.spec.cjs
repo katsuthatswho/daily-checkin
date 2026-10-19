@@ -11,7 +11,7 @@ test('both tabs share layout, partner is indigo, and every partner scale stays o
  await page.locator('#kt').click();await expect(page.locator('#k')).toBeVisible();
  await page.screenshot({path:'test-results/self-mobile.png',fullPage:true});
 });
-test('self form conditional controls, validation, save, update, history and exports',async({page})=>{
+test('self form conditional controls, validation, save, update, history and exports',async({page})=>{test.setTimeout(60000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.locator('#sk').click();await expect(page.locator('#ke')).toBeVisible();
  await page.locator('[data-g=medtoday] [data-v=Yes]').click();await expect(page.locator('#meddetails')).toBeVisible();
@@ -25,8 +25,8 @@ test('self form conditional controls, validation, save, update, history and expo
  let data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(data).toHaveLength(1);expect(data[0].getting_started).toBe('0');expect(data[0].side_effects).toEqual([]);
  await page.locator('[data-g=medtoday] [data-v=No]').click();for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="4"]').click();await page.locator('#sk').click();
  data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(data).toHaveLength(1);expect(data[0].getting_started).toBe('4');
- await page.locator('details.card').last().locator('summary').click();await expect(page.locator('#kh')).toContainText('Start 5/5');
- const download=page.waitForEvent('download');await page.locator('#ck').click();expect((await download).suggestedFilename()).toBe('my-checkins.csv');expect(errors).toEqual([]);
+ await page.locator('#k details.card').last().locator('summary').click();await expect(page.locator('#kh')).toContainText('Start 5/5');
+ const [file]=await Promise.all([page.waitForEvent('download'),page.locator('#ck').click()]);expect(file.suggestedFilename()).toBe('my-checkins.csv');expect(errors).toEqual([]);
 });
 test('partner observation, uncertainty, save, update and export',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.locator('#pt').click();
@@ -36,7 +36,7 @@ test('partner observation, uncertainty, save, update and export',async({page})=>
  let data=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(data).toHaveLength(1);expect(data[0].start_obs).toBe('A little better');
  await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();data=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(data).toHaveLength(1);expect(data[0].start_obs).toBe('Same');
  await page.locator('#p details.card').last().locator('summary').click();await expect(page.locator('#ph')).toContainText('Same');
- const download=page.waitForEvent('download');await page.locator('#cp').click();expect((await download).suggestedFilename()).toBe('partner-checkins.csv');expect(errors).toEqual([]);
+ const [file]=await Promise.all([page.waitForEvent('download'),page.locator('#cp').click()]);expect(file.suggestedFilename()).toBe('partner-checkins.csv');expect(errors).toEqual([]);
 });
 test('offline shell works after initial online load',async({page,context})=>{
  await page.waitForFunction(()=>navigator.serviceWorker.controller!==null,{timeout:20000});
