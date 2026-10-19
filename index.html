@@ -177,11 +177,12 @@ function mdPartner(rows){
 async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}let o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1800)}
 $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
 
+function experimentReport(){const data=get('daily_checkin_experiments_v1',{active:null,history:[]});if(!data.history?.length)return '';const names={start:'Getting started',switch:'Switching tasks',finish:'Finishing tasks',life:'Life outside work'};return '\n\nBEHAVIOURAL EXPERIMENTS (SELF-REPORTED)\n'+data.history.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(r=>r.date+' — '+(names[r.type]||r.type)+': '+r.result+(r.note?' — '+r.note:'')).join('\n')+'\nThese are personal experiments, not evidence of treatment effectiveness.'}
 function doctorReport(){
  const mine=get(K,[]),partner=get(P,[]);
  if(!mine.length&&!partner.length)return '';
  const convert=s=>s.replace(/^#{1,3} /gm,'').replace(/\*\*(.*?)\*\*/g,'$1').replace(/^---$/gm,'────────────────────');
- return 'DAILY CHECK-IN — REPORT FOR CLINICIAN\nGenerated: '+localDay()+'\nBased on self-reported check-ins and optional partner observations. Not a clinical assessment.\n\n'+convert(mdMine(mine))+'\n\n'+convert(mdPartner(partner))+'\n';
+ return 'DAILY CHECK-IN — REPORT FOR CLINICIAN\nGenerated: '+localDay()+'\nBased on self-reported check-ins and optional partner observations. Not a clinical assessment.\n\n'+convert(mdMine(mine))+'\n\n'+convert(mdPartner(partner))+experimentReport()+'\n';
 }
 $('#doctor-copy').onclick=async()=>{const report=doctorReport();if(!report){$('#doctor-message').textContent='No saved entries to copy yet.';return}await copyMD(report,$('#doctor-copy'));$('#doctor-message').textContent='Readable report copied. Paste into Notes, email or a document.'};
 $('#doctor-share').onclick=async()=>{
@@ -240,13 +241,13 @@ refreshJournalStatus();
 function restoreGroup(g,v){if(v===undefined||v===null||v==='')return;const b=$$('[data-g="'+g+'"] .c').find(x=>x.dataset.v===String(v));if(b)b.classList.add('sel')}
 function restoreMulti(id,values){if(!Array.isArray(values))return;$$(id+' .c').forEach(b=>b.classList.toggle('sel',values.includes(b.dataset.v)))}
 const DRAFT_KEY='daily_checkin_drafts_v1';
-let loadedDraftDate=selectedDay(),draftRestoring=false,draftTimer;
+let loadedDraftDate=selectedDay(),draftRestoring=false,draftTimer,draftDirty=false;
 const draftFields=['med','dose','medtime','tn','kn','droptime','pn'];
 const draftGroups=['medtoday','sleep','start','attention','sidequests','finish','switching','regulation','crowd','dropoff','side','self',...qs.map(([g])=>g)];
 function captureDraft(){return {groups:Object.fromEntries(draftGroups.map(g=>[g,val(g)])),fields:Object.fromEntries(draftFields.map(id=>[id,$('#'+id)?.value||''])),multi:Object.fromEntries(['wins','drops','effects'].map(id=>[id,$$('#'+id+' .sel').map(b=>b.dataset.v)])),details:$('#more-details').open,updated:new Date().toISOString()}}
 function draftHasContent(d){return Object.values(d.groups).some(Boolean)||Object.values(d.fields).some(Boolean)||Object.values(d.multi).some(v=>v.length)}
-function saveDraftNow(){if(draftRestoring||!loadedDraftDate)return;clearTimeout(draftTimer);const d=captureDraft(),all=get(DRAFT_KEY,{});if(draftHasContent(d))all[loadedDraftDate]=d;else delete all[loadedDraftDate];try{set(DRAFT_KEY,all);$('#draft-status').textContent=draftHasContent(d)?'Draft kept on this device':'No unsaved draft'}catch(e){$('#draft-status').textContent='Draft not stored. Save your check-in before leaving.'}}
-function scheduleDraft(){if(draftRestoring)return;clearTimeout(draftTimer);draftTimer=setTimeout(saveDraftNow,250)}
+function saveDraftNow(){if(draftRestoring||!loadedDraftDate||!draftDirty)return;clearTimeout(draftTimer);const d=captureDraft(),all=get(DRAFT_KEY,{});if(draftHasContent(d))all[loadedDraftDate]=d;else delete all[loadedDraftDate];try{set(DRAFT_KEY,all);draftDirty=false;$('#draft-status').textContent=draftHasContent(d)?'Draft kept on this device':'No unsaved draft'}catch(e){$('#draft-status').textContent='Draft not stored. Save your check-in before leaving.'}}
+function scheduleDraft(){if(draftRestoring)return;draftDirty=true;clearTimeout(draftTimer);draftTimer=setTimeout(saveDraftNow,250)}
 function restoreDraft(date){const d=get(DRAFT_KEY,{})[date];if(!d)return false;draftRestoring=true;try{
  Object.entries(d.groups||{}).forEach(([g,v])=>{if(v){$('[data-g="'+g+'"] .c').forEach(b=>b.classList.toggle('sel',b.dataset.v===String(v)))}});
  Object.entries(d.fields||{}).forEach(([id,v])=>{const el=$('#'+id);if(el)el.value=v});
@@ -256,11 +257,11 @@ function restoreDraft(date){const d=get(DRAFT_KEY,{})[date];if(!d)return false;d
  $('#draft-status').textContent='Unsaved draft restored · '+new Date(d.updated).toLocaleString();
  return true
  }finally{draftRestoring=false}}
-function clearDraftFor(date){clearTimeout(draftTimer);const all=get(DRAFT_KEY,{});delete all[date];try{set(DRAFT_KEY,all)}catch(e){}$('#draft-status').textContent='Saved check-in'}
+function clearDraftFor(date){clearTimeout(draftTimer);draftDirty=false;const all=get(DRAFT_KEY,{});delete all[date];try{set(DRAFT_KEY,all)}catch(e){}$('#draft-status').textContent='Saved check-in'}
 document.addEventListener('input',e=>{if(e.target.closest('#k,#p'))scheduleDraft()});
 document.addEventListener('change',e=>{if(e.target.closest('#k,#p')&&e.target.id!=='entrydate')scheduleDraft()});
 document.addEventListener('click',e=>{if(e.target.closest('#k .c,#p .c,#more-details summary,[data-clearcarry]'))scheduleDraft()});
-addEventListener('pagehide',()=>{if(!get(K,[]).some(r=>r.date===loadedDraftDate)&&!get(P,[]).some(r=>r.date===loadedDraftDate))saveDraftNow()});
+addEventListener('pagehide',saveDraftNow);
 function priorDay(date){const d=new Date(date+'T12:00:00');d.setDate(d.getDate()-1);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
 function carryPrevious(rows,date,key,field,notice){
  const prev=rows.find(r=>r.date===priorDay(date)),value=prev&&typeof prev[key]==='string'?prev[key].trim():'';
@@ -285,7 +286,7 @@ function loadSelectedDate(){
  }else{$('#med').value=st.medication||'';fillDoses();carryPrevious(get(K,[]),selectedDay(),'treatment_notes','#tn','#treatment-carry');carryPrevious(get(K,[]),selectedDay(),'note','#kn','#personal-carry');if($('#personal-carry').classList.contains('hide')===false)$('#more-details').open=true}
  const partner=get(P,[]).find(r=>r.date===selectedDay());
  if(partner){qs.forEach(([g])=>restoreGroup(g,partner[g]));restoreGroup('self',partner.still_themselves||partner.still_herself);$('#pn').value=partner.note||''}else carryPrevious(get(P,[]),selectedDay(),'note','#pn','#partner-carry')
- toggleMedication();toggleDropoff();toggleEffects();progress();dateLabels();restoreDraft(selectedDay());
+ toggleMedication();toggleDropoff();toggleEffects();progress();dateLabels();restoreDraft(selectedDay());draftDirty=false;
 }
 $('#entrydate').onchange=()=>{saveDraftNow();loadedDraftDate=selectedDay();if(!/^\d{4}-\d{2}-\d{2}$/.test(selectedDay())||selectedDay()>localDay()){$('#entrydate').value=localDay();loadedDraftDate=localDay()}loadSelectedDate()};
 loadSelectedDate();
