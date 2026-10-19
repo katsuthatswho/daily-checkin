@@ -102,3 +102,16 @@ test('history escapes user-controlled HTML and does not execute it',async({page}
  await expect(page.locator('#ph img')).toHaveCount(0);
  await expect(page.locator('#ph')).toContainText('<img');
 });
+
+test('tabs have consistent hierarchy and partner progress updates',async({page})=>{
+ await expect(page.locator('#k h1')).toBeVisible();
+ await page.locator('#pt').click();
+ await expect(page.locator('#partnerdate')).not.toBeEmpty();
+ await expect(page.locator('#partnerprogress')).toContainText('A quick look');
+ await expect(page.locator('#p .section-kicker')).toHaveCount(2);
+ await page.locator('[data-g=start_obs] [data-v=Same]').click();
+ await expect(page.locator('#partnerprogress')).toContainText('1 of 7');
+ await expect(page.locator('#p .save')).toHaveCount(1);
+ await page.locator('#kt').click();
+ await expect(page.locator('#k .section-kicker')).toHaveCount(3);
+});
