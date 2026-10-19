@@ -114,7 +114,7 @@ function multi(id){
   }
 }
 multi('#wins'); multi('#effects'); multi('#drops');
-function toggleEffects(){let show=val('side')&&val('side')!=='None';$('#effectdetails').classList.toggle('hide',!show);if(!show)$('#effects .sel').forEach(x=>x.classList.remove('sel'))}
+function toggleEffects(){let show=val('side')&&val('side')!=='None';$('#effectdetails').classList.toggle('hide',!show);if(!show)$$('#effects .sel').forEach(x=>x.classList.remove('sel'))}
 function toggleDropoff(){let yes=val('dropoff')==='Yes';$('#dropdetails').classList.toggle('hide',!yes);if(!yes){$('#droptime').value='';$$('#drops .sel').forEach(x=>x.classList.remove('sel'))}}
 
 const doses={
