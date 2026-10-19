@@ -70,7 +70,7 @@ document.addEventListener('click',e=>{
   let g=b.closest('[data-g]').dataset.g;
   if(g==='medtoday'||g==='start'||g==='attention'||g==='sidequests'||g==='finish'||g==='switching'||g==='regulation')$('#ko').style.display='none';
   if(g.endsWith('_obs')||g==='self')$('#po').style.display='none';
-  $$$('[data-g="'+g+'"] .c').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
+  $('[data-g="'+g+'"] .c').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
   if(g==='medtoday') toggleMedication(); if(g==='dropoff') toggleDropoff(); if(g==='side') toggleEffects(); progress();
 });
 function multi(id){
@@ -281,7 +281,7 @@ const DRAFT_KEY='daily_checkin_drafts_v1';
 let loadedDraftDate=selectedDay(),draftRestoring=false,draftTimer,draftDirty=false;
 const draftFields=['med','dose','medtime','tn','kn','droptime','pn','lifequality','appetite'];
 const draftGroups=['medtoday','sleep','start','attention','sidequests','finish','switching','regulation','crowd','dropoff','side','self',...qs.map(([g])=>g)];
-function captureDraft(){return {groups:Object.fromEntries(draftGroups.map(g=>[g,val(g)])),fields:Object.fromEntries(draftFields.map(id=>[id,$('#'+id)?.value||''])),multi:Object.fromEntries(['wins','drops','effects'].map(id=>[id,$$$('#'+id+' .sel').map(b=>b.dataset.v)])),details:$('#more-details').open,updated:new Date().toISOString()}}
+function captureDraft(){return {groups:Object.fromEntries(draftGroups.map(g=>[g,val(g)])),fields:Object.fromEntries(draftFields.map(id=>[id,$('#'+id)?.value||''])),multi:Object.fromEntries(['wins','drops','effects'].map(id=>[id,$('#'+id+' .sel').map(b=>b.dataset.v)])),details:$('#more-details').open,updated:new Date().toISOString()}}
 function draftHasContent(d){return Object.values(d.groups).some(Boolean)||Object.values(d.fields).some(Boolean)||Object.values(d.multi).some(v=>v.length)}
 function saveDraftNow(){if(draftRestoring||!loadedDraftDate||!draftDirty)return;clearTimeout(draftTimer);const d=captureDraft(),all=get(DRAFT_KEY,{});if(draftHasContent(d))all[loadedDraftDate]=d;else delete all[loadedDraftDate];try{set(DRAFT_KEY,all);draftDirty=false;$('#draft-status').textContent=draftHasContent(d)?'Draft kept on this device':'No unsaved draft'}catch(e){$('#draft-status').textContent='Draft not stored. Save your check-in before leaving.'}}
 function scheduleDraft(){if(draftRestoring)return;draftDirty=true;clearTimeout(draftTimer);draftTimer=setTimeout(saveDraftNow,250)}
