@@ -115,3 +115,19 @@ test('tabs have consistent hierarchy and partner progress updates',async({page})
  await page.locator('#kt').click();
  await expect(page.locator('#k .section-kicker')).toHaveCount(3);
 });
+
+test('backfill date saves separately, reloads edits and exports accurate dates',async({page})=>{
+ const today=await page.locator('#entrydate').inputValue();
+ const yesterday=await page.evaluate(()=>{const d=new Date();d.setDate(d.getDate()-1);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
+ await page.locator('#entrydate').fill(yesterday);
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#sk').click();
+ await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
+ await page.reload();await page.locator('#entrydate').fill(yesterday);
+ await expect(page.locator('[data-g=start] [data-v="2"]')).toHaveClass(/sel/);
+ await page.locator('#pt').click();await expect(page.locator('[data-g=start_obs] [data-v=Same]')).toHaveClass(/sel/);
+ await page.locator('#entrydate').fill(today);await expect(page.locator('[data-g=start] .sel')).toHaveCount(0);
+ const result=await page.evaluate(()=>({mine:JSON.parse(localStorage.getItem('my_daily_v4')),partner:JSON.parse(localStorage.getItem('partner_weekly_v3')),markdown:mdMine(JSON.parse(localStorage.getItem('my_daily_v4')))}));
+ expect(result.mine[0].date).toBe(yesterday);expect(result.partner[0].date).toBe(yesterday);expect(result.markdown).toContain(yesterday);
+});
