@@ -342,3 +342,29 @@ test('one active experiment, daily review and clinician export persist',async({p
  expect(report).toContain('BEHAVIOURAL EXPERIMENTS');
  expect(report).toContain('Worked when I prepared the desk');
 });
+
+test('clinician overview separates observed trends, treatment context and dated evidence',async({page})=>{
+ const result=await page.evaluate(()=>{
+ localStorage.setItem('my_daily_v4',JSON.stringify([
+ {date:'2026-10-01',medication_today:'Yes',medication:'Vyvanse (lisdexamfetamine)',dose:'20 mg',getting_started:'1',attention_control:'2',sleep:'Poor',side_effect_severity:'Mild',dropoff:'Yes'},
+ {date:'2026-10-03',medication_today:'Yes',medication:'Vyvanse (lisdexamfetamine)',dose:'20 mg',getting_started:'3',attention_control:'4',sleep:'Good',dropoff:'No'}]));
+ localStorage.setItem('partner_weekly_v3',JSON.stringify([{date:'2026-10-03',start_obs:'A little better'}]));
+ return doctorReport();
+ });
+ expect(result).toContain('REVIEW AT A GLANCE');
+ expect(result).toContain('Getting started: mean 3.0/5 across 2 answered days');
+ expect(result).toContain('Recorded period: 2026-10-01 to 2026-10-03');
+ expect(result).toContain('SIDE EFFECTS: 1 days');
+ expect(result).toContain('No causal treatment effect can be inferred');
+ expect(result).toContain('DATED RECORDS');
+});
+test('draft capture persists multiple selections and scores without losing previous dates',async({page})=>{
+ await page.locator('#more-details').evaluate(el=>el.open=true);
+ await page.locator('#kn').fill('Keep this note');
+ await page.locator('[data-g=start] [data-v="3"]').click();
+ await page.locator('#wins [data-v="Exercise"]').click();
+ await page.reload();
+ await expect(page.locator('#kn')).toHaveValue('Keep this note');
+ await expect(page.locator('[data-g=start] [data-v="3"]')).toHaveClass(/sel/);
+ await expect(page.locator('#wins [data-v="Exercise"]')).toHaveClass(/sel/);
+});
