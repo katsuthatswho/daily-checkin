@@ -70,7 +70,7 @@ document.addEventListener('click',e=>{
   let g=b.closest('[data-g]').dataset.g;
   if(g==='medtoday'||g==='start'||g==='attention'||g==='sidequests'||g==='finish'||g==='switching'||g==='regulation')$('#ko').style.display='none';
   if(g.endsWith('_obs')||g==='self')$('#po').style.display='none';
-  $$('[data-g="'+g+'"] .c').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
+  $$$('[data-g="'+g+'"] .c').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
   if(g==='medtoday') toggleMedication(); if(g==='dropoff') toggleDropoff(); if(g==='side') toggleEffects(); progress();
 });
 function multi(id){
@@ -178,11 +178,46 @@ async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){l
 $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
 
 function experimentReport(){const data=get('daily_checkin_experiments_v1',{active:null,history:[]});if(!data.history?.length)return '';const names={start:'Getting started',switch:'Switching tasks',finish:'Finishing tasks',life:'Life outside work'};return '\n\nBEHAVIOURAL EXPERIMENTS (SELF-REPORTED)\n'+data.history.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(r=>r.date+' — '+(names[r.type]||r.type)+': '+r.result+(r.note?' — '+r.note:'')).join('\n')+'\nThese are personal experiments, not evidence of treatment effectiveness.'}
+function clinicianOverview(mine,partner){
+ const sorted=mine.slice().sort((a,b)=>a.date.localeCompare(b.date));
+ const dates=[...mine,...partner].map(r=>r.date).filter(Boolean).sort();
+ const lines=['REVIEW AT A GLANCE'];
+ if(!dates.length)return '';
+ lines.push('Recorded period: '+dates[0]+' to '+dates[dates.length-1]+'.');
+ lines.push('Self-report: '+mine.length+' dated entries. Partner: '+partner.length+' dated entries. Matched dates: '+mine.filter(r=>partner.some(p=>p.date===r.date)).length+'.');
+ const dimensions=[['Getting started','getting_started'],['Staying focused','attention_control'],['Staying on track','side_quest_control'],['Following through','finishing'],['Switching gears','switching'],['Pausing and regulating','impulse_restlessness_control']];
+ if(sorted.length){
+  lines.push('FUNCTION (1 = most difficulty; 5 = least difficulty):');
+  dimensions.forEach(([name,key])=>{
+   const answered=sorted.filter(r=>r[key]!==''&&r[key]!=null&&Number.isInteger(Number(r[key]))&&Number(r[key])>=0&&Number(r[key])<=4);
+   if(!answered.length)return;
+   const avg=answered.reduce((s,r)=>s+Number(r[key])+1,0)/answered.length;
+   const first=Number(answered[0][key])+1,last=Number(answered[answered.length-1][key])+1;
+   lines.push('  '+name+': mean '+avg.toFixed(1)+'/5 across '+answered.length+' answered days; first '+first+'/5 ('+answered[0].date+'), latest '+last+'/5 ('+answered[answered.length-1].date+').');
+  });
+  const yes=sorted.filter(r=>r.medication_today==='Yes').length,no=sorted.filter(r=>r.medication_today==='No').length;
+  lines.push('MEDICATION: recorded as taken on '+yes+' days, not taken on '+no+' days, unspecified on '+(sorted.length-yes-no)+' days.');
+  const regimens=[...new Set(sorted.filter(r=>r.medication_today==='Yes').map(r=>[r.medication,r.dose].filter(Boolean).join(' · ')).filter(Boolean))];
+  if(regimens.length)lines.push('Recorded medication/dose: '+regimens.join('; ')+'.');
+  const sleep=sorted.filter(r=>r.sleep);if(sleep.length)lines.push('SLEEP: '+sleep.length+' days recorded; poor/below usual on '+sleep.filter(r=>['Poor','Below usual'].includes(r.sleep)).length+' days.');
+  const effects=sorted.filter(r=>r.side_effect_severity&&r.side_effect_severity!=='None');
+  if(effects.length)lines.push('SIDE EFFECTS: '+effects.length+' days with recorded severity other than None. Review dated details below.');
+  const dips=sorted.filter(r=>r.dropoff==='Yes');
+  if(dips.length)lines.push('LATER-DAY DIP: reported on '+dips.length+' of '+sorted.filter(r=>r.dropoff).length+' days with an answer; not necessarily medication-related.');
+ }
+ if(partner.length){
+  const observed=partner.reduce((n,r)=>n+qs.filter(([key])=>r[key]&&r[key]!=='Not sure').length,0);
+  lines.push('PARTNER: '+observed+' rated observations across '+partner.length+' entries. These compare behaviour with the person’s usual presentation and are not directly comparable with self-scores.');
+ }
+ lines.push('LIMITS: Scores are descriptive, not validated diagnostic measures. Uneven dates, changing circumstances, medication changes and missing responses limit comparisons. No causal treatment effect can be inferred.');
+ lines.push('','DATED RECORDS');
+ return lines.join('\n');
+}
 function doctorReport(){
  const mine=get(K,[]),partner=get(P,[]);
  if(!mine.length&&!partner.length)return '';
  const convert=s=>s.replace(/^#{1,3} /gm,'').replace(/\*\*(.*?)\*\*/g,'$1').replace(/^---$/gm,'────────────────────');
- return 'DAILY CHECK-IN — REPORT FOR CLINICIAN\nGenerated: '+localDay()+'\nBased on self-reported check-ins and optional partner observations. Not a clinical assessment.\n\n'+convert(mdMine(mine))+'\n\n'+convert(mdPartner(partner))+experimentReport()+'\n';
+ return 'DAILY CHECK-IN — REPORT FOR CLINICIAN\nGenerated: '+localDay()+'\nBased on self-reported check-ins and optional partner observations. Not a clinical assessment.\n\n'+clinicianOverview(mine,partner)+'\n\n'+convert(mdMine(mine))+'\n\n'+convert(mdPartner(partner))+experimentReport()+'\n';
 }
 $('#doctor-copy').onclick=async()=>{const report=doctorReport();if(!report){$('#doctor-message').textContent='No saved entries to copy yet.';return}await copyMD(report,$('#doctor-copy'));$('#doctor-message').textContent='Readable report copied. Paste into Notes, email or a document.'};
 $('#doctor-share').onclick=async()=>{
@@ -244,12 +279,12 @@ const DRAFT_KEY='daily_checkin_drafts_v1';
 let loadedDraftDate=selectedDay(),draftRestoring=false,draftTimer,draftDirty=false;
 const draftFields=['med','dose','medtime','tn','kn','droptime','pn'];
 const draftGroups=['medtoday','sleep','start','attention','sidequests','finish','switching','regulation','crowd','dropoff','side','self',...qs.map(([g])=>g)];
-function captureDraft(){return {groups:Object.fromEntries(draftGroups.map(g=>[g,val(g)])),fields:Object.fromEntries(draftFields.map(id=>[id,$('#'+id)?.value||''])),multi:Object.fromEntries(['wins','drops','effects'].map(id=>[id,$$('#'+id+' .sel').map(b=>b.dataset.v)])),details:$('#more-details').open,updated:new Date().toISOString()}}
+function captureDraft(){return {groups:Object.fromEntries(draftGroups.map(g=>[g,val(g)])),fields:Object.fromEntries(draftFields.map(id=>[id,$('#'+id)?.value||''])),multi:Object.fromEntries(['wins','drops','effects'].map(id=>[id,$$$('#'+id+' .sel').map(b=>b.dataset.v)])),details:$('#more-details').open,updated:new Date().toISOString()}}
 function draftHasContent(d){return Object.values(d.groups).some(Boolean)||Object.values(d.fields).some(Boolean)||Object.values(d.multi).some(v=>v.length)}
 function saveDraftNow(){if(draftRestoring||!loadedDraftDate||!draftDirty)return;clearTimeout(draftTimer);const d=captureDraft(),all=get(DRAFT_KEY,{});if(draftHasContent(d))all[loadedDraftDate]=d;else delete all[loadedDraftDate];try{set(DRAFT_KEY,all);draftDirty=false;$('#draft-status').textContent=draftHasContent(d)?'Draft kept on this device':'No unsaved draft'}catch(e){$('#draft-status').textContent='Draft not stored. Save your check-in before leaving.'}}
 function scheduleDraft(){if(draftRestoring)return;draftDirty=true;clearTimeout(draftTimer);draftTimer=setTimeout(saveDraftNow,250)}
 function restoreDraft(date){const d=get(DRAFT_KEY,{})[date];if(!d)return false;draftRestoring=true;try{
- Object.entries(d.groups||{}).forEach(([g,v])=>{if(v){$('[data-g="'+g+'"] .c').forEach(b=>b.classList.toggle('sel',b.dataset.v===String(v)))}});
+ Object.entries(d.groups||{}).forEach(([g,v])=>{if(v){$$('[data-g="'+g+'"] .c').forEach(b=>b.classList.toggle('sel',b.dataset.v===String(v)))}});
  Object.entries(d.fields||{}).forEach(([id,v])=>{const el=$('#'+id);if(el)el.value=v});
  Object.entries(d.multi||{}).forEach(([id,v])=>restoreMulti('#'+id,v));
  $('#more-details').open=!!d.details;
