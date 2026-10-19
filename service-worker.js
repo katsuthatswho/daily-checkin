@@ -1,5 +1,5 @@
 // Network-first app shell. Offline cache is fallback only; never cache personal entries.
-const CACHE='daily-checkin-offline-v45';
+const CACHE='daily-checkin-offline-v46';
 const SHELL=new URL('./index.html',self.registration.scope).href;
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.add(new Request(SHELL,{cache:'reload'}))).then(()=>self.skipWaiting()));
