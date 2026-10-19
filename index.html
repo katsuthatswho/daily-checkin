@@ -281,7 +281,7 @@ function insightData(){const mine=periodRows(get(K,[])),partner=periodRows(get(P
 function scores(rows,key){return rows.map(r=>r[key]).filter(v=>v!==''&&v!==undefined&&v!==null&&Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=4).map(Number)}
 function insightFacts(){
  const {mine,partner,shared}=insightData(),lines=['DAILY CHECK-IN — FACTUAL SUMMARY','Period: '+(insightPeriod==='all'?'All recorded dates':'Last '+insightPeriod+' calendar days'),'Personal entries: '+mine.length,'Partner entries: '+partner.length,'Dates with both: '+shared.length,''];
- [['Getting started','getting_started'],['Attention','attention_control'],['Following through','finishing'],['Switching gears','switching']].forEach(([label,key])=>{const v=scores(mine,key);if(v.length)lines.push(label+': '+v.map(x=>x+1).join(', ')+' out of 5 ('+v.length+' answered days).')});
+ [['Getting started','getting_started'],['Staying focused','attention_control'],['Staying on track','side_quest_control'],['Following through','finishing'],['Switching gears','switching'],['Pausing and regulating','impulse_restlessness_control']].forEach(([label,key])=>{const v=scores(mine,key);if(v.length)lines.push(label+': '+v.map(x=>x+1).join(', ')+' out of 5 ('+v.length+' answered days).')});
  const yes=mine.filter(r=>r.medication_today==='Yes').length,no=mine.filter(r=>r.medication_today==='No').length;
  lines.push('Medication recorded: Yes '+yes+', No '+no+', not recorded '+(mine.length-yes-no)+'.');
  const notes=[...mine.map(r=>({date:r.date,who:'Self',note:[r.treatment_notes,r.note].filter(Boolean).join(' | ')})),...partner.map(r=>({date:r.date,who:'Partner',note:r.note||''}))].filter(r=>r.note).sort((a,b)=>a.date.localeCompare(b.date));
@@ -294,7 +294,6 @@ function renderInsights(){
  const {mine,partner,shared}=insightData();
  const dims=[['Getting started','getting_started'],['Staying focused','attention_control'],['Staying on track','side_quest_control'],['Following through','finishing'],['Switching gears','switching'],['Pausing & regulating','impulse_restlessness_control']];
  const dayCount=insightPeriod==='all'?null:Number(insightPeriod);
- const dates=[...new Set([...mine,...partner].map(r=>r.date))];
  let body='<div class="insight-lead"><span class="insight-overline">YOUR RECORD AT A GLANCE</span><div class="insight-lead-grid"><div><strong>'+mine.length+'</strong><span>days checked in</span></div><div><strong>'+partner.length+'</strong><span>partner entries</span></div><div><strong>'+shared.length+'</strong><span>dates together</span></div></div><p>'+ (dayCount?'Within the last '+dayCount+' days.':'Across all saved dates.')+' Unrecorded days are not counted as low scores.</p></div>';
  if(!mine.length&&!partner.length){$('#insight-body').innerHTML=body+insightCard('GET STARTED','Your first check-in makes this useful','Save a check-in to begin seeing your recorded days here. No streaks to maintain.');return}
  if(mine.length){
@@ -308,7 +307,6 @@ function renderInsights(){
     const bars=values.slice(-14).map(r=>'<span class="trend-dot" style="--score:'+r.v+'" title="'+htmlSafe(r.date)+': '+r.v+'/5"></span>').join('');
     return '<div class="trend-row"><div class="trend-label"><strong>'+htmlSafe(name)+'</strong><span>'+mean.toFixed(1)+'/5 average · '+range+' · '+values.length+' days</span></div><div class="trend-dots" role="img" aria-label="'+htmlSafe(name)+': '+values.slice(-14).map(r=>r.date+' '+r.v+' of 5').join(', ')+'">'+bars+'</div></div>'
   }).join('')+'</div><p class="insight-foot">Only the latest 14 answered dates are plotted per dimension. Averages describe recorded responses, not a clinical measure.</p></section>';
-  const recent=mine.slice(-7);
   const medication=mine.filter(r=>r.medication_today==='Yes').length;
   const notes=mine.filter(r=>r.note||r.treatment_notes);
   body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">03 / CONTEXT</div><h2>What else was happening</h2></div><div class="context-pairs"><div><strong>'+medication+' of '+mine.length+'</strong><span>entries recorded medication taken</span></div><div><strong>'+notes.length+'</strong><span>entries with written notes</span></div></div><p class="insight-muted">Medication and scores appear together in your record, but this view cannot determine whether one caused the other.</p></section>';
