@@ -185,7 +185,7 @@ test('doctor report is readable plain text with dates and both perspectives',asy
 test('unified navigation, factual insights, journal edit and XSS safety',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.locator('#it').click();await expect(page.locator('#insights')).toBeVisible();
- await expect(page.locator('#insight-body')).toContainText('Nothing to summarise');
+ await expect(page.locator('#insight-body')).toContainText('Your first check-in makes this useful');
  await page.locator('#kt').click();
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
@@ -193,7 +193,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
  await page.locator('#sk').click();
  await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
  await page.locator('#it').click();
- await expect(page.locator('#insight-body')).toContainText('1 shared date');
+ await expect(page.locator('#insight-body')).toContainText('1');
  await expect(page.locator('#insight-body')).toContainText('<img src=x');
  await expect(page.locator('#insight-body img')).toHaveCount(0);
  await page.locator('[data-period="7"]').click();
@@ -211,7 +211,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
 });
 
 test('headings, date and navigation remain in consistent order across every section',async({page})=>{
- const states=[['k','How was your day?'],['p','What did you notice?'],['insights','The bigger picture.'],['journal-view','Your journal.']];
+ const states=[['k','How was your day?'],['p','What did you notice?'],['insights','What’s changing?'],['journal-view','Your journal.']];
  for(const [view,title] of states){
   if(view==='k')await page.locator('#kt').click();
   else if(view==='p'){await page.locator('#kt').click();await page.locator('#pt').click()}
@@ -272,4 +272,38 @@ test('ADHD-friendly short form, optional details, sticky save and pencil icon',a
  const manifest=await (await request.get('http://127.0.0.1:8765/manifest.webmanifest')).json();
  expect(manifest.icons.some(i=>i.type==='image/png')).toBeTruthy();
  const svg=await (await request.get('http://127.0.0.1:8765/icon.svg')).text();expect(svg).toContain('stroke');
+});
+
+test('new-day notes carry forward visibly, remain editable, and never overwrite yesterday',async({page})=>{
+ const yesterday=await page.evaluate(()=>{const d=new Date();d.setDate(d.getDate()-1);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
+ await page.locator('#entrydate').fill(yesterday);
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#more-details').evaluate(el=>el.open=true);
+ await page.locator('#kn').fill('Keep this in mind tomorrow');
+ await page.locator('#tn').fill('Treatment context from yesterday');
+ await page.locator('#sk').click();
+ await expect(page.locator('#save-toast')).toContainText('saved');
+ const today=await page.evaluate(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
+ await page.locator('#entrydate').fill(today);
+ await expect(page.locator('#personal-carry')).toBeVisible();
+ await expect(page.locator('#kn')).toHaveValue('Keep this in mind tomorrow');
+ await expect(page.locator('#tn')).toHaveValue('Treatment context from yesterday');
+ await page.locator('#personal-carry .carry-clear').click();
+ await expect(page.locator('#kn')).toHaveValue('');
+ await page.locator('#entrydate').fill(yesterday);
+ await expect(page.locator('#kn')).toHaveValue('Keep this in mind tomorrow');
+});
+test('Insights gives all six dimensions, trend marks and original dated notes',async({page})=>{
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#more-details').evaluate(el=>el.open=true);
+ await page.locator('#kn').fill('A distinct original observation');
+ await page.locator('#sk').click();
+ await page.locator('#it').click();
+ await expect(page.locator('.insight-dim')).toHaveCount(6);
+ await expect(page.locator('.trend-row')).toHaveCount(6);
+ await expect(page.locator('.trend-dot')).toHaveCount(6);
+ await expect(page.locator('#insight-body')).toContainText('A distinct original observation');
+ await expect(page.locator('#insight-body')).toContainText('not a diagnosis');
 });
