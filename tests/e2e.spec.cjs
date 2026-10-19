@@ -32,7 +32,9 @@ test('self form conditional controls, validation, save, update, history and expo
 test('partner observation, uncertainty, save, update and export',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.locator('#pt').click();
  await page.locator('#sp').click();await expect(page.locator('#po')).toContainText('Choose at least one');
- await page.locator('[data-g=start_obs] [data-v="Not sure"]').click();await page.locator('#sp').click();await expect(page.locator('#po')).toContainText('Choose at least one');
+ await page.locator('[data-g=start_obs] [data-v="Not sure"]').click();await page.locator('#sp').click();await expect(page.locator('#po')).toContainText('Saved');
+ let unsure=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(unsure[0].start_obs).toBe('Not sure');
+ const order=await page.locator('[data-g=start_obs] .c').evaluateAll(bs=>bs.map(b=>b.dataset.v));expect(order).toEqual(['Not sure','Worse','Same','A little better','Clearly better']);
  await page.locator('[data-g=start_obs] [data-v="A little better"]').click();await page.locator('#sp').click();
  let data=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(data).toHaveLength(1);expect(data[0].start_obs).toBe('A little better');
  await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();data=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(data).toHaveLength(1);expect(data[0].start_obs).toBe('Same');
