@@ -354,7 +354,7 @@ test('clinician overview separates observed trends, treatment context and dated 
  expect(result).toContain('REVIEW AT A GLANCE');
  expect(result).toContain('Getting started: mean 3.0/5 across 2 answered days');
  expect(result).toContain('Recorded period: 2026-10-01 to 2026-10-03');
- expect(result).toContain('SIDE EFFECTS: 1 days');
+ expect(result).toContain('SIDE EFFECTS: severity reported above None on 1 recorded day');
  expect(result).toContain('No causal treatment effect can be inferred');
  expect(result).toContain('DATED RECORDS');
 });
@@ -380,7 +380,7 @@ test('optional life quality and appetite survive draft, save and clinician repor
  localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-20',medication_today:'Yes',life_quality:'Good day',appetite:'Skipped meals or struggled to eat'}]));
  return doctorReport();
  });
- expect(report).toContain('LIFE QUALITY: 1 days recorded');
- expect(report).toContain('APPETITE: 1 days with skipped meals');
+ expect(report).toContain('LIFE QUALITY: 1 of 1 recorded days felt good');
+ expect(report).toContain('APPETITE: skipped meals or difficulty eating on 1 of 1 recorded days');
  expect(report).toContain('How life felt: Good day');
 });
