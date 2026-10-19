@@ -426,6 +426,15 @@ test('full device backup includes unfinished drafts and behavioural experiments'
  expect(backup).toHaveProperty('behavioural_experiments_on_this_device');
 });
 
+test('app script parses and navigation initializes without browser errors',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.reload();
+ expect(errors).toEqual([]);
+ await page.locator('#wt').click();
+ await expect(page.locator('#help-view')).toBeVisible();
+ await page.locator('#it').click();
+ await expect(page.locator('#insights')).toBeVisible();
+});
 test('four destinations keep check-in, strategies, insights and records distinct',async({page})=>{
  const tabs=page.locator('.tabs button');
  await expect(tabs).toHaveCount(4);
