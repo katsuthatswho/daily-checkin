@@ -359,6 +359,7 @@ test('clinician overview separates observed trends, treatment context and dated 
  expect(result).toContain('DATED RECORDS');
 });
 test('draft capture persists multiple selections and scores without losing previous dates',async({page})=>{
+ const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
  await page.locator('#more-details').evaluate(el=>el.open=true);
  await page.locator('#kn').fill('Keep this note');
  await page.locator('[data-g=start] [data-v="3"]').click();
@@ -367,7 +368,7 @@ test('draft capture persists multiple selections and scores without losing previ
  expect(stored[await page.locator('#entrydate').inputValue()]?.fields?.kn).toBe('Keep this note');
  await page.reload();
  const diagnostic=await page.evaluate(()=>({date:document.querySelector('#entrydate').value,note:document.querySelector('#kn').value,drafts:localStorage.getItem('daily_checkin_drafts_v1'),status:document.querySelector('#draft-status').textContent}));
- expect(diagnostic.note,JSON.stringify(diagnostic)).toBe('Keep this note');
+ expect(diagnostic.note,JSON.stringify({...diagnostic,pageErrors})).toBe('Keep this note');
  await expect(page.locator('[data-g=start] [data-v="3"]')).toHaveClass(/sel/);
  await expect(page.locator('#wins [data-v="Exercise"]')).toHaveClass(/sel/);
 });
