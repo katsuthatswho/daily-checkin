@@ -189,7 +189,7 @@ function loadSelectedDate(){
  if(partner){qs.forEach(([g])=>restoreGroup(g,partner[g]));restoreGroup('self',partner.still_themselves||partner.still_herself);$('#pn').value=partner.note||''}
  toggleMedication();toggleDropoff();toggleEffects();progress();dateLabels();
 }
-$('#entrydate').onchange=()=>{if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(selectedDay())||selectedDay()>localDay()){$('#entrydate').value=localDay()}loadSelectedDate()};
+$('#entrydate').onchange=()=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(selectedDay())||selectedDay()>localDay()){$('#entrydate').value=localDay()}loadSelectedDate()};
 loadSelectedDate();
 function render(){
  let k=get(K,[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,7);
