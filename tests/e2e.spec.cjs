@@ -253,7 +253,7 @@ test('save feedback is visible at button position for success, update and valida
  await expect(page.locator('#save-toast')).toContainText('Partner check-in saved');
 });
 
-test('iOS home screen icon is PNG and manifest references real PNG',async({page,request})=>{const icon=await request.get('http://127.0.0.1:8765/apple-touch-icon.png');expect(icon.ok()).toBeTruthy();expect(icon.headers()['content-type']).toContain('image/png');const bytes=await icon.body();expect(bytes.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',/apple-touch-icon\\.png/);const manifest=await (await request.get('http://127.0.0.1:8765/manifest.webmanifest')).json();expect(manifest.icons.some(x=>x.type==='image/png')).toBe(true)});
+test('iOS home screen icon is PNG and manifest references real PNG',async({page,request})=>{const icon=await request.get('http://127.0.0.1:8765/apple-touch-icon.png');expect(icon.ok()).toBeTruthy();expect(icon.headers()['content-type']).toContain('image/png');const bytes=await icon.body();expect(bytes.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',/apple-touch-icon.png/);const manifest=await (await request.get('http://127.0.0.1:8765/manifest.webmanifest')).json();expect(manifest.icons.some(x=>x.type==='image/png')).toBe(true)});
 
 test('ADHD-friendly short form, optional details, sticky save and pencil icon',async({page,request})=>{
  await expect(page.locator('#more-details')).not.toHaveAttribute('open','');
@@ -269,7 +269,7 @@ test('ADHD-friendly short form, optional details, sticky save and pencil icon',a
  await page.locator('#kn').fill('Optional entry');await page.locator('#sk').click();
  await page.reload();await expect(page.locator('#more-details')).toHaveAttribute('open','');
  await expect(page.locator('#kn')).toHaveValue('Optional entry');
- const manifest=await (await request.get('/manifest.webmanifest')).json();
+ const manifest=await (await request.get('http://127.0.0.1:8765/manifest.webmanifest')).json();
  expect(manifest.icons.some(i=>i.type==='image/png')).toBeTruthy();
  const svg=await (await request.get('http://127.0.0.1:8765/icon.svg')).text();expect(svg).toContain('stroke');
 });
