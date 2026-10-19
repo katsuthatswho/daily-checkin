@@ -143,15 +143,15 @@ $('#sk').onclick=()=>{
   side_effect_severity:val('side'),side_effects:$$('#effects .sel').map(x=>x.dataset.v),
   note:$('#kn').value.trim()
  };
- let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);try{set(K,a)}catch(e){notifySave('Could not save. Check available device storage.',true);return}clearDraftFor(r.date);$('#ko').textContent=(i>=0?'Check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');notifySave((i>=0?'Check-in updated':'Check-in saved')+' on this device ✓');
+ let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);try{set(K,a)}catch(e){notifySave('Could not save. Check available device storage.',true);return}clearDraftFor(r.date,'self');$('#ko').textContent=(i>=0?'Check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');notifySave((i>=0?'Check-in updated':'Check-in saved')+' on this device ✓');
  progress();render();refreshJournalStatus();renderInsights();renderJournal()
 };
-$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:selectedDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});notifySave('Not saved yet. Add at least one observation.',true);return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);try{set(P,a)}catch(e){notifySave('Could not save. Check available device storage.',true);return}clearDraftFor(r.date);$('#po').textContent=(i>=0?'Partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');notifySave((i>=0?'Partner check-in updated':'Partner check-in saved')+' on this device ✓');render();refreshJournalStatus();renderInsights();renderJournal()};
+$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:selectedDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});notifySave('Not saved yet. Add at least one observation.',true);return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);try{set(P,a)}catch(e){notifySave('Could not save. Check available device storage.',true);return}clearDraftFor(r.date,'partner');$('#po').textContent=(i>=0?'Partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');notifySave((i>=0?'Partner check-in updated':'Partner check-in saved')+' on this device ✓');render();refreshJournalStatus();renderInsights();renderJournal()};
 
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
 function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
-$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-device-data.json',JSON.stringify({daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[])},null,2),'application/json');
+$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-device-data.json',JSON.stringify({exported_at:new Date().toISOString(),format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[]),unfinished_drafts_on_this_device:get(DRAFT_KEY,{}),behavioural_experiments_on_this_device:experimentData()},null,2),'application/json');
 
 const htmlSafe=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const frac=v=>v===''||v==null||!Number.isInteger(Number(v))||Number(v)<0||Number(v)>4?'Not recorded':(Number(v)+1)+'/5';
@@ -294,7 +294,21 @@ function restoreDraft(date){const d=get(DRAFT_KEY,{})[date];if(!d)return false;d
  $('#draft-status').textContent='Unsaved draft restored · '+new Date(d.updated).toLocaleString();
  return true
  }finally{draftRestoring=false}}
-function clearDraftFor(date){clearTimeout(draftTimer);draftDirty=false;const all=get(DRAFT_KEY,{});delete all[date];try{set(DRAFT_KEY,all)}catch(e){}$('#draft-status').textContent='Saved check-in'}
+function clearDraftFor(date,who){
+ clearTimeout(draftTimer);draftDirty=false;
+ const all=get(DRAFT_KEY,{}),draft=all[date];
+ if(draft){
+  const partnerGroups=new Set(['self',...qs.map(([g])=>g)]);
+  const keepGroup=who==='self'?g=>partnerGroups.has(g):g=>!partnerGroups.has(g);
+  const keepField=who==='self'?id=>id==='pn':id=>id!=='pn';
+  const groups=Object.fromEntries(Object.entries(draft.groups||{}).filter(([g,v])=>keepGroup(g)&&v));
+  const fields=Object.fromEntries(Object.entries(draft.fields||{}).filter(([id,v])=>keepField(id)&&v));
+  const multi=who==='self'?{}:Object.fromEntries(Object.entries(draft.multi||{}).filter(([,v])=>Array.isArray(v)&&v.length));
+  if(Object.keys(groups).length||Object.keys(fields).length||Object.keys(multi).length)all[date]={groups,fields,multi,details:who==='partner'&&draft.details,updated:draft.updated};
+  else delete all[date];
+ }
+ try{set(DRAFT_KEY,all);$('#draft-status').textContent=all[date]?'Other unfinished answers kept on this device':'Check-in saved'}catch(e){$('#draft-status').textContent='Saved check-in; unfinished answers could not be stored'}
+}
 document.addEventListener('input',e=>{if(e.target.closest('#k,#p'))scheduleDraft()});
 document.addEventListener('change',e=>{if(e.target.closest('#k,#p')&&e.target.id!=='entrydate')scheduleDraft()});
 document.addEventListener('click',e=>{if(e.target.closest('#k .c,#p .c,#more-details summary,[data-clearcarry]'))scheduleDraft()});
