@@ -243,7 +243,7 @@ const DRAFT_KEY='daily_checkin_drafts_v1';
 let loadedDraftDate=selectedDay(),draftRestoring=false,draftTimer;
 const draftFields=['med','dose','medtime','tn','kn','droptime','pn'];
 const draftGroups=['medtoday','sleep','start','attention','sidequests','finish','switching','regulation','crowd','dropoff','side','self',...qs.map(([g])=>g)];
-function captureDraft(){return {groups:Object.fromEntries(draftGroups.map(g=>[g,val(g)])),fields:Object.fromEntries(draftFields.map(id=>[id,$('#'+id)?.value||''])),multi:Object.fromEntries(['wins','drops','effects'].map(id=>[id,$('#'+id+' .sel').map(b=>b.dataset.v)])),details:$('#more-details').open,updated:new Date().toISOString()}}
+function captureDraft(){return {groups:Object.fromEntries(draftGroups.map(g=>[g,val(g)])),fields:Object.fromEntries(draftFields.map(id=>[id,$('#'+id)?.value||''])),multi:Object.fromEntries(['wins','drops','effects'].map(id=>[id,$$('#'+id+' .sel').map(b=>b.dataset.v)])),details:$('#more-details').open,updated:new Date().toISOString()}}
 function draftHasContent(d){return Object.values(d.groups).some(Boolean)||Object.values(d.fields).some(Boolean)||Object.values(d.multi).some(v=>v.length)}
 function saveDraftNow(){if(draftRestoring||!loadedDraftDate)return;clearTimeout(draftTimer);const d=captureDraft(),all=get(DRAFT_KEY,{});if(draftHasContent(d))all[loadedDraftDate]=d;else delete all[loadedDraftDate];try{set(DRAFT_KEY,all);$('#draft-status').textContent=draftHasContent(d)?'Draft kept on this device':'No unsaved draft'}catch(e){$('#draft-status').textContent='Draft not stored. Save your check-in before leaving.'}}
 function scheduleDraft(){if(draftRestoring)return;clearTimeout(draftTimer);draftTimer=setTimeout(saveDraftNow,250)}
