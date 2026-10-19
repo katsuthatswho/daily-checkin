@@ -19,7 +19,7 @@
 <div id="meddetails" class="hide">
 <div style="margin-top:12px"><div class="hint">Medication</div><select id="med"><option value="">Select medication</option><option>Vyvanse (lisdexamfetamine)</option><option>Concerta / long-acting methylphenidate</option><option>Ritalin LA</option><option>Ritalin immediate-release</option><option>Dexamfetamine</option><option>Other</option></select></div>
 <div style="margin-top:10px"><div class="hint">Dose</div><select id="dose"><option value="">Select dose</option></select></div>
-<div style="margin-top:10px"><div class="hint">Time taken</div><input id="medtime" type="time"></div>
+<div style="margin-top:10px"><div class="hint">Time taken</div><select id="medtime-quick" aria-label="Medication time"><option value="">Not recorded</option><option value="06:30">Before 7 am</option><option value="07:30">7–8 am</option><option value="08:30">8–9 am</option><option value="09:30">9–10 am</option><option value="10:30">10–11 am</option><option value="11:30">After 11 am</option><option value="other">Specific time</option></select><input id="medtime" type="time" class="hide" aria-label="Specific time medication taken"><div class="hint">Time ranges are approximate. Use Specific time for an exact record.</div></div>
 </div>
 <div style="margin-top:12px"><div class="label">Sleep last night</div><div class="row" data-g="sleep"><button class="c" data-v="Poor">Poor</button><button class="c" data-v="Below usual" aria-label="Below usual">Low</button><button class="c" data-v="Usual" aria-label="Usual">Usual</button><button class="c" data-v="Good">Good</button><button class="c" data-v="Great">Great</button></div></div>
 <div style="margin-top:10px"><div class="hint">Treatment notes</div><div id="treatment-carry" class="carry-note hide"></div><textarea id="tn" placeholder="Optional"></textarea></div>
@@ -322,17 +322,20 @@ function carryPrevious(rows,date,key,field,notice){
  banner.innerHTML='<span>Carried from '+htmlSafe(prev.date)+' · Review or edit before saving today.</span> <button type="button" class="carry-clear" data-clearcarry="'+field.slice(1)+'">Clear</button>';
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-clearcarry]');if(!b)return;const field=$('#'+b.dataset.clearcarry);if(field)field.value='';b.closest('.carry-note').classList.add('hide')});
+function syncMedTime(){const q=$('#medtime-quick'),t=$('#medtime');t.classList.toggle('hide',q.value!=='other');if(q.value&&q.value!=='other')t.value=q.value;if(!q.value)t.value=''}
+function restoreMedTime(){const t=$('#medtime').value,q=$('#medtime-quick');q.value=t?([...q.options].some(o=>o.value===t)?t:'other'):'';t.classList.toggle('hide',q.value!=='other')}
+$('#medtime-quick').addEventListener('change',()=>{syncMedTime();scheduleDraft()});
 function loadSelectedDate(){
  $$('[data-g] .c.sel,#wins .sel,#drops .sel,#effects .sel').forEach(b=>b.classList.remove('sel'));
  ['#medtime','#tn','#kn','#droptime','#pn','#appetite','#lifequality'].forEach(id=>$(id).value='');
- $('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
+ $('#medtime-quick').value='';$('#medtime').classList.add('hide');$('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
  const mine=get(K,[]).find(r=>r.date===selectedDay());
  if(mine){
   if(mine.life_quality||mine.appetite||mine.life_outside_work?.length||mine.work_crowding||mine.dropoff||mine.side_effect_severity||mine.note||mine.treatment_notes)$('#more-details').open=true;
   [['medtoday','medication_today'],['sleep','sleep'],['start','getting_started'],['attention','attention_control'],['sidequests','side_quest_control'],['finish','finishing'],['switching','switching'],['regulation','impulse_restlessness_control'],['crowd','work_crowding'],['dropoff','dropoff'],['side','side_effect_severity']].forEach(([g,k])=>restoreGroup(g,mine[k]));
   if(mine.medication&&doses[mine.medication]){$('#med').value=mine.medication;st.dose=mine.dose||'';fillDoses()}
   else{$('#med').value=st.medication||'';fillDoses()}
-  $('#appetite').value=mine.appetite||'';$('#lifequality').value=mine.life_quality||'';$('#medtime').value=mine.time_taken||'';$('#tn').value=mine.treatment_notes||'';$('#kn').value=mine.note||'';$('#droptime').value=mine.dropoff_time||'';
+  $('#appetite').value=mine.appetite||'';$('#lifequality').value=mine.life_quality||'';$('#medtime').value=mine.time_taken||'';restoreMedTime();$('#tn').value=mine.treatment_notes||'';$('#kn').value=mine.note||'';$('#droptime').value=mine.dropoff_time||'';
   restoreMulti('#wins',mine.life_outside_work);restoreMulti('#drops',mine.dropoff_changes);restoreMulti('#effects',mine.side_effects);
  }else{$('#med').value=st.medication||'';fillDoses();carryPrevious(get(K,[]),selectedDay(),'treatment_notes','#tn','#treatment-carry');carryPrevious(get(K,[]),selectedDay(),'note','#kn','#personal-carry');if($('#personal-carry').classList.contains('hide')===false)$('#more-details').open=true}
  const partner=get(P,[]).find(r=>r.date===selectedDay());
@@ -451,10 +454,11 @@ $('#experiment-review').onclick=()=>{
  try{set(EXP_KEY,data)}catch(e){$('#experiment-feedback').textContent='Could not save the review.';return}
  renderExperiment();$('#experiment-feedback').textContent='Review saved on this device.';
 };
+function deleteJournalEntry(date,who){const label=who==='mine'?'your':'partner';if(!confirm('Delete '+label+' entry for '+date+'? This cannot be undone. Export a backup first if needed.'))return;const key=who==='mine'?K:P;try{set(key,get(key,[]).filter(r=>r.date!==date))}catch(e){alert('Could not delete entry.');return}renderJournal();renderInsights();if(selectedDay()===date)loadSelectedDate()}
 function renderJournal(){
  const mine=get(K,[]).filter(dated).map(r=>({...r,_who:'mine'})),partner=get(P,[]).filter(dated).map(r=>({...r,_who:'partner'}));
  const rows=[...(journalFilter==='partner'?[]:mine),...(journalFilter==='mine'?[]:partner)].sort((a,b)=>b.date.localeCompare(a.date)||a._who.localeCompare(b._who));
- $('#journal-list').innerHTML=rows.length?rows.map(r=>'<article class="journal-item"><strong>'+htmlSafe(r.date)+' · '+(r._who==='mine'?'My check-in':'Partner')+'</strong><p>'+htmlSafe(r._who==='mine'?'Getting started '+frac(r.getting_started)+' · Focus '+frac(r.attention_control)+(r.note?' · '+r.note:''):(r.start_obs?'Getting started: '+r.start_obs:'Observation saved')+(r.note?' · '+r.note:''))+'</p><button data-editdate="'+htmlSafe(r.date)+'" data-editwho="'+r._who+'">Review / edit</button></article>').join(''):'<p class="hint">No entries in this view yet.</p>';
+ $('#journal-list').innerHTML=rows.length?rows.map(r=>'<article class="journal-item"><strong>'+htmlSafe(r.date)+' · '+(r._who==='mine'?'My check-in':'Partner')+'</strong><p>'+htmlSafe(r._who==='mine'?'Getting started '+frac(r.getting_started)+' · Focus '+frac(r.attention_control)+(r.note?' · '+r.note:''):(r.start_obs?'Getting started: '+r.start_obs:'Observation saved')+(r.note?' · '+r.note:''))+'</p><button data-editdate="'+htmlSafe(r.date)+'" data-editwho="'+r._who+'">Review / edit</button> <button type="button" data-deletedate="'+htmlSafe(r.date)+'" data-deletewho="'+r._who+'">Delete</button></article>').join(''):'<p class="hint">No entries in this view yet.</p>';
 }
 function showView(view){
  activeView=view;['k','p','help-view','insights','journal-view'].forEach(id=>$('#'+id).classList.toggle('hide',id!==view));
@@ -467,7 +471,7 @@ function showView(view){
 $('#kt').onclick=()=>showView('k');$('#self-switch').onclick=()=>showView('k');$('#pt').onclick=()=>showView('p');$('#wt').onclick=()=>showView('help-view');$('#it').onclick=()=>showView('insights');$('#jt').onclick=()=>showView('journal-view');
 $$('[data-period]').forEach(b=>b.onclick=()=>{insightPeriod=b.dataset.period;$$('[data-period]').forEach(x=>x.classList.toggle('on',x===b));renderInsights()});
 $$('[data-jfilter]').forEach(b=>b.onclick=()=>{journalFilter=b.dataset.jfilter;$$('[data-jfilter]').forEach(x=>x.classList.toggle('on',x===b));renderJournal()});
-$('#journal-list').onclick=e=>{const b=e.target.closest('[data-editdate]');if(!b)return;$('#entrydate').value=b.dataset.editdate;loadSelectedDate();showView(b.dataset.editwho==='mine'?'k':'p')};
+$('#journal-list').onclick=e=>{const d=e.target.closest('[data-deletedate]');if(d){deleteJournalEntry(d.dataset.deletedate,d.dataset.deletewho);return}const b=e.target.closest('[data-editdate]');if(!b)return;$('#entrydate').value=b.dataset.editdate;loadSelectedDate();showView(b.dataset.editwho==='mine'?'k':'p')};
 $('#insight-journal').onclick=()=>showView(!get(K,[]).length&&!get(P,[]).length?'k':'journal-view');
 $('#insight-copy').onclick=async()=>{await copyMD(insightFacts(),$('#insight-copy'));$('#insight-share-status').textContent='Copied. Paste into Notes or a message.'};
 $('#insight-share').onclick=async()=>{const report=insightFacts(),file=new File([report],'daily-checkin-insights.txt',{type:'text/plain'});try{if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'Daily Check-in insights'});$('#insight-share-status').textContent='Share sheet closed. Check the destination.'}else{dl(file.name,report,'text/plain');$('#insight-share-status').textContent='Report downloaded.'}}catch(e){$('#insight-share-status').textContent=e.name==='AbortError'?'Sharing cancelled.':'Sharing failed. Try Copy summary.'}};
