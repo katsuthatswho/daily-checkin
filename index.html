@@ -200,10 +200,10 @@ function clinicianOverview(mine,partner){
   const regimens=[...new Set(sorted.filter(r=>r.medication_today==='Yes').map(r=>[r.medication,r.dose].filter(Boolean).join(' · ')).filter(Boolean))];
   if(regimens.length)lines.push('Recorded medication/dose: '+regimens.join('; ')+'.');
   const sleep=sorted.filter(r=>r.sleep);if(sleep.length)lines.push('SLEEP: '+sleep.length+' days recorded; poor/below usual on '+sleep.filter(r=>['Poor','Below usual'].includes(r.sleep)).length+' days.');
-  const appetite=sorted.filter(r=>r.appetite);if(appetite.length)lines.push('APPETITE: '+appetite.filter(r=>r.appetite==='Skipped meals or struggled to eat').length+' days with skipped meals or difficulty eating, out of '+appetite.length+' answered days.');
-  const wellbeing=sorted.filter(r=>r.life_quality);if(wellbeing.length)lines.push('LIFE QUALITY: '+wellbeing.length+' days recorded; '+wellbeing.filter(r=>['Good day','Really good day'].includes(r.life_quality)).length+' described as good or really good.');
+  const appetite=sorted.filter(r=>r.appetite);if(appetite.length)lines.push('APPETITE: skipped meals or difficulty eating on '+appetite.filter(r=>r.appetite==='Skipped meals or struggled to eat').length+' of '+appetite.length+' recorded days.');
+  const wellbeing=sorted.filter(r=>r.life_quality);if(wellbeing.length)lines.push('LIFE QUALITY: '+wellbeing.filter(r=>['Good day','Really good day'].includes(r.life_quality)).length+' of '+wellbeing.length+' recorded days felt good or really good.');
   const effects=sorted.filter(r=>r.side_effect_severity&&r.side_effect_severity!=='None');
-  if(effects.length)lines.push('SIDE EFFECTS: '+effects.length+' days with recorded severity other than None. Review dated details below.');
+  if(effects.length)lines.push('SIDE EFFECTS: severity reported above None on '+effects.length+' recorded '+(effects.length===1?'day':'days')+'. Review dated details below.');
   const dips=sorted.filter(r=>r.dropoff==='Yes');
   if(dips.length)lines.push('LATER-DAY DIP: reported on '+dips.length+' of '+sorted.filter(r=>r.dropoff).length+' days with an answer; not necessarily medication-related.');
  }
