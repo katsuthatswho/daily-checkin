@@ -413,6 +413,7 @@ test('full device backup includes unfinished drafts and behavioural experiments'
   return {drafts,day:document.querySelector('#entrydate').value};
  });
  expect(result.drafts[result.day].fields.kn).toBe('Unfinished backup note');
+ await page.locator('#bk').evaluate(el=>el.closest('details').open=true);
  const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#bk').click()]);
  const text=await download.createReadStream().then(async stream=>{
   const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks).toString('utf8');
