@@ -138,9 +138,9 @@ $('#sk').onclick=()=>{
   note:$('#kn').value.trim()
  };
  let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(K,a);$('#ko').textContent=(i>=0?'Check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');
- progress();render();refreshJournalStatus()
+ progress();render();refreshJournalStatus();renderInsights();renderJournal()
 };
-$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:selectedDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');render();refreshJournalStatus()};
+$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:selectedDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');render();refreshJournalStatus();renderInsights();renderJournal()};
 
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
@@ -257,8 +257,63 @@ function render(){
  let p=get(P,[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+htmlSafe(r.date)+'</b><br><span class="muted">Start: '+htmlSafe(r.start_obs||'—')+' · Finish: '+htmlSafe(r.finish_obs||'—')+' · Life: '+htmlSafe(r.life_obs||'—')+' · Themselves: '+htmlSafe(r.still_themselves||r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
 }
 render();
-$('#kt').onclick=()=>{document.body.classList.remove('partner-mode');$('#k').classList.remove('hide');$('#p').classList.add('hide');$('#kt').classList.add('on');$('#pt').classList.remove('on')};
-$('#pt').onclick=()=>{document.body.classList.add('partner-mode');$('#p').classList.remove('hide');$('#k').classList.add('hide');$('#pt').classList.add('on');$('#kt').classList.remove('on')};
+
+let activeView='k',insightPeriod='30',journalFilter='both';
+const dated=r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date||'');
+function periodRows(rows){const all=rows.filter(dated).slice().sort((a,b)=>a.date.localeCompare(b.date));if(insightPeriod==='all')return all;const d=new Date(localDay()+'T12:00:00');d.setDate(d.getDate()-Number(insightPeriod)+1);const floor=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');return all.filter(r=>r.date>=floor&&r.date<=localDay())}
+function insightData(){const mine=periodRows(get(K,[])),partner=periodRows(get(P,[]));return {mine,partner,shared:mine.filter(m=>partner.some(p=>p.date===m.date))}}
+function scores(rows,key){return rows.map(r=>r[key]).filter(v=>v!==''&&v!==undefined&&v!==null&&Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=4).map(Number)}
+function insightFacts(){
+ const {mine,partner,shared}=insightData(),lines=['DAILY CHECK-IN — FACTUAL SUMMARY','Period: '+(insightPeriod==='all'?'All recorded dates':'Last '+insightPeriod+' calendar days'),'Personal entries: '+mine.length,'Partner entries: '+partner.length,'Dates with both: '+shared.length,''];
+ [['Getting started','getting_started'],['Attention','attention_control'],['Following through','finishing'],['Switching gears','switching']].forEach(([label,key])=>{const v=scores(mine,key);if(v.length)lines.push(label+': '+v.map(x=>x+1).join(', ')+' out of 5 ('+v.length+' answered days).')});
+ const yes=mine.filter(r=>r.medication_today==='Yes').length,no=mine.filter(r=>r.medication_today==='No').length;
+ lines.push('Medication recorded: Yes '+yes+', No '+no+', not recorded '+(mine.length-yes-no)+'.');
+ const notes=[...mine.map(r=>({date:r.date,who:'Self',note:[r.treatment_notes,r.note].filter(Boolean).join(' | ')})),...partner.map(r=>({date:r.date,who:'Partner',note:r.note||''}))].filter(r=>r.note).sort((a,b)=>a.date.localeCompare(b.date));
+ if(notes.length){lines.push('','ORIGINAL DATED NOTES');notes.forEach(r=>lines.push(r.date+' — '+r.who+': '+r.note))}
+ lines.push('','Self scores and partner observations use different scales and are not directly comparable. Missing entries are not zero. Descriptive summary only, not a clinical assessment.');
+ return lines.join('\n')
+}
+function insightCard(kicker,title,body,foot=''){return '<article class="insight-card"><div class="insight-kicker">'+htmlSafe(kicker)+'</div><h2>'+htmlSafe(title)+'</h2><p>'+body+'</p>'+(foot?'<p class="hint">'+htmlSafe(foot)+'</p>':'')+'</article>'}
+function renderInsights(){
+ const {mine,partner,shared}=insightData();
+ $('#insight-body').innerHTML='<div class="insight-metrics">'+[[mine.length,'Your entries'],[partner.length,'Partner entries'],[shared.length,'Shared dates']].map(([n,label])=>'<div class="insight-metric"><strong>'+n+'</strong><span>'+label+'</span></div>').join('')+'</div>';
+ if(!mine.length&&!partner.length){$('#insight-body').innerHTML+=insightCard('Your record','Nothing to summarise yet.','Save a check-in to start building a dated record.');return}
+ const cards=[];
+ const dimensions=[['Getting started','getting_started'],['Staying focused','attention_control'],['Staying on track','side_quest_control'],['Following through','finishing'],['Switching gears','switching'],['Impulse / restlessness','impulse_restlessness_control']];
+ const available=dimensions.map(([name,key])=>({name,values:scores(mine,key)})).filter(x=>x.values.length);
+ if(available.length){const x=available[0],counts=[0,1,2,3,4].map(v=>x.values.filter(n=>n===v).length),top=counts.indexOf(Math.max(...counts));
+ cards.push(insightCard('01 / Your recorded scores',x.name,'Most frequent answer: <strong>'+(top+1)+'/5</strong> ('+counts[top]+' of '+x.values.length+' recorded answers).<div class="score-bars" role="img" aria-label="Score frequency from one to five">'+counts.map((n,k)=>'<span title="'+(k+1)+'/5: '+n+' days" style="height:'+Math.max(5,100*n/Math.max(...counts))+'%"></span>').join('')+'</div><span class="hint">Bars represent scores 1 to 5, left to right.</span>','1 = more difficulty; 5 = less difficulty. Only recorded answers are counted.'))}
+ if(mine.length){const yes=mine.filter(r=>r.medication_today==='Yes').length,no=mine.filter(r=>r.medication_today==='No').length;cards.push(insightCard('02 / Medication record','What you recorded','Taken: <strong>'+yes+'</strong> day(s). Not taken: <strong>'+no+'</strong> day(s). Unrecorded: <strong>'+(mine.length-yes-no)+'</strong> day(s).','Self-reported answers, not evidence of medication effectiveness.'))}
+ if(shared.length){const pairs=shared.slice(-7).reverse().map(m=>{const p=partner.find(r=>r.date===m.date);return '<div class="journal-item"><strong>'+htmlSafe(m.date)+'</strong><p>You — getting started: '+htmlSafe(frac(m.getting_started))+'<br>Partner — getting started relative to usual: '+htmlSafe(noted(p.start_obs))+'</p></div>'}).join('');cards.push(insightCard('03 / Two perspectives','Same dates, two viewpoints',shared.length+' shared date(s).'+pairs,'Different scales: these responses cannot be labelled as agreement or disagreement.'))}
+ else cards.push(insightCard('03 / Two perspectives','No paired dates yet.','Your and your partner’s check-ins need to share a date for side-by-side review.'));
+ const notes=[...mine.map(r=>({date:r.date,who:'You',note:[r.treatment_notes,r.note].filter(Boolean).join(' · ')})),...partner.map(r=>({date:r.date,who:'Partner',note:r.note||''}))].filter(r=>r.note.trim()).sort((a,b)=>b.date.localeCompare(a.date));
+ cards.push(notes.length?insightCard('04 / Notable mentions','In your own words',notes.slice(0,5).map(r=>'<div class="journal-item"><strong>'+htmlSafe(r.date)+' · '+htmlSafe(r.who)+'</strong><p>'+htmlSafe(r.note)+'</p></div>').join(''),'Original wording and dates, without inferred themes. '+notes.length+' note(s) in this period.'):insightCard('04 / Notable mentions','No written notes yet.','Optional notes will appear here as originally written.'));
+ cards.push(insightCard('How to read this','Patterns, not conclusions','No missing days are scored as zero. Scores and partner categories are different measures. This view cannot establish causes or treatment effects.','Review the original entries with your clinician.'));
+ $('#insight-body').innerHTML+=cards.join('');
+}
+function renderJournal(){
+ const mine=get(K,[]).filter(dated).map(r=>({...r,_who:'mine'})),partner=get(P,[]).filter(dated).map(r=>({...r,_who:'partner'}));
+ const rows=[...(journalFilter==='partner'?[]:mine),...(journalFilter==='mine'?[]:partner)].sort((a,b)=>b.date.localeCompare(a.date)||a._who.localeCompare(b._who));
+ $('#journal-list').innerHTML=rows.length?rows.map(r=>'<article class="journal-item"><strong>'+htmlSafe(r.date)+' · '+(r._who==='mine'?'My check-in':'Partner')+'</strong><p>'+htmlSafe(r._who==='mine'?'Getting started '+frac(r.getting_started)+' · Focus '+frac(r.attention_control)+(r.note?' · '+r.note:''):(r.start_obs?'Getting started: '+r.start_obs:'Observation saved')+(r.note?' · '+r.note:''))+'</p><button data-editdate="'+htmlSafe(r.date)+'" data-editwho="'+r._who+'">Review / edit</button></article>').join(''):'<p class="hint">No entries in this view yet.</p>';
+}
+function showView(view){
+ activeView=view;['k','p','insights','journal-view'].forEach(id=>$('#'+id).classList.toggle('hide',id!==view));
+ const check=view==='k'||view==='p';$('#checkin-switch').classList.toggle('hide',!check);$('#entrydate').parentElement.classList.toggle('hide',!check);
+ $('#kt').classList.toggle('on',check);$('#it').classList.toggle('on',view==='insights');$('#jt').classList.toggle('on',view==='journal-view');
+ $('#self-switch').classList.toggle('on',view==='k');$('#pt').classList.toggle('on',view==='p');document.body.classList.toggle('partner-mode',view==='p');
+ if(view==='insights')renderInsights();if(view==='journal-view'){renderJournal();refreshJournalStatus()}
+ window.scrollTo(0,0)
+}
+$('#kt').onclick=()=>showView('k');$('#self-switch').onclick=()=>showView('k');$('#pt').onclick=()=>showView('p');$('#it').onclick=()=>showView('insights');$('#jt').onclick=()=>showView('journal-view');
+$$('[data-period]').forEach(b=>b.onclick=()=>{insightPeriod=b.dataset.period;$$('[data-period]').forEach(x=>x.classList.toggle('on',x===b));renderInsights()});
+$$('[data-jfilter]').forEach(b=>b.onclick=()=>{journalFilter=b.dataset.jfilter;$$('[data-jfilter]').forEach(x=>x.classList.toggle('on',x===b));renderJournal()});
+$('#journal-list').onclick=e=>{const b=e.target.closest('[data-editdate]');if(!b)return;$('#entrydate').value=b.dataset.editdate;loadSelectedDate();showView(b.dataset.editwho==='mine'?'k':'p')};
+$('#insight-copy').onclick=async()=>{await copyMD(insightFacts(),$('#insight-copy'));$('#insight-share-status').textContent='Copied. Paste into Notes or a message.'};
+$('#insight-share').onclick=async()=>{const report=insightFacts(),file=new File([report],'daily-checkin-insights.txt',{type:'text/plain'});try{if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'Daily Check-in insights'});$('#insight-share-status').textContent='Share sheet closed. Check the destination.'}else{dl(file.name,report,'text/plain');$('#insight-share-status').textContent='Report downloaded.'}}catch(e){$('#insight-share-status').textContent=e.name==='AbortError'?'Sharing cancelled.':'Sharing failed. Try Copy summary.'}};
+$('#journal-home').appendChild($('#journal-panel'));
+const personalExports=$('#kh').closest('details.card'),partnerExports=$('#ph').closest('details.card');
+$('#journal-home').appendChild(personalExports);$('#journal-home').appendChild(partnerExports);
+personalExports.querySelector('summary').textContent='Personal exports';partnerExports.querySelector('summary').textContent='Partner exports';
 if('serviceWorker' in navigator)addEventListener('load',async()=>{
  try{
   const reg=await navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'});
