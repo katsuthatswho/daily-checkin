@@ -3,6 +3,40 @@
 
 /* Calmer, mobile-first partner observation scale */
 :root{color-scheme:light}body{background:#f8faf9;color:#1d2930}.w{max-width:510px}.tabs{background:#f8faf9}.tabs button{border-radius:14px}.label{letter-spacing:-.015em}.section-kicker{color:#64776f}.partner-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;padding:4px;background:#e9efeb;border-radius:15px}.partner-scale .c{white-space:normal;min-width:0;width:100%;padding:12px 2px;min-height:48px;border:0;border-radius:11px;background:transparent;color:#44554f;font-size:11px;font-weight:650;letter-spacing:-.02em;line-height:1.2}.partner-scale .c.sel{background:#244e43!important;border-color:#244e43!important;color:white!important;box-shadow:0 2px 7px #163b2d22}.partner-scale .c:focus-visible{outline:2px solid #244e43;outline-offset:2px}.partner-scale .c[data-v="Not sure"]{color:#718078}.partner-scale .c[data-v="Not sure"].sel{background:#5d6b66!important;border-color:#5d6b66!important}.partner-scale+.hint{margin-top:5px}#pq .card{padding:17px 0}#pq .label{font-size:15px;margin-bottom:9px}#pq .help summary{background:white}.save{background:#244e43}.on,.sel{background:#244e43!important;border-color:#244e43!important}@media(max-width:360px){.partner-scale .c{font-size:10px;min-height:44px}}
+
+/* Design system: shared rhythm, distinct perspective palettes */
+:root{--ink:#18252b;--muted:#66767a;--surface:#fff;--line:#e0e7e5;--self:#245c4b;--partner:#514f89;--active:var(--self);--page:#f7faf8}
+body{background:var(--page);color:var(--ink);transition:background-color .18s ease}
+body.partner-mode{--active:var(--partner);--page:#f8f7fc;--line:#e4e2ef}
+.w{max-width:520px;padding:16px 18px max(70px,env(safe-area-inset-bottom))}
+.tabs{padding:5px;background:#e9eeeb;border-radius:17px;gap:4px;margin:0 0 20px}
+body.partner-mode .tabs{background:#eae8f3}
+.tabs button{min-height:44px;background:transparent;border:0;border-radius:13px;color:#5e6d69;font-weight:700}
+.tabs button.on{background:var(--surface)!important;color:var(--active)!important;border:0!important;box-shadow:0 2px 7px #13261b12}
+h1{font-size:27px;letter-spacing:-.045em;line-height:1.12;margin:0 0 8px}
+.sub,.hint{color:var(--muted);line-height:1.5}
+.card{padding:17px 0;border-color:var(--line)}
+.label{font-size:15px;line-height:1.35;letter-spacing:-.015em;margin-bottom:11px}
+.c{color:var(--ink);border-color:var(--line);font-weight:550;transition:background-color .12s,border-color .12s}
+.c.sel,.on{background:var(--active)!important;border-color:var(--active)!important;color:#fff!important}
+.save{background:var(--active);border-radius:15px;min-height:54px;box-shadow:0 4px 14px #14282012}
+.save:active,.c:active{transform:scale(.99)}
+.scale5{border-color:var(--line)}
+.scale5 .c.sel{background:var(--active)!important}
+.help summary{color:var(--active);border-color:var(--line);background:white}
+.section-kicker{color:var(--active);margin-top:23px}
+.secondary{border-color:var(--line);color:var(--active);min-height:44px}
+.partner-scale{background:#eeecf6;gap:3px}
+.partner-scale .c{color:#5c5879;background:transparent}
+.partner-scale .c.sel{background:var(--partner)!important;border-color:var(--partner)!important;color:#fff!important}
+.partner-scale .c[data-v="Not sure"].sel{background:#77738f!important;border-color:#77738f!important}
+#pq .card{padding:17px 0}
+#p>.sub{margin-bottom:10px}
+#p .row[data-g=self] .c{flex:1 1 42%}
+#p .row[data-g=self] .c.sel{background:var(--partner)!important}
+#p .save{background:var(--partner)}
+body.partner-mode .ok{background:#f0effa;border-color:#d9d5f1}
+@media(max-width:390px){.w{padding-left:15px;padding-right:15px}.partner-scale .c{font-size:10px;padding:10px 1px;min-height:46px}}
 </style></head><body><main class="w"><div class="tabs"><button id="kt" class="on">My check-in</button><button id="pt">Partner</button></div>
 <section id="k"><h1>Daily check-in</h1><div class="sub" id="date"></div><div class="sub" id="progress" style="margin-top:4px">A short daily check-in. Tap what fits best.</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
@@ -161,8 +195,8 @@ function render(){
  let p=get(P,[]).slice().reverse().slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+r.date+'</b><br><span class="muted">Start: '+(r.start_obs||'—')+' · Finish: '+(r.finish_obs||'—')+' · Life: '+(r.life_obs||'—')+' · Themselves: '+(r.still_themselves||r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
 }
 render();
-$('#kt').onclick=()=>{$('#k').classList.remove('hide');$('#p').classList.add('hide');$('#kt').classList.add('on');$('#pt').classList.remove('on')};
-$('#pt').onclick=()=>{$('#p').classList.remove('hide');$('#k').classList.add('hide');$('#pt').classList.add('on');$('#kt').classList.remove('on')};
+$('#kt').onclick=()=>{document.body.classList.remove('partner-mode');$('#k').classList.remove('hide');$('#p').classList.add('hide');$('#kt').classList.add('on');$('#pt').classList.remove('on')};
+$('#pt').onclick=()=>{document.body.classList.add('partner-mode');$('#p').classList.remove('hide');$('#k').classList.add('hide');$('#pt').classList.add('on');$('#kt').classList.remove('on')};
 if('serviceWorker' in navigator)addEventListener('load',async()=>{
  try{
   const reg=await navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'});
