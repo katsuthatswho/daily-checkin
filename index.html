@@ -13,7 +13,7 @@
 #p .save,#k .save{margin-top:20px}
 #p .partner-scale .c{overflow:hidden;text-overflow:clip}
 </style></head><body><main class="w"><div class="tabs"><button id="kt" class="on">My check-in</button><button id="pt">Partner</button></div>
-<section id="k"><h1>My daily check-in</h1><div class="sub" id="date"></div><div class="sub" id="progress" style="margin-top:4px">A quick look at how today went.</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
+<div class="card" style="padding:8px 0 15px;margin-bottom:10px"><label class="label" for="entrydate" style="display:block;margin-bottom:6px">Check-in date</label><input id="entrydate" type="date" style="max-width:220px"><div class="hint" id="datehint">Today by default. Select a past date to catch up or edit.</div></div><section id="k"><h1>My daily check-in</h1><div class="sub" id="date"></div><div class="sub" id="progress" style="margin-top:4px">A quick look at how today went.</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
 <div class="card"><div class="label">Medication today</div><div class="row" data-g="medtoday"><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Yes">Yes</button></div>
 <div id="meddetails" class="hide">
@@ -60,7 +60,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='my_daily_v4',P='partner_weekly_v3',S='tracker_settings_v3';
 const localDay=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-$('#date').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});$('#partnerdate').textContent=$('#date').textContent;
+$('#entrydate').max=localDay();$('#entrydate').value=localDay();const selectedDay=()=>$('#entrydate').value;function dateLabels(){const d=selectedDay();$('#date').textContent=d;$('#partnerdate').textContent=d;$('#datehint').textContent=d===localDay()?'Today. You can also catch up on a past day.':'Viewing '+d+'. Existing answers will load if saved.'}dateLabels();
 const val=g=>{let x=$('[data-g="'+g+'"] .sel');return x?x.dataset.v:''};
 const coreGroups=['medtoday','start','attention','sidequests','finish','switching','regulation'];
 function progress(){let n=coreGroups.filter(g=>val(g)).length;$('#progress').textContent=n? n+' of '+coreGroups.length+' essentials answered':'A quick look at how today went.';let p=qs.filter(([g])=>val(g)).length;$('#partnerprogress').textContent=p?p+' of '+qs.length+' observations answered':'A quick look at what you noticed.'}
@@ -126,7 +126,7 @@ $('#sk').onclick=()=>{
  $('#ke').classList.add('hide');
  let medicated=val('medtoday')==='Yes';
  let r={
-  timestamp:new Date().toISOString(),date:localDay(),
+  timestamp:new Date().toISOString(),date:selectedDay(),
   medication_today:val('medtoday')||'Not recorded',
   medication:medicated?$('#med').value:'',dose:medicated?$('#dose').value:'',time_taken:medicated?$('#medtime').value:'',
   sleep:val('sleep'),treatment_notes:$('#tn').value.trim(),
@@ -137,10 +137,10 @@ $('#sk').onclick=()=>{
   side_effect_severity:val('side'),side_effects:$$('#effects .sel').map(x=>x.dataset.v),
   note:$('#kn').value.trim()
  };
- let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(K,a);$('#ko').textContent=(i>=0?'Today’s check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');
+ let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(K,a);$('#ko').textContent=(i>=0?'Check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');
  progress();render()
 };
-$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:localDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Today’s partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');render()};
+$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:selectedDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');render()};
 
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
@@ -157,7 +157,7 @@ function mdMine(rows){
  const fields=[['Getting started','getting_started'],['Attention control','attention_control'],['Managing tangents / side quests','side_quest_control'],['Following through','finishing'],['Stopping and switching','switching'],['Impulse / restlessness control','impulse_restlessness_control']];
  return head+rows.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(r=>{
   let medication=r.medication_today==='Yes'?[r.medication||'Medication not specified',r.dose||'Dose not specified',r.time_taken?'taken at '+r.time_taken:'time not recorded'].join(' · '):r.medication_today==='No'?'Not taken': 'Not recorded';
-  let lines=['## '+noted(r.date),'**Medication:** '+medication,'**Sleep quality:** '+noted(r.sleep),'','**Daily functioning**',...fields.map(([label,key])=>'- '+label+': '+frac(r[key])),'- Work crowding out life: '+frac(r.work_crowding),'**Life outside work:** '+(Array.isArray(r.life_outside_work)&&r.life_outside_work.length?r.life_outside_work.join(', '):'Not recorded'),'','**Tolerability**','- Later-day dip (not necessarily medication-related): '+noted(r.dropoff)+(r.dropoff_time?' (at '+r.dropoff_time+')':'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' · '+r.dropoff_changes.join(', '):''),'- Side-effect severity: '+noted(r.side_effect_severity),'- Side effects: '+(Array.isArray(r.side_effects)&&r.side_effects.length?r.side_effects.join(', '):'Not recorded')];
+  let lines=['## '+noted(r.date),'**Medication:** '+medication,'**Sleep quality:** '+noted(r.sleep),'','**Daily functioning**',...fields.map(([label,key])=>'- '+label+': '+frac(r[key])),'- Work crowding out life: '+frac(r.work_crowding),'**Life outside work:** '+(Array.isArray(r.life_outside_work)&&r.life_outside_work.length?r.life_outside_work.join(', '):'Not recorded'),'','**Tolerability**','- Later-day dip (not necessarily medication-related): '+noted(r.dropoff)+(r.dropoff_time?' (at '+r.dropoff_time+')':'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' · '+r.dropoff_changes.join(', '):''),'- Side-effect severity: '+noted(r.side_effect_severity),'- Side effects: '+(r.side_effect_severity==='None'?'None reported':Array.isArray(r.side_effects)&&r.side_effects.length?r.side_effects.join(', '):'Not specified')];
   if(r.treatment_notes)lines.push('**Treatment notes:** '+r.treatment_notes);
   if(r.note)lines.push('**Other observations:** '+r.note);
   return lines.join('\n')
@@ -171,21 +171,26 @@ function mdPartner(rows){
 async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}let o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1800)}
 $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
 
-function restoreGroup(g,v){if(v===undefined||v===null||v==='')return;const b=$('[data-g="'+g+'"] .c').find(x=>x.dataset.v===String(v));if(b)b.classList.add('sel')}
-function restoreMulti(id,values){if(!Array.isArray(values))return;$(id+' .c').forEach(b=>b.classList.toggle('sel',values.includes(b.dataset.v)))}
-function restoreToday(){
- const mine=get(K,[]).find(r=>r.date===localDay());
+function restoreGroup(g,v){if(v===undefined||v===null||v==='')return;const b=$$('[data-g="'+g+'"] .c').find(x=>x.dataset.v===String(v));if(b)b.classList.add('sel')}
+function restoreMulti(id,values){if(!Array.isArray(values))return;$$(id+' .c').forEach(b=>b.classList.toggle('sel',values.includes(b.dataset.v)))}
+function loadSelectedDate(){
+ $$('[data-g] .c.sel,#wins .sel,#drops .sel,#effects .sel').forEach(b=>b.classList.remove('sel'));
+ ['#medtime','#tn','#kn','#droptime','#pn'].forEach(id=>$(id).value='');
+ $('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');
+ const mine=get(K,[]).find(r=>r.date===selectedDay());
  if(mine){
   [['medtoday','medication_today'],['sleep','sleep'],['start','getting_started'],['attention','attention_control'],['sidequests','side_quest_control'],['finish','finishing'],['switching','switching'],['regulation','impulse_restlessness_control'],['crowd','work_crowding'],['dropoff','dropoff'],['side','side_effect_severity']].forEach(([g,k])=>restoreGroup(g,mine[k]));
   if(mine.medication&&doses[mine.medication]){$('#med').value=mine.medication;st.dose=mine.dose||'';fillDoses()}
+  else{$('#med').value=st.medication||'';fillDoses()}
   $('#medtime').value=mine.time_taken||'';$('#tn').value=mine.treatment_notes||'';$('#kn').value=mine.note||'';$('#droptime').value=mine.dropoff_time||'';
   restoreMulti('#wins',mine.life_outside_work);restoreMulti('#drops',mine.dropoff_changes);restoreMulti('#effects',mine.side_effects);
-  toggleMedication();toggleDropoff();toggleEffects();progress();
- }
- const partner=get(P,[]).find(r=>r.date===localDay());
- if(partner){qs.forEach(([g])=>restoreGroup(g,partner[g]));restoreGroup('self',partner.still_themselves||partner.still_herself);$('#pn').value=partner.note||'';progress()}
+ }else{$('#med').value=st.medication||'';fillDoses()}
+ const partner=get(P,[]).find(r=>r.date===selectedDay());
+ if(partner){qs.forEach(([g])=>restoreGroup(g,partner[g]));restoreGroup('self',partner.still_themselves||partner.still_herself);$('#pn').value=partner.note||''}
+ toggleMedication();toggleDropoff();toggleEffects();progress();dateLabels();
 }
-restoreToday();
+$('#entrydate').onchange=()=>{if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(selectedDay())||selectedDay()>localDay()){$('#entrydate').value=localDay()}loadSelectedDate()};
+loadSelectedDate();
 function render(){
  let k=get(K,[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,7);
  $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+htmlSafe(r.date)+'</b> · '+htmlSafe(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+frac(r.getting_started)+' · Attention '+frac(r.attention_control)+' · Side quests '+frac(r.side_quest_control)+' · Finish '+frac(r.finishing)+'</span></div>').join(''):'<p class="muted">No entries yet.</p>';
