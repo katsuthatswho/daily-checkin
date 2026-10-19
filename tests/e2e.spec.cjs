@@ -324,3 +324,21 @@ test('unsaved notes survive changing dates, reload and navigation',async({page})
  await page.locator('#kt').click();
  await expect(page.locator('#kn')).toHaveValue('Draft note must not disappear');
 });
+
+test('one active experiment, daily review and clinician export persist',async({page})=>{
+ await page.locator('#it').click();
+ await page.locator('#experiment-type').selectOption('start');
+ await expect(page.locator('#experiment-plan')).toContainText('first physical step');
+ await page.locator('#experiment-start').click();
+ await expect(page.locator('#experiment-active')).toBeVisible();
+ await page.locator('#experiment-result').selectOption('partly');
+ await page.locator('#experiment-note').fill('Worked when I prepared the desk');
+ await page.locator('#experiment-review').click();
+ await expect(page.locator('#experiment-history')).toContainText('Worked when I prepared the desk');
+ await page.reload();await page.locator('#it').click();
+ await expect(page.locator('#experiment-result')).toHaveValue('partly');
+ await expect(page.locator('#experiment-note')).toHaveValue('Worked when I prepared the desk');
+ const report=await page.evaluate(()=>{localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',medication_today:'No'}]));return doctorReport()});
+ expect(report).toContain('BEHAVIOURAL EXPERIMENTS');
+ expect(report).toContain('Worked when I prepared the desk');
+});
