@@ -368,3 +368,19 @@ test('draft capture persists multiple selections and scores without losing previ
  await expect(page.locator('[data-g=start] [data-v="3"]')).toHaveClass(/sel/);
  await expect(page.locator('#wins [data-v="Exercise"]')).toHaveClass(/sel/);
 });
+
+test('optional life quality and appetite survive draft, save and clinician report',async({page})=>{
+ await page.locator('#more-details').evaluate(el=>el.open=true);
+ await page.locator('#lifequality').selectOption('Good day');
+ await page.locator('#appetite').selectOption('Skipped meals or struggled to eat');
+ await page.reload();
+ await expect(page.locator('#lifequality')).toHaveValue('Good day');
+ await expect(page.locator('#appetite')).toHaveValue('Skipped meals or struggled to eat');
+ const report=await page.evaluate(()=>{
+ localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-20',medication_today:'Yes',life_quality:'Good day',appetite:'Skipped meals or struggled to eat'}]));
+ return doctorReport();
+ });
+ expect(report).toContain('LIFE QUALITY: 1 days recorded');
+ expect(report).toContain('APPETITE: 1 days with skipped meals');
+ expect(report).toContain('How life felt: Good day');
+});
