@@ -104,7 +104,7 @@ test('history escapes user-controlled HTML and does not execute it',async({page}
 });
 
 test('tabs have consistent hierarchy and partner progress updates',async({page})=>{
- await expect(page.locator('#k h1')).toBeVisible();
+ await expect(page.locator('#checkin-title')).toBeVisible();
  await page.locator('#pt').click();
  await expect(page.locator('#partnerdate')).not.toBeEmpty();
  await expect(page.locator('#partnerprogress')).toContainText('A quick look');
@@ -179,7 +179,7 @@ test('doctor report is readable plain text with dates and both perspectives',asy
  expect(report).toContain('How to read this');
  expect(report).toContain(await page.locator('#entrydate').inputValue());
  expect(report).not.toContain('**');expect(report.split('\n').some(line=>/^#{1,3} /.test(line))).toBe(false);
- expect(report).toContain('\\n');
+ expect(report.split('\n').length).toBeGreaterThan(10);
 });
 
 test('unified navigation, factual insights, journal edit and XSS safety',async({page})=>{
