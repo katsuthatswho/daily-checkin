@@ -63,6 +63,7 @@ test('mobile options remain on one row at multiple widths',async({page})=>{
  for(const width of [320,360,375,390,430]){
   await page.setViewportSize({width,height:800});
   for(const selector of ['[data-g=sleep]','.partner-scale']){
+   if(selector==='.partner-scale')await page.locator('#pt').click();else await page.locator('#kt').click();
    const items=await page.locator(selector).first().locator('.c').evaluateAll(bs=>({rows:new Set(bs.map(b=>Math.round(b.getBoundingClientRect().top))).size,overflow:bs.some(b=>b.scrollWidth>b.clientWidth)}));
    expect(items.rows).toBe(1);expect(items.overflow).toBe(false);
   }
