@@ -461,7 +461,7 @@ function showView(view){
  const check=view==='k'||view==='p';$('#checkin-switch').classList.toggle('hide',!check);$('#checkin-head').classList.toggle('hide',!check);
  $('#kt').classList.toggle('on',check);$('#wt').classList.toggle('on',view==='help-view');$('#it').classList.toggle('on',view==='insights');$('#jt').classList.toggle('on',view==='journal-view');['kt','wt','it','jt'].forEach(id=>$('#'+id).removeAttribute('aria-current'));$('#'+(check?'kt':view==='help-view'?'wt':view==='insights'?'it':'jt')).setAttribute('aria-current','page');
  $('#self-switch').classList.toggle('on',view==='k');$('#pt').classList.toggle('on',view==='p');$('#self-switch').setAttribute('aria-pressed',String(view==='k'));$('#pt').setAttribute('aria-pressed',String(view==='p'));document.body.classList.toggle('partner-mode',view==='p');$('#checkin-title').textContent=view==='p'?'What did you notice?':'How was your day?';$('#checkin-description').textContent=view==='p'?'A second perspective, compared with their usual behaviour.':'A few observations, saved privately on this device.';
- if(view==='insights')renderInsights();if(view==='help-view')renderExperiment()if(view==='journal-view'){renderJournal();refreshJournalStatus()}
+ if(view==='insights')renderInsights();if(view==='help-view')renderExperiment();if(view==='journal-view'){renderJournal();refreshJournalStatus()}
  window.scrollTo(0,0)
 }
 $('#kt').onclick=()=>showView('k');$('#self-switch').onclick=()=>showView('k');$('#pt').onclick=()=>showView('p');$('#wt').onclick=()=>showView('help-view');$('#it').onclick=()=>showView('insights');$('#jt').onclick=()=>showView('journal-view');
