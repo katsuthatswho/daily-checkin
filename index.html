@@ -286,7 +286,7 @@ function draftHasContent(d){return Object.values(d.groups).some(Boolean)||Object
 function saveDraftNow(){if(draftRestoring||!loadedDraftDate||!draftDirty)return;clearTimeout(draftTimer);const d=captureDraft(),all=get(DRAFT_KEY,{});if(draftHasContent(d))all[loadedDraftDate]=d;else delete all[loadedDraftDate];try{set(DRAFT_KEY,all);draftDirty=false;$('#draft-status').textContent=draftHasContent(d)?'Draft kept on this device':'No unsaved draft'}catch(e){$('#draft-status').textContent='Draft not stored. Save your check-in before leaving.'}}
 function scheduleDraft(){if(draftRestoring)return;draftDirty=true;saveDraftNow()}
 function restoreDraft(date){const d=get(DRAFT_KEY,{})[date];if(!d)return false;draftRestoring=true;try{
- Object.entries(d.groups||{}).forEach(([g,v])=>{if(v){$$$('[data-g="'+g+'"] .c').forEach(b=>b.classList.toggle('sel',b.dataset.v===String(v)))}});
+ Object.entries(d.groups||{}).forEach(([g,v])=>{if(v){$$('[data-g="'+g+'"] .c').forEach(b=>b.classList.toggle('sel',b.dataset.v===String(v)))}});
  Object.entries(d.fields||{}).forEach(([id,v])=>{const el=$('#'+id);if(el)el.value=v});
  Object.entries(d.multi||{}).forEach(([id,v])=>restoreMulti('#'+id,v));
  $('#more-details').open=!!d.details;
