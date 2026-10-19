@@ -326,7 +326,7 @@ test('unsaved notes survive changing dates, reload and navigation',async({page})
 });
 
 test('one active experiment, daily review and clinician export persist',async({page})=>{
- await page.locator('#it').click();
+ await page.locator('#wt').click();
  await page.locator('#experiment-type').selectOption('start');
  await expect(page.locator('#experiment-plan')).toContainText('first physical step');
  await page.locator('#experiment-start').click();
@@ -335,7 +335,7 @@ test('one active experiment, daily review and clinician export persist',async({p
  await page.locator('#experiment-note').fill('Worked when I prepared the desk');
  await page.locator('#experiment-review').click();
  await expect(page.locator('#experiment-history')).toContainText('Worked when I prepared the desk');
- await page.reload();await page.locator('#it').click();
+ await page.reload();await page.locator('#wt').click();
  await expect(page.locator('#experiment-result')).toHaveValue('partly');
  await expect(page.locator('#experiment-note')).toHaveValue('Worked when I prepared the desk');
  const report=await page.evaluate(()=>{localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',medication_today:'No'}]));return doctorReport()});
@@ -424,4 +424,26 @@ test('full device backup includes unfinished drafts and behavioural experiments'
  expect(backup.format).toBe('daily-checkin-device-backup-v2');
  expect(backup.unfinished_drafts_on_this_device[result.day].fields.kn).toBe('Unfinished backup note');
  expect(backup).toHaveProperty('behavioural_experiments_on_this_device');
+});
+
+test('four destinations keep check-in, strategies, insights and records distinct',async({page})=>{
+ const tabs=page.locator('.tabs button');
+ await expect(tabs).toHaveCount(4);
+ await expect(page.locator('#kt')).toContainText('Today');
+ await expect(page.locator('#wt')).toContainText('What helps');
+ await expect(page.locator('#it')).toContainText('Patterns');
+ await expect(page.locator('#jt')).toContainText('Records');
+ await page.locator('#wt').click();
+ await expect(page.locator('#help-view')).toBeVisible();
+ await expect(page.locator('#experiment-type')).toBeVisible();
+ await expect(page.locator('#insights')).toBeHidden();
+ await expect(page.locator('#wt')).toHaveAttribute('aria-current','page');
+ await page.locator('#it').click();
+ await expect(page.locator('#insights')).toBeVisible();
+ await expect(page.locator('#help-view')).toBeHidden();
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-view')).toBeVisible();
+ await page.locator('#kt').click();
+ await expect(page.locator('#k')).toBeVisible();
+ await expect(page.locator('#checkin-head')).toBeVisible();
 });
