@@ -131,9 +131,9 @@ $('#sk').onclick=()=>{
   note:$('#kn').value.trim()
  };
  let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(K,a);$('#ko').textContent=(i>=0?'Today’s check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');
- $$('#k .sel').forEach(x=>x.classList.remove('sel'));$('#kn').value='';$('#tn').value='';$('#medtime').value='';$('#droptime').value='';toggleMedication();toggleDropoff();toggleEffects();progress();render()
+ progress();render()
 };
-$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:localDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Today’s partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');$$('#p .sel').forEach(x=>x.classList.remove('sel'));$('#pn').value='';render()};
+$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:localDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Today’s partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');render()};
 
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
@@ -160,6 +160,21 @@ function mdPartner(rows){
 async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}let o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1800)}
 $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
 
+function restoreGroup(g,v){if(v===undefined||v===null||v==='')return;const b=$('[data-g="'+g+'"] .c').find(x=>x.dataset.v===String(v));if(b)b.classList.add('sel')}
+function restoreMulti(id,values){if(!Array.isArray(values))return;$(id+' .c').forEach(b=>b.classList.toggle('sel',values.includes(b.dataset.v)))}
+function restoreToday(){
+ const mine=get(K,[]).find(r=>r.date===localDay());
+ if(mine){
+  [['medtoday','medication_today'],['sleep','sleep'],['start','getting_started'],['attention','attention_control'],['sidequests','side_quest_control'],['finish','finishing'],['switching','switching'],['regulation','impulse_restlessness_control'],['crowd','work_crowding'],['dropoff','dropoff'],['side','side_effect_severity']].forEach(([g,k])=>restoreGroup(g,mine[k]));
+  if(mine.medication&&doses[mine.medication]){$('#med').value=mine.medication;st.dose=mine.dose||'';fillDoses()}
+  $('#medtime').value=mine.time_taken||'';$('#tn').value=mine.treatment_notes||'';$('#kn').value=mine.note||'';$('#droptime').value=mine.dropoff_time||'';
+  restoreMulti('#wins',mine.life_outside_work);restoreMulti('#drops',mine.dropoff_changes);restoreMulti('#effects',mine.side_effects);
+  toggleMedication();toggleDropoff();toggleEffects();progress();
+ }
+ const partner=get(P,[]).find(r=>r.date===localDay());
+ if(partner){qs.forEach(([g])=>restoreGroup(g,partner[g]));restoreGroup('self',partner.still_themselves||partner.still_herself);$('#pn').value=partner.note||''}
+}
+restoreToday();
 function render(){
  let k=get(K,[]).slice().reverse().slice(0,7);
  $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+r.date+'</b> · '+(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+frac(r.getting_started)+' · Attention '+frac(r.attention_control)+' · Side quests '+frac(r.side_quest_control)+' · Finish '+frac(r.finishing)+'</span></div>').join(''):'<p class="muted">No entries yet.</p>';
