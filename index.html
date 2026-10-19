@@ -140,22 +140,25 @@ function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Objec
 function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
 $('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-device-data.json',JSON.stringify({daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[])},null,2),'application/json');
 
-const frac=v=>v===''||v==null?'—':(Number(v)+1)+'/5';
+const frac=v=>v===''||v==null?'Not recorded':(Number(v)+1)+'/5';
+const noted=v=>v===undefined||v===null||v===''?'Not recorded':String(v);
+const summary=(rows,label)=>{let dates=rows.map(r=>r.date).filter(Boolean).sort();return '# '+label+'\n\n**Entries:** '+rows.length+' | **Period:** '+(dates.length?dates[0]+' to '+dates[dates.length-1]:'Not recorded')+'\n\n'};
 function mdMine(rows){
- if(!rows.length)return '# Daily Check-ins\n\nNo entries yet.';
- return '# Daily Check-ins\n\n'+rows.map(r=>{
-  let tx=r.medication_today==='Yes'?[r.medication,r.dose,r.time_taken&&('at '+r.time_taken)].filter(Boolean).join(' · '):'No medication';
-  let life=Array.isArray(r.life_outside_work)&&r.life_outside_work.length?r.life_outside_work.join(', '):'—';
-  let fx=Array.isArray(r.side_effects)&&r.side_effects.length?r.side_effects.join(', '):'—';
-  return '## '+r.date+'\n- **Medication:** '+tx+'\n- **Sleep:** '+(r.sleep||'—')+
-  '\n- **Getting started:** '+frac(r.getting_started)+'\n- **Attention control:** '+frac(r.attention_control)+'\n- **Side-quest control:** '+frac(r.side_quest_control)+'\n- **Finishing:** '+frac(r.finishing)+'\n- **Stopping & switching:** '+frac(r.switching)+'\n- **Impulse/restlessness control:** '+frac(r.impulse_restlessness_control)+
-  '\n- **Life outside work:** '+life+'\n- **Work crowding:** '+frac(r.work_crowding)+'\n- **Drop-off:** '+(r.dropoff||'—')+(r.dropoff_time?' at '+r.dropoff_time:'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' ('+r.dropoff_changes.join(', ')+')':'')+'\n- **Side effects:** '+(r.side_effect_severity||'—')+' ('+fx+')'+
-  (r.treatment_notes?'\n- **Treatment notes:** '+r.treatment_notes:'')+(r.note?'\n- **Notes:** '+r.note:'')
- }).join('\n\n')
+ if(!rows.length)return '# Personal ADHD treatment check-ins\n\nNo entries yet.';
+ let head=summary(rows,'Personal ADHD treatment check-ins')+'**How to read this:** Function scores run from 1 (most difficulty) to 5 (least difficulty / best control). Work crowding runs in the opposite direction: 1 means work did not crowd out life; 5 means it crowded out life completely. Sleep and side-effect labels are categorical, not numerical. “Not recorded” means no answer was saved, not that a symptom was absent.\n\n';
+ const fields=[['Getting started','getting_started'],['Attention control','attention_control'],['Managing tangents / side quests','side_quest_control'],['Following through','finishing'],['Stopping and switching','switching'],['Impulse / restlessness control','impulse_restlessness_control']];
+ return head+rows.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(r=>{
+  let medication=r.medication_today==='Yes'?[r.medication||'Medication not specified',r.dose||'Dose not specified',r.time_taken?'taken at '+r.time_taken:'time not recorded'].join(' · '):r.medication_today==='No'?'Not taken': 'Not recorded';
+  let lines=['## '+noted(r.date),'**Medication:** '+medication,'**Sleep quality:** '+noted(r.sleep),'','**Daily functioning**',...fields.map(([label,key])=>'- '+label+': '+frac(r[key])),'- Work crowding out life: '+frac(r.work_crowding),'**Life outside work:** '+(Array.isArray(r.life_outside_work)&&r.life_outside_work.length?r.life_outside_work.join(', '):'Not recorded'),'','**Tolerability**','- Medication wearing off: '+noted(r.dropoff)+(r.dropoff_time?' (at '+r.dropoff_time+')':'')+(Array.isArray(r.dropoff_changes)&&r.dropoff_changes.length?' · '+r.dropoff_changes.join(', '):''),'- Side-effect severity: '+noted(r.side_effect_severity),'- Side effects: '+(Array.isArray(r.side_effects)&&r.side_effects.length?r.side_effects.join(', '):'Not recorded')];
+  if(r.treatment_notes)lines.push('**Treatment notes:** '+r.treatment_notes);
+  if(r.note)lines.push('**Other observations:** '+r.note);
+  return lines.join('\n')
+ }).join('\n\n---\n\n')
 }
 function mdPartner(rows){
- if(!rows.length)return '# Partner Check-ins\n\nNo entries yet.';
- return '# Partner Check-ins\n\n'+rows.map(r=>'## '+r.date+'\n'+qs.map(([k,q])=>'- **'+q+'** '+(r[k]||'—')).join('\n')+'\n- **Still seemed like themselves:** '+(r.still_themselves||r.still_herself||'—')+(r.note?'\n- **Notes:** '+r.note:'')).join('\n\n')
+ if(!rows.length)return '# Partner observations\n\nNo entries yet.';
+ let head=summary(rows,'Partner observations')+'**How to read this:** Ratings compare observable behaviour with the person’s usual behaviour: Worse, Same, A little better, Clearly better. “Not sure” means the observer could not assess it; it is not an improvement score. “Not recorded” means no answer was saved.\n\n';
+ return head+rows.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(r=>['## '+noted(r.date),...qs.map(([k,q])=>'- '+q+': '+noted(r[k])),'- Seemed like themselves: '+noted(r.still_themselves||r.still_herself),...(r.note?['**Partner notes:** '+r.note]:[])].join('\n')).join('\n\n---\n\n')
 }
 async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}let o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1800)}
 $('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
