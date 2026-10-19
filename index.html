@@ -48,6 +48,11 @@ body.partner-mode #p .label{color:#302d57}
 .partner-answer .unsure-choice.sel{background:#77738f!important;border-color:#77738f!important;color:#fff!important}
 #p .save{background:#514f89}
 #p .ok{background:#f0effa;border-color:#d9d5f1}
+
+/* Single-row five-choice partner scale at narrow phone widths */
+.partner-answer .partner-scale{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;padding:4px!important;flex-wrap:nowrap!important}
+.partner-answer .partner-scale .c{display:flex;align-items:center;justify-content:center;min-width:0!important;width:100%!important;min-height:43px!important;padding:6px 1px!important;font-size:clamp(9px,2.65vw,11px)!important;line-height:1.1!important;white-space:nowrap!important;overflow:hidden;text-overflow:clip;border-radius:9px!important}
+.partner-answer .partner-scale .c[data-v="Not sure"].sel{background:#77738f!important;border-color:#77738f!important}
 </style></head><body><main class="w"><div class="tabs"><button id="kt" class="on">My check-in</button><button id="pt">Partner</button></div>
 <section id="k"><h1>Daily check-in</h1><div class="sub" id="date"></div><div class="sub" id="progress" style="margin-top:4px">A short daily check-in. Tap what fits best.</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
@@ -149,7 +154,7 @@ const qs=[
 ['regulation_obs','Pausing & restlessness','Did they seem better able to pause before reacting, or less driven by restlessness or stimulation-seeking?'],
 ['life_obs','Capacity outside work','Did they seem to have more capacity for everyday life — home tasks, meals, plans, people or downtime?']
 ],opts=['Worse','Same','A little better','Clearly better','Not sure'];
-$('#pq').innerHTML=qs.map(([k,q,help])=>'<div class="card"><div class="label">'+q+' <details class="help"><summary aria-label="What this means">?</summary><div class="hint">'+help+'</div></details></div><div data-g="'+k+'" class="partner-answer"><div class="row partner-scale">'+opts.slice(0,4).map((o,i)=>'<button type="button" class="c" data-v="'+o+'" aria-label="'+o+'">'+(['Worse','Same','A bit better','Much better'][i])+'</button>').join('')+'</div><button type="button" class="unsure-choice c" data-v="Not sure">Not sure / didn’t observe</button></div></div>').join('');
+$('#pq').innerHTML=qs.map(([k,q,help])=>'<div class="card"><div class="label">'+q+' <details class="help"><summary aria-label="What this means">?</summary><div class="hint">'+help+'</div></details></div><div data-g="'+k+'" class="partner-answer"><div class="row partner-scale">'+opts.map((o,i)=>'<button type="button" class="c" data-v="'+o+'" aria-label="'+o+'">'+(['Worse','Same','A bit','Better','Unsure'][i])+'</button>').join('')+'</div></div></div>').join('');
 
 function flash(s){$(s).style.background='';$(s).style.borderColor='';$(s).style.display='block'}
 $('#sk').onclick=()=>{
