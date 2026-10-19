@@ -407,6 +407,7 @@ test('saving self check-in retains unfinished partner note and observation',asyn
  expect(saved.length).toBe(1);
 });
 test('full device backup includes unfinished drafts and behavioural experiments',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.locator('#more-details').evaluate(el=>el.open=true);
  await page.locator('#kn').fill('Unfinished backup note');
  const result=await page.evaluate(()=>{
@@ -415,11 +416,11 @@ test('full device backup includes unfinished drafts and behavioural experiments'
  });
  expect(result.drafts[result.day].fields.kn).toBe('Unfinished backup note');
  await page.locator('#bk').evaluate(el=>el.closest('details').open=true);
- const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#bk').click()]);
- const text=await download.createReadStream().then(async stream=>{
-  const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks).toString('utf8');
- });
- const backup=JSON.parse(text);
+ const captured=await page.evaluate(()=>{let raw='';const original=URL.createObjectURL;URL.createObjectURL=blob=>{window.__backupBlob=blob;return original.call(URL,blob)};return true});
+ await page.locator('#bk').click();
+ const backupText=await page.evaluate(async()=>window.__backupBlob?await window.__backupBlob.text():null);
+ expect(backupText,JSON.stringify(errors)).toBeTruthy();
+ const backup=JSON.parse(backupText);
  expect(backup.format).toBe('daily-checkin-device-backup-v2');
  expect(backup.unfinished_drafts_on_this_device[result.day].fields.kn).toBe('Unfinished backup note');
  expect(backup).toHaveProperty('behavioural_experiments_on_this_device');
