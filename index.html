@@ -4,6 +4,7 @@
 .row[data-g="sleep"] .c{min-width:0;width:100%;padding:8px 1px;font-size:clamp(11px,3vw,13px);line-height:1.15;white-space:nowrap;min-height:46px}
 /* Keep text and controls consistent across both tabs */
 .row[data-g="sleep"] .c:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.partner-scale .c[data-v="Not sure"]{border-right:2px solid #c8c5d8;border-radius:9px 4px 4px 9px;margin-right:1px;font-weight:650}.partner-scale .c[data-v="Not sure"]:not(.sel){background:#fff;color:#625e7c}.partner-scale .c[data-v="Not sure"].sel{background:#77738f!important;color:#fff!important}.partner-scale .c[data-v="Worse"]{margin-left:1px}
 </style></head><body><main class="w"><div class="tabs"><button id="kt" class="on">My check-in</button><button id="pt">Partner</button></div>
 <section id="k"><h1>My daily check-in</h1><div class="sub" id="date"></div><div class="sub" id="progress" style="margin-top:4px">A quick look at how today went.</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
@@ -41,7 +42,7 @@
 <button class="save" id="sk">Save my check-in</button>
 
 <details class="card" style="margin-top:18px"><summary>History & export</summary><div id="kh"></div><button class="secondary" id="mk">Copy as Markdown</button><button class="secondary" id="ck">Export my check-ins</button><button class="secondary" id="bk">Export data from this device</button></details></section>
-<section id="p" class="hide"><h1>Partner check-in</h1><div class="sub">Compare what you noticed today with their usual behaviour. If you didn't see it, choose Unsure.</div><div class="ok" id="po">Saved on this device ✓</div>
+<section id="p" class="hide"><h1>Partner check-in</h1><div class="sub">Compared with their usual behaviour, what did you notice? Choose Unsure when you cannot tell.</div><div class="ok" id="po">Saved on this device ✓</div>
 <div id="pq"></div>
 <div class="card"><div class="label">Seemed like themselves</div><div class="row" data-g="self"><button class="c grow" data-v="Yes">Yes</button><button class="c grow" data-v="Mostly">Mostly</button><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button></div></div>
 <div class="card"><div class="label">Anything else you noticed?</div><textarea id="pn" placeholder="Optional"></textarea></div>
@@ -108,7 +109,7 @@ const qs=[
 ['regulation_obs','Pausing & regulating','Did they seem better able to pause before reacting, or less driven by restlessness or stimulation-seeking?'],
 ['life_obs','Life outside work','Did they seem to have more capacity for everyday life — home tasks, meals, plans, people or downtime?']
 ],opts=['Worse','Same','A little better','Clearly better','Not sure'];
-$('#pq').innerHTML=qs.map(([k,q,help])=>'<div class="card"><div class="label">'+q+' <details class="help"><summary aria-label="What this means">?</summary><div class="hint">'+help+'</div></details></div><div data-g="'+k+'" class="partner-answer"><div class="row partner-scale">'+opts.map((o,i)=>'<button type="button" class="c" data-v="'+o+'" aria-label="'+o+'">'+(['Worse','Same','A bit','Better','Unsure'][i])+'</button>').join('')+'</div></div></div>').join('');
+$('#pq').innerHTML=qs.map(([k,q,help])=>'<div class="card"><div class="label">'+q+' <details class="help"><summary aria-label="What this means">?</summary><div class="hint">'+help+'</div></details></div><div data-g="'+k+'" class="partner-answer"><div class="row partner-scale">'+['Not sure','Worse','Same','A little better','Clearly better'].map((o,i)=>'<button type="button" class="c" data-v="'+o+'" aria-label="'+(o==='Not sure'?'Unable to assess':o)+'">'+(['Unsure','Worse','Same','A bit','Better'][i])+'</button>').join('')+'</div></div></div>').join('');
 
 function flash(s){$(s).style.background='';$(s).style.borderColor='';$(s).style.display='block'}
 $('#sk').onclick=()=>{
@@ -132,7 +133,7 @@ $('#sk').onclick=()=>{
  let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(K,a);$('#ko').textContent=(i>=0?'Today’s check-in updated':'Saved')+' ✓ · '+a.length+' check-in'+(a.length===1?'':'s')+' saved';flash('#ko');
  $$('#k .sel').forEach(x=>x.classList.remove('sel'));$('#kn').value='';$('#tn').value='';$('#medtime').value='';$('#droptime').value='';toggleMedication();toggleDropoff();toggleEffects();progress();render()
 };
-$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:localDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k]&&r[k]!=='Not sure')){const msg=$('#po');msg.textContent='Choose at least one observation you could actually assess.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Today’s partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');$$('#p .sel').forEach(x=>x.classList.remove('sel'));$('#pn').value='';render()};
+$('#sp').onclick=()=>{let r={timestamp:new Date().toISOString(),date:localDay()};qs.forEach(([k])=>r[k]=val(k));r.still_themselves=val('self');r.note=$('#pn').value.trim();if(!qs.some(([k])=>r[k])&&!r.still_themselves&&!r.note){const msg=$('#po');msg.textContent='Choose at least one response. Unsure is a valid response.';msg.style.display='block';msg.style.background='#fff7ed';msg.style.borderColor='#fed7aa';msg.scrollIntoView({block:'nearest',behavior:'smooth'});return;}let a=get(P,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);set(P,a);$('#po').textContent=(i>=0?'Today’s partner check-in updated':'Saved')+' ✓ · '+a.length+' partner check-in'+(a.length===1?'':'s')+' saved';flash('#po');$$('#p .sel').forEach(x=>x.classList.remove('sel'));$('#pn').value='';render()};
 
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
