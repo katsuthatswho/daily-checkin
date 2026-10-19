@@ -69,3 +69,18 @@ test('mobile options remain on one row at multiple widths',async({page})=>{
   }
  }
 });
+
+test('clinician notes exports explain scales and preserve current fields',async({page})=>{
+ const result=await page.evaluate(()=>{
+  const sample={date:'2026-10-19',medication_today:'Yes',medication:'Vyvanse (lisdexamfetamine)',dose:'20 mg',getting_started:'3',work_crowding:'4',sleep:'Good',side_effect_severity:'None',note:'A concrete example'};
+  const self=mdMine([sample]);const partner=mdPartner([{date:'2026-10-19',start_obs:'Not sure',life_obs:'Clearly better',note:'Observed at home'}]);
+  return {self,partner};
+ });
+ expect(result.self).toContain('Work crowding runs in the opposite direction');
+ expect(result.self).toContain('Not recorded');
+ expect(result.self).toContain('A concrete example');
+ expect(result.self).toContain('20 mg');
+ expect(result.partner).toContain('not an improvement score');
+ expect(result.partner).toContain('Not sure');
+ expect(result.partner).toContain('Observed at home');
+});
