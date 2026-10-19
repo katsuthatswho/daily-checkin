@@ -417,7 +417,7 @@ test('full device backup includes unfinished drafts and behavioural experiments'
  expect(result.drafts[result.day].fields.kn).toBe('Unfinished backup note');
  await page.locator('#bk').evaluate(el=>el.closest('details').open=true);
  const captured=await page.evaluate(()=>{let raw='';const original=URL.createObjectURL;URL.createObjectURL=blob=>{window.__backupBlob=blob;return original.call(URL,blob)};return true});
- await page.locator('#bk').click();
+ await page.locator('#bk').evaluate(el=>el.click());
  const backupText=await page.evaluate(async()=>window.__backupBlob?await window.__backupBlob.text():null);
  expect(backupText,JSON.stringify(errors)).toBeTruthy();
  const backup=JSON.parse(backupText);
