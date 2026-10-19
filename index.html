@@ -5,6 +5,13 @@
 /* Keep text and controls consistent across both tabs */
 .row[data-g="sleep"] .c:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .partner-scale .c[data-v="Not sure"]{border-right:2px solid #c8c5d8;border-radius:9px 4px 4px 9px;margin-right:1px;font-weight:650}.partner-scale .c[data-v="Not sure"]:not(.sel){background:#fff;color:#625e7c}.partner-scale .c[data-v="Not sure"].sel{background:#77738f!important;color:#fff!important}.partner-scale .c[data-v="Worse"]{margin-left:1px}
+/* Both tabs use the same question, section and action rhythm. */
+#p .partner-answer,#k .scale5{width:100%}
+#p .card,#k .card{padding:18px 0}
+#p .label,#k .label{font-size:15px;line-height:1.4;margin-bottom:11px}
+#p .section-kicker,#k .section-kicker{margin:27px 0 5px}
+#p .save,#k .save{margin-top:20px}
+#p .partner-scale .c{overflow:hidden;text-overflow:clip}
 </style></head><body><main class="w"><div class="tabs"><button id="kt" class="on">My check-in</button><button id="pt">Partner</button></div>
 <section id="k"><h1>My daily check-in</h1><div class="sub" id="date"></div><div class="sub" id="progress" style="margin-top:4px">A quick look at how today went.</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
@@ -42,21 +49,21 @@
 <button class="save" id="sk">Save my check-in</button>
 
 <details class="card" style="margin-top:18px"><summary>History & export</summary><div id="kh"></div><button class="secondary" id="mk">Copy as Markdown</button><button class="secondary" id="ck">Export my check-ins</button><button class="secondary" id="bk">Export data from this device</button></details></section>
-<section id="p" class="hide"><h1>Partner check-in</h1><div class="sub">Compared with their usual behaviour, what did you notice? Choose Unsure when you cannot tell.</div><div class="ok" id="po">Saved on this device ✓</div>
+<section id="p" class="hide"><h1>Partner check-in</h1><div class="sub" id="partnerdate"></div><div class="sub" id="partnerprogress" style="margin-top:4px">A quick look at what you noticed.</div><div class="sub" style="margin-top:8px">Compared with their usual behaviour, what did you notice? Choose Unsure when you cannot tell.</div><div class="ok" id="po">Saved on this device ✓</div>
 <div id="pq"></div>
-<div class="card"><div class="label">Seemed like themselves</div><div class="row" data-g="self"><button class="c grow" data-v="Yes">Yes</button><button class="c grow" data-v="Mostly">Mostly</button><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button></div></div>
-<div class="card"><div class="label">Anything else you noticed?</div><textarea id="pn" placeholder="Optional"></textarea></div>
+<div class="section-kicker">Wellbeing & observations</div><div class="card"><div class="label">Seemed like themselves</div><div class="row" data-g="self"><button class="c grow" data-v="Yes">Yes</button><button class="c grow" data-v="Mostly">Mostly</button><button class="c grow" data-v="No">No</button><button class="c grow" data-v="Not sure">Not sure</button></div></div>
+<div class="card"><div class="label">Anything else you noticed? <span class="optional">Optional</span></div><textarea id="pn" placeholder="Optional"></textarea></div>
 <button class="save" id="sp">Save check-in</button>
-<details class="card"><summary>History & export</summary><div id="ph"></div><button class="secondary" id="mp">Copy as Markdown</button><button class="secondary" id="cp">Export partner responses from this device</button></details></section>
+<details class="card" style="margin-top:18px"><summary>History & export</summary><div id="ph"></div><button class="secondary" id="mp">Copy as Markdown</button><button class="secondary" id="cp">Export partner responses from this device</button></details></section>
 <footer>Private to this browser. Entries don't sync between devices.</footer></main><script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='my_daily_v4',P='partner_weekly_v3',S='tracker_settings_v3';
 const localDay=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-$('#date').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+$('#date').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});$('#partnerdate').textContent=$('#date').textContent;
 const val=g=>{let x=$('[data-g="'+g+'"] .sel');return x?x.dataset.v:''};
 const coreGroups=['medtoday','start','attention','sidequests','finish','switching','regulation'];
-function progress(){let n=coreGroups.filter(g=>val(g)).length;$('#progress').textContent=n? n+' of '+coreGroups.length+' essentials answered':'A quick look at how today went.'}
+function progress(){let n=coreGroups.filter(g=>val(g)).length;$('#progress').textContent=n? n+' of '+coreGroups.length+' essentials answered':'A quick look at how today went.';let p=qs.filter(([g])=>val(g)).length;$('#partnerprogress').textContent=p?p+' of '+qs.length+' observations answered':'A quick look at what you noticed.'}
 
 document.addEventListener('click',e=>{
   let b=e.target.closest('[data-g] .c'); if(!b)return;
@@ -109,7 +116,7 @@ const qs=[
 ['regulation_obs','Pausing & regulating','Did they seem better able to pause before reacting, or less driven by restlessness or stimulation-seeking?'],
 ['life_obs','Life outside work','Did they seem to have more capacity for everyday life — home tasks, meals, plans, people or downtime?']
 ],opts=['Worse','Same','A little better','Clearly better','Not sure'];
-$('#pq').innerHTML=qs.map(([k,q,help])=>'<div class="card"><div class="label">'+q+' <details class="help"><summary aria-label="What this means">?</summary><div class="hint">'+help+'</div></details></div><div data-g="'+k+'" class="partner-answer"><div class="row partner-scale">'+['Not sure','Worse','Same','A little better','Clearly better'].map((o,i)=>'<button type="button" class="c" data-v="'+o+'" aria-label="'+(o==='Not sure'?'Unable to assess':o)+'">'+(['Unsure','Worse','Same','A bit','Better'][i])+'</button>').join('')+'</div></div></div>').join('');
+$('#pq').innerHTML='<div class="section-kicker">Focus & follow-through</div>'+qs.map(([k,q,help])=>'<div class="card"><div class="label">'+q+' <details class="help"><summary aria-label="What this means">?</summary><div class="hint">'+help+'</div></details></div><div data-g="'+k+'" class="partner-answer"><div class="row partner-scale">'+['Not sure','Worse','Same','A little better','Clearly better'].map((o,i)=>'<button type="button" class="c" data-v="'+o+'" aria-label="'+(o==='Not sure'?'Unable to assess':o)+'">'+(['Unsure','Worse','Same','A bit','Better'][i])+'</button>').join('')+'</div></div></div>').join('');
 
 function flash(s){$(s).style.background='';$(s).style.borderColor='';$(s).style.display='block'}
 $('#sk').onclick=()=>{
@@ -176,7 +183,7 @@ function restoreToday(){
   toggleMedication();toggleDropoff();toggleEffects();progress();
  }
  const partner=get(P,[]).find(r=>r.date===localDay());
- if(partner){qs.forEach(([g])=>restoreGroup(g,partner[g]));restoreGroup('self',partner.still_themselves||partner.still_herself);$('#pn').value=partner.note||''}
+ if(partner){qs.forEach(([g])=>restoreGroup(g,partner[g]));restoreGroup('self',partner.still_themselves||partner.still_herself);$('#pn').value=partner.note||'';progress()}
 }
 restoreToday();
 function render(){
