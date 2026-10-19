@@ -233,3 +233,22 @@ test('headings, date and navigation remain in consistent order across every sect
  }
  await page.reload();await expect(page.locator('#checkin-title')).toHaveText('How was your day?');
 });
+
+test('save feedback is visible at button position for success, update and validation',async({page})=>{
+ await page.locator('#sk').click();
+ await expect(page.locator('#save-toast')).toBeVisible();
+ await expect(page.locator('#save-toast')).toContainText('Not saved yet');
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#sk').click();
+ await expect(page.locator('#save-toast')).toBeVisible();
+ await expect(page.locator('#save-toast')).toContainText('Check-in saved on this device');
+ await page.locator('#sk').click();
+ await expect(page.locator('#save-toast')).toContainText('Check-in updated');
+ await page.locator('#pt').click();
+ await page.locator('#sp').click();
+ await expect(page.locator('#save-toast')).toContainText('Not saved yet');
+ await page.locator('[data-g=start_obs] [data-v=Same]').click();
+ await page.locator('#sp').click();
+ await expect(page.locator('#save-toast')).toContainText('Partner check-in saved');
+});
