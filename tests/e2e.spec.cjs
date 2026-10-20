@@ -458,7 +458,7 @@ test('four destinations keep check-in, strategies, insights and records distinct
 });
 
 test('quick notes require explicit save and keep partner and self separate',async({page})=>{
- await page.locator('#quick-self').fill('Started one small task');page.once('dialog',d=>d.accept());await page.locator('#quick-self-apply').click();await expect(page.locator('#kn')).toHaveValue('Started one small task');
- await page.locator('#pt').click();await page.locator('#quick-partner').fill('Seemed more settled');page.once('dialog',d=>d.accept());await page.locator('#quick-partner-apply').click();await expect(page.locator('#pn')).toHaveValue('Seemed more settled');
+ await page.locator('#quick-self').fill('Started one small task');await page.locator('#quick-self-apply').click();await expect(page.locator('#kn')).toHaveValue('Started one small task');await expect(page.locator('#quick-self-status')).toContainText('NOT saved yet');
+ await page.locator('#pt').click();await page.locator('#quick-partner').fill('Seemed more settled');await page.locator('#quick-partner-apply').click();await expect(page.locator('#pn')).toHaveValue('Seemed more settled');
  await expect(page.locator('#kn')).toHaveValue('Started one small task');
 });
