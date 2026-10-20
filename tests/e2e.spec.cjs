@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v64');
+ expect(result.keys).toContain('daily-checkin-offline-v65');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -458,7 +458,7 @@ test('four destinations keep check-in, strategies, insights and records distinct
 });
 
 test('quick notes require explicit save and keep partner and self separate',async({page})=>{
- await page.locator('#quick-self').fill('Started one small task');await page.locator('#quick-self-apply').click();await expect(page.locator('#kn')).toHaveValue('Started one small task');await expect(page.locator('#quick-self-status')).toContainText('NOT saved yet');
+ await page.locator('#quick-self').fill('Started one small task');await page.locator('#quick-self-apply').click();await expect(page.locator('#kn')).toHaveValue('Started one small task');await expect(page.locator('#quick-self-status')).toContainText('unsaved draft');
  await page.locator('#pt').click();await page.locator('#quick-partner').fill('Seemed more settled');await page.locator('#quick-partner-apply').click();await expect(page.locator('#pn')).toHaveValue('Seemed more settled');
  await expect(page.locator('#kn')).toHaveValue('Started one small task');
 });
