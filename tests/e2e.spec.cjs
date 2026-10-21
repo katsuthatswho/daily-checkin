@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v75');
+ expect(result.keys).toContain('daily-checkin-offline-v76');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -438,9 +438,9 @@ test('app script parses and navigation initializes without browser errors',async
 test('three destinations keep check-in, patterns with strategies, and records distinct',async({page})=>{
  const tabs=page.locator('.tabs button');
  await expect(tabs).toHaveCount(3);
- await expect(page.locator('#kt')).toContainText('Today');
+ await expect(page.locator('#kt')).toContainText('Check-in');
  await expect(page.locator('#it')).toContainText('Patterns');
- await expect(page.locator('#jt')).toContainText('Records');
+ await expect(page.locator('#jt')).toContainText('Journal');
  await page.locator('#it').click();
  await expect(page.locator('#insights')).toBeVisible();
  await expect(page.locator('#help-view')).toBeVisible();
@@ -524,4 +524,26 @@ test('iOS shortcut references the dedicated PNG icon',async({page})=>{
  const response=await page.request.get(url);
  expect(response.ok()).toBeTruthy();
  expect(response.headers()['content-type']).toContain('image/png');
+});
+
+test('primary product navigation works after startup, date changes and reload',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await expect(page.locator('#k')).toBeVisible();
+ await page.locator('#it').click();
+ await expect(page.locator('#insights')).toBeVisible();
+ await expect(page.locator('#help-view')).toBeVisible();
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-view')).toBeVisible();
+ await page.locator('#kt').click();
+ await expect(page.locator('#k')).toBeVisible();
+ await page.locator('#pt').click();
+ await expect(page.locator('#p')).toBeVisible();
+ await page.locator('#it').click();
+ await expect(page.locator('#insights')).toBeVisible();
+ await page.locator('#kt').click();
+ await expect(page.locator('#k')).toBeVisible();
+ await page.reload();
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-view')).toBeVisible();
+ expect(errors).toEqual([]);
 });
