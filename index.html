@@ -416,7 +416,7 @@ function mdPartner(rows){
  return head+rows.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(r=>['## '+noted(r.date),...qs.map(([k,q])=>'- '+q+': '+noted(r[k])),'- Seemed like themselves: '+noted(r.still_themselves||r.still_herself),...(r.note?['**Partner notes:** '+r.note]:[])].join('\n')).join('\n\n---\n\n')
 }
 async function copyMD(t,b){try{await navigator.clipboard.writeText(t)}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}let o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1800)}
-$('#mk').onclick=()=>copyMD(mdMine(get(K,[])),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
+$('#mk').onclick=()=>copyMD(journalMarkdown(journalRows()),$('#mk'));$('#mp').onclick=()=>copyMD(mdPartner(get(P,[])),$('#mp'));
 
 function experimentReport(){const data=get('daily_checkin_experiments_v1',{active:null,history:[]});if(!data.history?.length)return '';const names={start:'Getting started',switch:'Switching tasks',finish:'Finishing tasks',life:'Life outside work'};return '\n\nBEHAVIOURAL EXPERIMENTS (SELF-REPORTED)\n'+data.history.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(r=>r.date+' — '+(names[r.type]||r.type)+': '+r.result+(r.note?' — '+r.note:'')).join('\n')+'\nThese are personal experiments, not evidence of treatment effectiveness.'}
 function clinicianOverview(mine,partner){
