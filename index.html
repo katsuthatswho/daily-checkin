@@ -127,7 +127,7 @@ function notifySave(message,failed=false){
 }
 function flash(s){$(s).style.background='';$(s).style.borderColor='';$(s).style.display='block'}
 $('#sk').onclick=()=>{
- if($('#quick-self').value.trim())previewQuick('#quick-self','#kn','#quick-self-status');
+ if($('#quick-self').value.trim()&&$('#quick-self').value.trim()!==$('#kn').value.trim())previewQuick('#quick-self','#kn','#quick-self-status');
  let required=['medtoday','start','attention','sidequests','finish','switching','regulation'];
  let missing=required.filter(g=>!val(g));
  if(missing.length){$('#more-details').open=false;$('#ke').textContent='Please answer the remaining '+missing.length+' essential question'+(missing.length===1?'':'s')+'.';$('#ke').classList.remove('hide');$('#ke').scrollIntoView({block:'center',behavior:'smooth'});notifySave('Not saved yet. Complete the required questions.',true);return}
@@ -336,7 +336,7 @@ function loadSelectedDate(){
   [['medtoday','medication_today'],['sleep','sleep'],['start','getting_started'],['attention','attention_control'],['sidequests','side_quest_control'],['finish','finishing'],['switching','switching'],['regulation','impulse_restlessness_control'],['crowd','work_crowding'],['dropoff','dropoff'],['side','side_effect_severity']].forEach(([g,k])=>restoreGroup(g,mine[k]));
   if(mine.medication&&doses[mine.medication]){$('#med').value=mine.medication;st.dose=mine.dose||'';fillDoses()}
   else{$('#med').value=st.medication||'';fillDoses()}
-  $('#appetite').value=mine.appetite||'';$('#lifequality').value=mine.life_quality||'';$('#medtime').value=mine.time_taken||'';restoreMedTime();$('#tn').value=mine.treatment_notes||'';$('#kn').value=mine.note||'';$('#droptime').value=mine.dropoff_time||'';
+  $('#appetite').value=mine.appetite||'';$('#lifequality').value=mine.life_quality||'';$('#medtime').value=mine.time_taken||'';restoreMedTime();$('#tn').value=mine.treatment_notes||'';$('#kn').value=mine.note||'';$('#quick-self').value=mine.note||'';$('#droptime').value=mine.dropoff_time||'';
   restoreMulti('#wins',mine.life_outside_work);restoreMulti('#drops',mine.dropoff_changes);restoreMulti('#effects',mine.side_effects);
  }else{$('#med').value=st.medication||'';fillDoses();carryPrevious(get(K,[]),selectedDay(),'treatment_notes','#tn','#treatment-carry');carryPrevious(get(K,[]),selectedDay(),'note','#kn','#personal-carry');if($('#personal-carry').classList.contains('hide')===false)$('#more-details').open=true}
  const partner=get(P,[]).find(r=>r.date===selectedDay());
@@ -483,8 +483,8 @@ function previewQuick(source,target,status){
   }else skipped.push(x.label)
  });
  const old=$(target).value.trim();
- $(target).value=old?old+'\n'+note:note;
- $(source).value='';
+ $(target).value=partner?(old&&old!==note?old+'\n'+note:note):note;
+ if(partner)$(source).value='';
  if(!partner)$('#more-details').open=true;
  toggleMedication();toggleEffects();progress();scheduleDraft();
  const missing=partner?[]:coreGroups.filter(g=>!val(g));const remaining=missing.length;
