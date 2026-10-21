@@ -135,6 +135,53 @@
  .optional-panel>summary{min-height:57px;padding:12px 14px}
  .save{min-height:49px}
 }
+
+/* Visual design v6: quieter type, cleaner surfaces, deliberate spacing */
+:root{--page:#fbfcfa;--ink:#1d2925;--muted:#697670;--line:#e5eae6;--accent:#245c47;--tint:#eff5f0}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body,button,input,textarea,select{font-family:"Avenir Next",Avenir,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{font-weight:400;letter-spacing:-.012em}
+@media(max-width:600px){
+ .w{padding-left:20px;padding-right:20px}
+ .app-head{margin:0 -20px;padding:12px 20px 9px;min-height:44px}
+ .app-mark{width:22px;height:22px;font-size:13px;border-radius:7px;background:#edf3ee}
+ .app-name{font-size:12px;font-weight:600;letter-spacing:0;color:#728078}
+ .tabs{margin:0 -20px 20px;padding:0 20px;gap:14px}
+ .tabs button{font-size:13px;font-weight:600;min-height:42px;letter-spacing:0}
+ .tabs button.on{box-shadow:inset 0 -2px 0 var(--accent)!important}
+ #checkin-head h1,#insights h1,#journal-view h1{font-size:28px;font-weight:650;letter-spacing:-.045em;line-height:1.16;margin-bottom:15px}
+ .checkin-switch{background:#f0f3ef;border:1px solid #edf0ec;border-radius:12px;gap:3px;margin-bottom:12px}
+ .checkin-switch button{font-weight:600;font-size:12px;color:#718079}
+ .checkin-switch button.on{border-radius:9px;box-shadow:0 1px 3px #152b2010!important}
+ .date-control{padding:0 0 11px;margin-bottom:11px}
+ .date-control .label{font-size:12px;font-weight:550}
+ .date-control input{font-size:13px;font-weight:550;border-color:#e6ebe7;border-radius:9px;background:#fff;min-height:36px}
+ #progress,#partnerprogress{font-size:12px;font-weight:600;color:#657a6c;margin-bottom:11px!important}
+ .quick-capture{background:transparent;border:1px solid #e1e8e2;border-radius:11px;margin-bottom:10px}
+ .quick-capture summary{font-size:13px;font-weight:600;color:#476d5a;min-height:43px}
+ .quick-capture .capture-chevron{font-size:19px}
+ #k>.card,#p>.card{padding:16px 0;border-bottom:1px solid #edf0ed}
+ #k>.card .label,#p>.card .label{font-size:15px;font-weight:650;letter-spacing:-.025em;margin-bottom:10px}
+ .c,.secondary{background:#fff;border-color:#e0e6e1;color:#26342e;font-weight:550;box-shadow:none!important}
+ .c.sel{font-weight:650}
+ .row[data-g=medtoday]{gap:8px}
+ .row[data-g=medtoday] .c{font-size:12px}
+ #usual-med-summary{font-size:11px!important;line-height:1.45!important;color:#829087;margin:0 0 9px!important}
+ #usual-med-taken:not(.hide){min-height:42px!important;margin:0 0 8px!important;border-radius:10px!important;border:1px solid #b9d0c0!important;background:#eff5f0!important;font-size:12px!important;font-weight:650!important}
+ .row[data-g=sleep]{gap:5px}
+ .row[data-g=sleep] .c{font-weight:550;font-size:clamp(10px,2.75vw,12px);border-radius:10px}
+ #k .section-kicker,#p .section-kicker{color:#6d8176;letter-spacing:.11em;font-weight:750}
+ .scale5,.partner-scale{background:#f0f4f0}
+ .scale5 .c,.partner-scale .c{font-weight:550}
+ #insights>.sub,#journal-view>.sub{color:#77847d;font-size:12px}
+ .periods button{font-weight:600;border-color:#e2e8e3}
+ .insight-lead{background:#edf4ef}
+ .insight-lead-grid strong,.insight-metric strong{font-weight:650;letter-spacing:-.04em}
+ .insight-card,.journal-item,.journal-panel{border-color:#e5ebe6;box-shadow:none}
+ .insight-card h2,.insight-section h2{font-weight:650}
+ .journal-heading strong{font-weight:650}
+ .save{font-weight:650;letter-spacing:0}
+}
 </style></head><body><main class="w"><header class="app-head"><div class="app-mark" aria-hidden="true">✎</div><div><div class="app-name">Daily Check-in</div></div></header><div class="tabs" role="navigation" aria-label="Sections"><button id="kt" class="on" type="button" aria-current="page"><span>Check-in</span></button><button id="it" type="button"><span>Patterns</span></button><button id="jt" type="button"><span>Journal</span></button></div>
 <section id="help-view" class="hide"><div class="eyebrow">TRY SOMETHING</div><h2>One small thing to try</h2><p class="sub">Try a practical adjustment, notice what happens, and decide whether it is worth keeping.</p><section id="experiment-section" class="experiment-section"><div class="insight-kicker">A SMALL EXPERIMENT</div><h2>Start with one change</h2><p class="insight-muted">Pick something that gets in your way, then try a small adjustment. Record what happened, including when it did not help.</p><label for="experiment-type" class="label">What would you like to make easier?</label><select id="experiment-type"><option value="">Choose one</option><option value="start">Getting started</option><option value="switch">Switching off or changing tasks</option><option value="finish">Finishing what I began</option><option value="life">Making room for life outside work</option></select><div id="experiment-plan" class="experiment-plan hide"></div><div id="experiment-active" class="hide"><div class="experiment-active-head"><strong id="experiment-name"></strong><button type="button" class="secondary" id="experiment-stop">Finish experiment</button></div><p id="experiment-step"></p><label class="label" for="experiment-result">How did it go today?</label><select id="experiment-result"><option value="">Not reviewed</option><option value="helped">It helped</option><option value="partly">A little</option><option value="not">Didn't help</option><option value="nottried">Didn't try it</option></select><label class="label" for="experiment-note">What made the difference? (optional)</label><textarea id="experiment-note" placeholder="A specific example is more useful than a perfect answer."></textarea><button type="button" id="experiment-review">Save today's review</button><p id="experiment-feedback" class="hint" role="status"></p><div id="experiment-history"></div></div></section></section><section id="insights" class="hide"><div class="eyebrow">PATTERNS & NEXT STEPS</div><h1>What’s changing?</h1><p class="sub">A clearer view of the days you recorded, with context kept intact.</p><div class="periods" role="group" aria-label="Insights time period"><button data-period="7">7 days</button><button data-period="30" class="on">30 days</button><button data-period="all">All time</button></div><div id="insight-body"></div><button class="secondary" id="insight-journal">Review dated entries</button><button class="secondary" id="insight-copy">Copy summary</button><button class="secondary" id="insight-share">Share summary</button><p id="insight-share-status" class="hint" role="status"></p></section><section id="journal-view" class="hide"><div class="eyebrow">JOURNAL</div><h1>Your saved days.</h1><p class="sub">Review, edit, back up or share your records.</p><div class="periods" role="group" aria-label="Journal entry filter"><button data-jfilter="both" class="on">Both</button><button data-jfilter="mine">Mine</button><button data-jfilter="partner">Partner</button></div><div class="journal-heading"><strong>Saved entries</strong><span>Newest first</span></div><div id="journal-list"></div><div class="journal-heading"><strong>Keep & share</strong><span>Backup and reports</span></div><div id="journal-home"><details id="journal-panel" class="card journal-panel"><summary>Journal backup <span id="journal-status" class="journal-pill">Checking…</span></summary><div class="hint" style="margin-top:10px">Your check-ins are saved on this device. Keep one dated Markdown journal in iCloud Drive as a second copy.</div><p id="journal-detail" class="hint" role="status" aria-live="polite"></p><button type="button" class="secondary" id="journal-export">Save full journal to Files (.md)</button><div style="margin-top:18px;border-top:1px solid var(--line);padding-top:15px"><div class="label">For your doctor</div><div class="hint">Plain-text report with dates and score explanations. No Markdown symbols. Review before sharing.</div><button type="button" class="secondary" id="doctor-copy">Copy readable report</button><button type="button" class="secondary" id="doctor-share">Share report (.txt)</button><div id="doctor-message" class="hint" role="status" aria-live="polite"></div></div><div class="hint" style="margin-top:7px">Choose iCloud Drive in Files and <strong>replace</strong> your previous <code>daily-checkin-journal.md</code>. Each export is a complete, deduplicated snapshot, not an extra set of entries.</div><div id="journal-confirm" class="hide" style="padding:12px 0"><div class="label">Did you replace the existing journal file in Files?</div><div class="hint">Only confirm after checking it was saved. Downloading alone does not back up your data.</div><button type="button" class="secondary" id="journal-done">Yes, the file is saved</button><button type="button" class="secondary" id="journal-cancel">Not yet</button></div><div id="journal-message" class="hint" role="status" aria-live="polite"></div></details></div></section><section id="checkin-head" aria-labelledby="checkin-title"><h1 id="checkin-title">How was your day?</h1><p class="sub" id="checkin-description" hidden></p><div id="checkin-switch" class="checkin-switch" role="group" aria-label="Whose check-in"><button id="self-switch" class="on" type="button" aria-pressed="true">My check-in</button><button id="pt" type="button" aria-pressed="false">Partner observations</button></div><div class="date-control"><label class="label" for="entrydate">Entry date</label><input id="entrydate" type="date"><div class="hint" id="datehint">Today by default. Choose an earlier date to review or edit.</div></div></section><section id="k"><p id="draft-status" class="draft-status" role="status" aria-live="polite"></p><div class="sub" id="progress" style="margin-top:4px">0 of 7 answered</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
