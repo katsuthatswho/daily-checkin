@@ -50,10 +50,10 @@ test('offline shell works after initial online load',async({page,context})=>{
 test('saved answers restore after reload and can be corrected without re-entering',async({page})=>{
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('Remember this');await page.locator('#sk').click();
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#quick-self').fill('Remember this');await page.locator('#sk').click();
  await page.reload();
  await expect(page.locator('[data-g=start] [data-v="2"]')).toHaveClass(/sel/);
- await expect(page.locator('#kn')).toHaveValue('Remember this');
+ await expect(page.locator('#quick-self')).toHaveValue('Remember this');
  await page.locator('[data-g=start] [data-v="4"]').click();await page.locator('#sk').click();
  let mine=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(mine).toHaveLength(1);expect(mine[0].getting_started).toBe('4');
  await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#pn').fill('Partner note');await page.locator('#sp').click();await page.reload();await page.locator('#pt').click();
@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v72');
+ expect(result.keys).toContain('daily-checkin-offline-v73');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -135,7 +135,7 @@ test('backfill date saves separately, reloads edits and exports accurate dates',
 test('single journal backup is deduplicated, dated, confirmed and detects edits',async({page})=>{
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('First journal note');
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#quick-self').fill('First journal note');
  await page.locator('#sk').click();
  await page.locator('#pt').click();
  await page.locator('[data-g=start_obs] [data-v=Same]').click();
@@ -156,7 +156,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
  await page.locator('#journal-done').click();
  await expect(page.locator('#journal-status')).toContainText('Backed up');
  await page.locator('#kt').click();
- await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('Edited journal note');
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#quick-self').fill('Edited journal note');
  await page.locator('#sk').click();
  await expect(page.locator('#journal-status')).toContainText('Changes to back up');
  const revised=await page.evaluate(()=>journalMarkdown(journalRows()));
@@ -171,7 +171,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
 test('doctor report is readable plain text with dates and both perspectives',async({page})=>{
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('Doctor note');await page.locator('#sk').click();
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#quick-self').fill('Doctor note');await page.locator('#sk').click();
  await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
  const report=await page.evaluate(()=>doctorReport());
  expect(report).toContain('Doctor note');
@@ -189,7 +189,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
  await page.locator('#kt').click();
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#kn').fill('<img src=x onerror=alert(1)>');
+ await page.locator('#more-details').evaluate(el=>el.open=true);await page.locator('#quick-self').fill('<img src=x onerror=alert(1)>');
  await page.locator('#sk').click();
  await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
  await page.locator('#it').click();
@@ -206,7 +206,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
  await expect(page.locator('#journal-list .journal-item')).toHaveCount(1);
  await page.locator('#journal-list [data-editwho="mine"]').click();
  await expect(page.locator('#k')).toBeVisible();
- await expect(page.locator('#kn')).toHaveValue('<img src=x onerror=alert(1)>');
+ await expect(page.locator('#quick-self')).toHaveValue('<img src=x onerror=alert(1)>');
  expect(errors).toEqual([]);
 });
 
@@ -265,10 +265,9 @@ test('ADHD-friendly short form, optional details, sticky save and pencil icon',a
  await expect(page.locator('#progress')).toContainText('Ready to save');
  await page.locator('#sk').click();await expect(page.locator('#save-toast')).toContainText('Check-in saved');
  await page.reload();await expect(page.locator('#progress')).toContainText('Ready to save');
- await page.locator('#more-details > summary').click();await page.locator('#kn').evaluate(el=>el.closest('details').open=true);await expect(page.locator('#kn')).toBeVisible();
- await page.locator('#kn').fill('Optional entry');await page.locator('#sk').click();
- await page.reload();await expect(page.locator('#more-details')).toHaveAttribute('open','');
- await expect(page.locator('#kn')).toHaveValue('Optional entry');
+ await expect(page.locator('#quick-self')).toBeVisible();
+ await page.locator('#quick-self').fill('Optional entry');await page.locator('#sk').click();
+ await page.reload();await expect(page.locator('#quick-self')).toHaveValue('Optional entry');
  const manifest=await (await request.get('http://127.0.0.1:8765/manifest.webmanifest')).json();
  expect(manifest.icons.some(i=>i.type==='image/png')).toBeTruthy();
  const svg=await (await request.get('http://127.0.0.1:8765/icon.svg')).text();expect(svg).toContain('stroke');
@@ -280,26 +279,26 @@ test('new-day notes carry forward visibly, remain editable, and never overwrite 
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
  await page.locator('#more-details').evaluate(el=>el.open=true);
- await page.locator('#kn').fill('Keep this in mind tomorrow');
+ await page.locator('#quick-self').fill('Keep this in mind tomorrow');
  await page.locator('#tn').fill('Treatment context from yesterday');
  await page.locator('#sk').click();
  await expect(page.locator('#save-toast')).toContainText('saved');
  const today=await page.evaluate(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
  await page.locator('#entrydate').fill(today);
  await expect(page.locator('#personal-carry')).toBeVisible();
- await expect(page.locator('#kn')).toHaveValue('');
+ await expect(page.locator('#quick-self')).toHaveValue('');
  await expect(page.locator('#tn')).toHaveValue('');
  await expect(page.locator('#personal-carry')).toContainText('Keep this in mind tomorrow');
  await expect(page.locator('#treatment-carry')).toContainText('Treatment context from yesterday');
- await expect(page.locator('#kn')).toHaveValue('');
+ await expect(page.locator('#quick-self')).toHaveValue('');
  await page.locator('#entrydate').fill(yesterday);
- await expect(page.locator('#kn')).toHaveValue('Keep this in mind tomorrow');
+ await expect(page.locator('#quick-self')).toHaveValue('Keep this in mind tomorrow');
 });
 test('Insights gives all six dimensions, trend marks and original dated notes',async({page})=>{
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
  await page.locator('#more-details').evaluate(el=>el.open=true);
- await page.locator('#kn').fill('A distinct original observation');
+ await page.locator('#quick-self').fill('A distinct original observation');
  await page.locator('#sk').click();
  await page.locator('#it').click();
  await expect(page.locator('.insight-dim')).toHaveCount(6);
@@ -313,17 +312,17 @@ test('unsaved notes survive changing dates, reload and navigation',async({page})
  const today=await page.locator('#entrydate').inputValue();
  const yesterday=await page.evaluate(()=>{const d=new Date();d.setDate(d.getDate()-1);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
  await page.locator('#more-details').evaluate(el=>el.open=true);
- await page.locator('#kn').fill('Draft note must not disappear');
+ await page.locator('#quick-self').fill('Draft note must not disappear');
  await page.locator('#tn').fill('Medication context must persist');
  await page.locator('#entrydate').fill(yesterday);
  await page.locator('#entrydate').fill(today);
- await expect(page.locator('#kn')).toHaveValue('Draft note must not disappear');
+ await expect(page.locator('#quick-self')).toHaveValue('Draft note must not disappear');
  await expect(page.locator('#tn')).toHaveValue('Medication context must persist');
  await page.reload();
- await expect(page.locator('#kn')).toHaveValue('Draft note must not disappear');
+ await expect(page.locator('#quick-self')).toHaveValue('Draft note must not disappear');
  await page.locator('#it').click();
  await page.locator('#kt').click();
- await expect(page.locator('#kn')).toHaveValue('Draft note must not disappear');
+ await expect(page.locator('#quick-self')).toHaveValue('Draft note must not disappear');
 });
 
 test('one active experiment, daily review and clinician export persist',async({page})=>{
@@ -362,7 +361,7 @@ test('clinician overview separates observed trends, treatment context and dated 
 test('draft capture persists multiple selections and scores without losing previous dates',async({page})=>{
  const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
  await page.locator('#more-details').evaluate(el=>el.open=true);
- await page.locator('#kn').fill('Keep this note');
+ await page.locator('#quick-self').fill('Keep this note');
  await page.locator('[data-g=start] [data-v="3"]').click();
  await page.locator('#wins [data-v="Exercise"]').click();
  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('daily_checkin_drafts_v1')||'{}'));
@@ -410,7 +409,7 @@ test('saving self check-in retains unfinished partner note and observation',asyn
 test('full device backup includes unfinished drafts and behavioural experiments',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.locator('#more-details').evaluate(el=>el.open=true);
- await page.locator('#kn').fill('Unfinished backup note');
+ await page.locator('#quick-self').fill('Unfinished backup note');
  const result=await page.evaluate(()=>{
   const drafts=JSON.parse(localStorage.getItem('daily_checkin_drafts_v1')||'{}');
   return {drafts,day:document.querySelector('#entrydate').value};
@@ -459,9 +458,9 @@ test('four destinations keep check-in, strategies, insights and records distinct
 });
 
 test('quick notes require explicit save and keep partner and self separate',async({page})=>{
- await page.locator('#quick-self').fill('Started one small task');await page.locator('#quick-self-apply').click();await expect(page.locator('#kn')).toHaveValue('Started one small task');await expect(page.locator('#quick-self-status')).toContainText('Original note kept in your draft');
+ await page.locator('#quick-self').fill('Started one small task');await page.locator('#quick-self-apply').click();await expect(page.locator('#quick-self')).toHaveValue('Started one small task');await expect(page.locator('#quick-self-status')).toContainText('Original note kept in your draft');
  await page.locator('#pt').click();await page.locator('#quick-partner').fill('Seemed more settled');await page.locator('#quick-partner-apply').click();await expect(page.locator('#pn')).toHaveValue('Seemed more settled');
- await expect(page.locator('#kn')).toHaveValue('Started one small task');
+ await expect(page.locator('#quick-self')).toHaveValue('Started one small task');
 });
 
 test('saving directly from daily note preserves original words',async({page})=>{
@@ -470,7 +469,7 @@ test('saving directly from daily note preserves original words',async({page})=>{
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
  await page.locator('#sk').click();
  await page.reload();
- await expect(page.locator('#kn')).toHaveValue('Took Vyvanse and slept well. Started easily.');
+ await expect(page.locator('#quick-self')).toHaveValue('Took Vyvanse and slept well. Started easily.');
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')||'[]'));
  expect(saved.some(x=>x.note==='Took Vyvanse and slept well. Started easily.')).toBe(true);
 });
@@ -487,10 +486,10 @@ test('primary daily note remains visible after reviewing and can be edited',asyn
  await field.fill('Slept well and stayed focused');
  await page.locator('#quick-self-apply').click();
  await expect(field).toHaveValue('Slept well and stayed focused');
- await expect(page.locator('#kn')).toHaveValue('Slept well and stayed focused');
+ await expect(page.locator('#quick-self')).toHaveValue('Slept well and stayed focused');
  await field.fill('Slept well, then lost focus');
  await page.locator('#quick-self-apply').click();
- await expect(page.locator('#kn')).toHaveValue('Slept well, then lost focus');
+ await expect(page.locator('#quick-self')).toHaveValue('Slept well, then lost focus');
 });
 
 test('saved self entry does not overwrite an unfinished partner draft',async({page})=>{
