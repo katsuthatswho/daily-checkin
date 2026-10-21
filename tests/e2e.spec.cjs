@@ -521,7 +521,7 @@ test('iOS shortcut references the dedicated PNG icon',async({page})=>{
  const icon=page.locator('link[rel="apple-touch-icon"]');
  await expect(icon).toHaveAttribute('href',/home-icon-2026\.png/);
  const url=await icon.getAttribute('href');
- const response=await page.request.get(url);
+ const response=await page.request.get(new URL(url,page.url()).href);
  expect(response.ok()).toBeTruthy();
  expect(response.headers()['content-type']).toContain('image/png');
 });
