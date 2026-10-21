@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v69');
+ expect(result.keys).toContain('daily-checkin-offline-v70');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -490,4 +490,15 @@ test('primary daily note remains visible after reviewing and can be edited',asyn
  await field.fill('Slept well, then lost focus');
  await page.locator('#quick-self-apply').click();
  await expect(page.locator('#kn')).toHaveValue('Slept well, then lost focus');
+});
+
+test('saved self entry does not overwrite an unfinished partner draft',async({page})=>{
+ await page.locator('#pt').click();
+ await page.locator('#quick-partner').fill('Partner observation still in progress');
+ await page.locator('#kt').click();
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#sk').click();
+ await page.reload();await page.locator('#pt').click();
+ await expect(page.locator('#quick-partner')).toHaveValue('Partner observation still in progress');
 });
