@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v73');
+ expect(result.keys).toContain('daily-checkin-offline-v74');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -326,7 +326,7 @@ test('unsaved notes survive changing dates, reload and navigation',async({page})
 });
 
 test('one active experiment, daily review and clinician export persist',async({page})=>{
- await page.locator('#wt').click();
+ await page.locator('#it').click();
  await page.locator('#experiment-type').selectOption('start');
  await expect(page.locator('#experiment-plan')).toContainText('first physical step');
  await page.locator('#experiment-start').click();
@@ -335,7 +335,7 @@ test('one active experiment, daily review and clinician export persist',async({p
  await page.locator('#experiment-note').fill('Worked when I prepared the desk');
  await page.locator('#experiment-review').click();
  await expect(page.locator('#experiment-history')).toContainText('Worked when I prepared the desk');
- await page.reload();await page.locator('#wt').click();
+ await page.reload();await page.locator('#it').click();
  await expect(page.locator('#experiment-result')).toHaveValue('partly');
  await expect(page.locator('#experiment-note')).toHaveValue('Worked when I prepared the desk');
  const report=await page.evaluate(()=>{localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',medication_today:'No'}]));return doctorReport()});
@@ -430,33 +430,26 @@ test('app script parses and navigation initializes without browser errors',async
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.reload();
  expect(errors).toEqual([]);
- await page.locator('#wt').click();
+ await page.locator('#it').click();
  await expect(page.locator('#help-view')).toBeVisible();
  await page.locator('#it').click();
  await expect(page.locator('#insights')).toBeVisible();
 });
-test('four destinations keep check-in, strategies, insights and records distinct',async({page})=>{
+test('three destinations keep check-in, patterns with strategies, and records distinct',async({page})=>{
  const tabs=page.locator('.tabs button');
- await expect(tabs).toHaveCount(4);
+ await expect(tabs).toHaveCount(3);
  await expect(page.locator('#kt')).toContainText('Today');
- await expect(page.locator('#wt')).toContainText('What helps');
  await expect(page.locator('#it')).toContainText('Patterns');
  await expect(page.locator('#jt')).toContainText('Records');
- await page.locator('#wt').click();
- await expect(page.locator('#help-view')).toBeVisible();
- await expect(page.locator('#experiment-type')).toBeVisible();
- await expect(page.locator('#insights')).toBeHidden();
- await expect(page.locator('#wt')).toHaveAttribute('aria-current','page');
  await page.locator('#it').click();
  await expect(page.locator('#insights')).toBeVisible();
- await expect(page.locator('#help-view')).toBeHidden();
+ await expect(page.locator('#help-view')).toBeVisible();
+ await expect(page.locator('#experiment-type')).toBeVisible();
  await page.locator('#jt').click();
  await expect(page.locator('#journal-view')).toBeVisible();
  await page.locator('#kt').click();
  await expect(page.locator('#k')).toBeVisible();
- await expect(page.locator('#checkin-head')).toBeVisible();
 });
-
 test('quick notes require explicit save and keep partner and self separate',async({page})=>{
  await page.locator('#quick-self').fill('Started one small task');await page.locator('#quick-self-apply').click();await expect(page.locator('#quick-self')).toHaveValue('Started one small task');await expect(page.locator('#quick-self-status')).toContainText('Original note kept in your draft');
  await page.locator('#pt').click();await page.locator('#quick-partner').fill('Seemed more settled');await page.locator('#quick-partner-apply').click();await expect(page.locator('#pn')).toHaveValue('Seemed more settled');
@@ -475,7 +468,7 @@ test('saving directly from daily note preserves original words',async({page})=>{
 });
 test('unsent daily note survives reload and is not lost by tab navigation',async({page})=>{
  await page.locator('#quick-self').fill('Unfinished private thought');
- await page.locator('#wt').click();await page.locator('#kt').click();
+ await page.locator('#it').click();await page.locator('#kt').click();
  await page.reload();
  await expect(page.locator('#quick-self')).toHaveValue('Unfinished private thought');
 });
