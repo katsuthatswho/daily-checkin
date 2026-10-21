@@ -4,6 +4,34 @@ test.use({viewport:{width:375,height:812},isMobile:true,hasTouch:true,serviceWor
 test.beforeEach(async({page})=>{await page.goto('http://127.0.0.1:8765/');await page.evaluate(()=>localStorage.clear());await page.reload();await page.locator('#k > .quick-capture').evaluate(el=>el.open=true);});
 
 
+
+test('save validation names missing medication, jumps to it and clears after answer',async({page})=>{
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await expect(page.locator('#progress')).toContainText('6 of 7');
+ await page.locator('#sk').click();
+ await expect(page.locator('#ke')).toContainText('Medication today');
+ await expect(page.locator('[data-g=medtoday]').locator('xpath=..')).toHaveClass(/needs-answer/);
+ await expect(page.locator('[data-g=medtoday] .c').first()).toBeFocused();
+ await page.locator('#ke .missing-jump').click();
+ await expect(page.locator('[data-g=medtoday] .c').first()).toBeFocused();
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ await expect(page.locator('#ke')).toBeHidden();
+ await expect(page.locator('.completion-track')).toHaveAttribute('aria-valuenow','7');
+ await page.locator('#sk').click();
+ await expect(page.locator('#ko')).toContainText('Saved');
+ const data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(data).toHaveLength(1);expect(data[0].medication_today).toBe('No');
+});
+test('dog park is a selectable outside-work activity and persists on save',async({page})=>{
+ await page.locator('#more-details').evaluate(el=>el.open=true);
+ await page.locator('#wins [data-v="Dog park"]').click();
+ await expect(page.locator('#wins [data-v="Dog park"]')).toHaveClass(/sel/);
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#sk').click();
+ const data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(data[0].life_outside_work).toContain('Dog park');
+});
 test('day navigation and progress preserve dated entries',async({page})=>{
  await expect(page.locator('#next-day')).toBeDisabled();
  const today=await page.locator('#entrydate').inputValue();
