@@ -5,11 +5,14 @@ test.beforeEach(async({page})=>{await page.goto('http://127.0.0.1:8765/');await 
 
 
 
-test('save validation names missing medication, jumps to it and clears after answer',async({page})=>{
+test('partial save names missing medication, preserves entry and still permits completion',async({page})=>{
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
  await expect(page.locator('#progress')).toContainText('6 of 7');
  await page.locator('#sk').click();
  await expect(page.locator('#ke')).toContainText('Medication today');
+ await expect(page.locator('#ko')).toContainText('Saved');
+ let initial=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(initial).toHaveLength(1);expect(initial[0].medication_today).toBe('Not recorded');expect(initial[0].getting_started).toBe('2');
  await expect(page.locator('[data-g=medtoday]').locator('xpath=..')).toHaveClass(/needs-answer/);
  await expect(page.locator('[data-g=medtoday] .c').first()).toBeFocused();
  await page.locator('#ke .missing-jump').click();
@@ -31,6 +34,31 @@ test('dog park is a selectable outside-work activity and persists on save',async
  await page.locator('#sk').click();
  const data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
  expect(data[0].life_outside_work).toContain('Dog park');
+});
+
+test('a medication time is optional and a partial observation survives reload',async({page})=>{
+ await page.locator('#quick-self').fill('Went to the dog park and felt tired');
+ await page.locator('[data-g=medtoday] [data-v=Yes]').click();
+ await page.locator('#med').selectOption('Vyvanse (lisdexamfetamine)');
+ await page.locator('#dose').selectOption('20 mg');
+ await page.locator('#medtime-quick').selectOption('');
+ await page.locator('[data-g=attention] [data-v="3"]').click();
+ await page.locator('#sk').click();
+ await expect(page.locator('#ko')).toContainText('Saved');
+ const first=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
+ expect(first.time_taken).toBe('');
+ expect(first.note).toContain('dog park');
+ expect(first.attention_control).toBe('3');
+ expect(first.getting_started).toBe('');
+ await page.reload();
+ await expect(page.locator('#quick-self')).toHaveValue('Went to the dog park and felt tired');
+ await expect(page.locator('[data-g=attention] [data-v="3"]')).toHaveClass(/sel/);
+ await page.locator('#medtime-quick').selectOption('08:30');
+ await page.locator('#sk').click();
+ const updated=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(updated).toHaveLength(1);
+ expect(updated[0].time_taken).toBe('08:30');
+ expect(updated[0].note).toContain('dog park');
 });
 test('day navigation and progress preserve dated entries',async({page})=>{
  await expect(page.locator('#next-day')).toBeDisabled();
@@ -88,7 +116,7 @@ test('both tabs share layout, partner is indigo, and every partner scale stays o
 });
 test('self form conditional controls, validation, save, update, history and exports',async({page})=>{test.setTimeout(60000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.locator('#sk').click();await expect(page.locator('#ke')).toBeVisible();
+ await page.locator('#sk').click();await expect(page.locator('#ke')).toBeVisible();await expect(page.locator('#ko')).toContainText('Saved');
  await page.locator('[data-g=medtoday] [data-v=Yes]').click();await expect(page.locator('#meddetails')).toBeVisible();
  await page.locator('#med').selectOption('Vyvanse (lisdexamfetamine)');await page.locator('#dose').selectOption('20 mg');
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="0"]').click();
@@ -311,7 +339,8 @@ test('headings, date and navigation remain in consistent order across every sect
 test('save feedback is visible at button position for success, update and validation',async({page})=>{
  await page.locator('#sk').click();
  await expect(page.locator('#save-toast')).toBeVisible();
- await expect(page.locator('#save-toast')).toContainText('Not saved yet');
+ await expect(page.locator('#save-toast')).toContainText('Check-in saved on this device');
+ await expect(page.locator('#save-toast')).toContainText('7 unanswered');
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
  await page.locator('#sk').click();
