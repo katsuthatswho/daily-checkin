@@ -280,7 +280,8 @@ test('new-day notes carry forward visibly, remain editable, and never overwrite 
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
  await page.locator('#more-details').evaluate(el=>el.open=true);
  await page.locator('#quick-self').fill('Keep this in mind tomorrow');
- await page.locator('#tn').fill('Treatment context from yesterday');
+ await page.locator('#tn').evaluate(el=>el.closest('details').open=true);
+  await page.locator('#tn').fill('Treatment context from yesterday');
  await page.locator('#sk').click();
  await expect(page.locator('#save-toast')).toContainText('saved');
  const today=await page.evaluate(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
@@ -313,7 +314,8 @@ test('unsaved notes survive changing dates, reload and navigation',async({page})
  const yesterday=await page.evaluate(()=>{const d=new Date();d.setDate(d.getDate()-1);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
  await page.locator('#more-details').evaluate(el=>el.open=true);
  await page.locator('#quick-self').fill('Draft note must not disappear');
- await page.locator('#tn').fill('Medication context must persist');
+ await page.locator('#tn').evaluate(el=>el.closest('details').open=true);
+  await page.locator('#tn').fill('Medication context must persist');
  await page.locator('#entrydate').fill(yesterday);
  await page.locator('#entrydate').fill(today);
  await expect(page.locator('#quick-self')).toHaveValue('Draft note must not disappear');
