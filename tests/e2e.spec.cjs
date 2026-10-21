@@ -107,7 +107,7 @@ test('tabs have consistent hierarchy and partner progress updates',async({page})
  await expect(page.locator('#checkin-title')).toBeVisible();
  await page.locator('#pt').click();
  await expect(page.locator('#entrydate')).toHaveValue(/^\d{4}-\d{2}-\d{2}$/);
- await expect(page.locator('#partnerprogress')).toContainText('Choose what you noticed');
+ await expect(page.locator('#partnerprogress')).toContainText('Choose any observation');
  await expect(page.locator('#p .section-kicker')).toHaveCount(2);
  await page.locator('[data-g=start_obs] [data-v=Same]').click();
  await expect(page.locator('#partnerprogress')).toContainText('1 observations recorded');
@@ -554,9 +554,10 @@ test('usual medication is reusable with one explicit daily confirmation, never a
  await page.locator('[data-g=medtoday] [data-v=Yes]').click();
  await page.locator('#med').selectOption('Vyvanse (lisdexamfetamine)');
  await page.locator('#dose').selectOption({index:1});
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
  await expect(page.locator('#usual-med-taken')).toBeVisible();
  await page.reload();
- await expect(page.locator('[data-g="medtoday"] .sel')).toHaveCount(0);
+ await expect(page.locator('[data-g="medtoday"] [data-v="No"]')).toHaveClass(/sel/);
  await expect(page.locator('#usual-med-summary')).toContainText('Vyvanse');
  await page.locator('#usual-med-taken').click();
  await expect(page.locator('[data-g="medtoday"] [data-v="Yes"]')).toHaveClass(/sel/);
