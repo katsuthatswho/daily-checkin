@@ -1,7 +1,7 @@
 const {test,expect}=require('@playwright/test');
 const path=require('path');
 test.use({viewport:{width:375,height:812},isMobile:true,hasTouch:true,serviceWorkers:'allow'});
-test.beforeEach(async({page})=>{await page.goto('http://127.0.0.1:8765/');await page.evaluate(()=>localStorage.clear());await page.reload();await page.locator('#k > .quick-capture').evaluate(el=>el.open=true);});
+test.beforeEach(async({page})=>{await page.goto('http://127.0.0.1:8765/');await page.evaluate(()=>localStorage.clear());await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});await page.locator('#k > .quick-capture').evaluate(el=>el.open=true);});
 
 
 
@@ -335,7 +335,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
  await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
  await page.locator('#it').click();
  await expect(page.locator('#insight-body')).toContainText('1');
- await expect(page.locator('#journal-list')).toHaveCount(0); // Raw note belongs in Journal, not Patterns
+ await expect(page.locator('#insight-body')).not.toContainText('<img src=x'); // Raw note belongs in Journal, not Patterns
  await expect(page.locator('#insight-body img')).toHaveCount(0);
  await page.locator('[data-period="7"]').click();
  const result=await page.evaluate(()=>insightFacts());
