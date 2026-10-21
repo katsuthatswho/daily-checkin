@@ -347,7 +347,7 @@ $('#medtime-quick').addEventListener('change',()=>{syncMedTime();scheduleDraft()
 function loadSelectedDate(){
  $$('[data-g] .c.sel,#wins .sel,#drops .sel,#effects .sel').forEach(b=>b.classList.remove('sel'));
  ['#medtime','#tn','#kn','#droptime','#pn','#appetite','#lifequality','#quick-self','#quick-partner'].forEach(id=>$(id).value='');
- $('#medtime-quick').value='';$('#medtime').classList.add('hide');$('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;$('#quick-self-status').replaceChildren();$('#quick-partner-status').replaceChildren();$('#k details.card,#k details.treatment-extra').forEach(el=>el.open=false);['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
+ $('#medtime-quick').value='';$('#medtime').classList.add('hide');$('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;$('#quick-self-status').replaceChildren();$('#quick-partner-status').replaceChildren();$$('#k details.card,#k details.treatment-extra').forEach(el=>el.open=false);['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
  const mine=get(K,[]).find(r=>r.date===selectedDay());
  if(mine){
   if(mine.life_quality||mine.appetite||mine.life_outside_work?.length||mine.work_crowding||mine.dropoff||mine.side_effect_severity||mine.treatment_notes)$('#more-details').open=true;
