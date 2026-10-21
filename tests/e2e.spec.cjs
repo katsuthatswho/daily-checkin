@@ -20,7 +20,7 @@ test('partial save names missing medication, preserves entry and still permits c
  await expect(page.locator('#ke')).toBeHidden();
  await expect(page.locator('.completion-track')).toHaveAttribute('aria-valuenow','7');
  await page.locator('#sk').click();
- await expect(page.locator('#ko')).toContainText('Saved');
+ await expect(page.locator('#ko')).toContainText('Check-in updated');
  const data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
  expect(data).toHaveLength(1);expect(data[0].medication_today).toBe('No');
 });
