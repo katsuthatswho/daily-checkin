@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v76');
+ expect(result.keys).toContain('daily-checkin-offline-v77');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -546,4 +546,17 @@ test('primary product navigation works after startup, date changes and reload',a
  await page.locator('#jt').click();
  await expect(page.locator('#journal-view')).toBeVisible();
  expect(errors).toEqual([]);
+});
+
+test('usual medication is reusable with one explicit daily confirmation, never auto-recorded',async({page})=>{
+ await page.locator('#med').selectOption('Vyvanse (lisdexamfetamine)');
+ await page.locator('#dose').selectOption({index:1});
+ await expect(page.locator('#usual-med-taken')).toBeVisible();
+ await page.reload();
+ await expect(page.locator('[data-g="medtoday"] .sel')).toHaveCount(0);
+ await expect(page.locator('#usual-med-summary')).toContainText('Vyvanse');
+ await page.locator('#usual-med-taken').click();
+ await expect(page.locator('[data-g="medtoday"] [data-v="Yes"]')).toHaveClass(/sel/);
+ await expect(page.locator('#med')).toHaveValue('Vyvanse (lisdexamfetamine)');
+ await expect(page.locator('#dose')).not.toHaveValue('');
 });
