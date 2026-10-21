@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v71');
+ expect(result.keys).toContain('daily-checkin-offline-v72');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -502,4 +502,25 @@ test('saved self entry does not overwrite an unfinished partner draft',async({pa
  await page.locator('#sk').click();
  await page.reload();await page.locator('#pt').click();
  await expect(page.locator('#quick-partner')).toHaveValue('Partner observation still in progress');
+});
+
+test('editing visible note after review is the text actually saved',async({page})=>{
+ await page.locator('#quick-self').fill('First version');
+ await page.locator('#quick-self-apply').click();
+ await page.locator('#quick-self').fill('Corrected version');
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#sk').click();await page.reload();
+ await expect(page.locator('#quick-self')).toHaveValue('Corrected version');
+ const entries=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')||'[]'));
+ expect(entries[0].note).toBe('Corrected version');
+});
+test('reviewing partner note repeatedly never duplicates the note',async({page})=>{
+ await page.locator('#pt').click();
+ await page.locator('#quick-partner').fill('A calm afternoon');
+ await page.locator('#quick-partner-apply').click();
+ await page.locator('#quick-partner-apply').click();
+ await expect(page.locator('#pn')).toHaveValue('A calm afternoon');
+ await page.locator('#sp').click();await page.reload();await page.locator('#pt').click();
+ await expect(page.locator('#pn')).toHaveValue('A calm afternoon');
 });
