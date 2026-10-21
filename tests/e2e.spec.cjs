@@ -56,7 +56,7 @@ test('saved answers restore after reload and can be corrected without re-enterin
  await expect(page.locator('#quick-self')).toHaveValue('Remember this');
  await page.locator('[data-g=start] [data-v="4"]').click();await page.locator('#sk').click();
  let mine=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(mine).toHaveLength(1);expect(mine[0].getting_started).toBe('4');
- await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#pn').fill('Partner note');await page.locator('#sp').click();await page.reload();await page.locator('#pt').click();
+ await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#quick-partner').fill('Partner note');await page.locator('#sp').click();await page.reload();await page.locator('#pt').click();
  await expect(page.locator('[data-g=start_obs] [data-v=Same]')).toHaveClass(/sel/);await expect(page.locator('#pn')).toHaveValue('Partner note');
 });
 test('mobile options remain on one row at multiple widths',async({page})=>{
@@ -139,7 +139,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
  await page.locator('#sk').click();
  await page.locator('#pt').click();
  await page.locator('[data-g=start_obs] [data-v=Same]').click();
- await page.locator('#pn').fill('Partner observation');
+ await page.locator('#quick-partner').fill('Partner observation');
  await page.locator('#sp').click();
  const journal=await page.evaluate(()=>journalMarkdown(journalRows()));
  const date=await page.locator('#entrydate').inputValue();
@@ -391,7 +391,7 @@ test('optional life quality and appetite survive draft, save and clinician repor
 
 test('saving self check-in retains unfinished partner note and observation',async({page})=>{
  await page.locator('#pt').click();
- await page.locator('#pn').fill('Unfinished partner perspective');
+ await page.locator('#quick-partner').fill('Unfinished partner perspective');
  await page.locator('[data-g=start_obs] [data-v="A little better"]').click();
  await page.locator('#kt').click();
  for(const group of ['start','attention','sidequests','finish','switching','regulation']){
