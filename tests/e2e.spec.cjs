@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v67');
+ expect(result.keys).toContain('daily-checkin-offline-v68');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -265,7 +265,7 @@ test('ADHD-friendly short form, optional details, sticky save and pencil icon',a
  await expect(page.locator('#progress')).toContainText('Ready to save');
  await page.locator('#sk').click();await expect(page.locator('#save-toast')).toContainText('Check-in saved');
  await page.reload();await expect(page.locator('#progress')).toContainText('Ready to save');
- await page.locator('#more-details > summary').click();await expect(page.locator('#kn')).toBeVisible();
+ await page.locator('#more-details > summary').click();await page.locator('#kn').evaluate(el=>el.closest('details').open=true);await expect(page.locator('#kn')).toBeVisible();
  await page.locator('#kn').fill('Optional entry');await page.locator('#sk').click();
  await page.reload();await expect(page.locator('#more-details')).toHaveAttribute('open','');
  await expect(page.locator('#kn')).toHaveValue('Optional entry');
@@ -478,4 +478,16 @@ test('unsent daily note survives reload and is not lost by tab navigation',async
  await page.locator('#wt').click();await page.locator('#kt').click();
  await page.reload();
  await expect(page.locator('#quick-self')).toHaveValue('Unfinished private thought');
+});
+
+test('primary daily note remains visible after reviewing and can be edited',async({page})=>{
+ const field=page.locator('#quick-self');
+ await expect(field).toBeVisible();
+ await field.fill('Slept well and stayed focused');
+ await page.locator('#quick-self-apply').click();
+ await expect(field).toHaveValue('Slept well and stayed focused');
+ await expect(page.locator('#kn')).toHaveValue('Slept well and stayed focused');
+ await field.fill('Slept well, then lost focus');
+ await page.locator('#quick-self-apply').click();
+ await expect(page.locator('#kn')).toHaveValue('Slept well, then lost focus');
 });
