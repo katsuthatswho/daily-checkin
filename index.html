@@ -324,7 +324,7 @@ function clearDraftFor(date,who){
   const groups=Object.fromEntries(Object.entries(draft.groups||{}).filter(([g,v])=>keepGroup(g)&&v));
   const fields=Object.fromEntries(Object.entries(draft.fields||{}).filter(([id,v])=>keepField(id)&&v));
   const multi=who==='self'?{}:Object.fromEntries(Object.entries(draft.multi||{}).filter(([,v])=>Array.isArray(v)&&v.length));
-  if(Object.keys(groups).length||Object.keys(fields).length||Object.keys(multi).length)all[date]={groups,fields,multi,details:who==='partner'&&draft.details,updated:draft.updated};
+  if(Object.keys(groups).length||Object.keys(fields).length||Object.keys(multi).length)all[date]={groups,fields,multi,details:who==='partner'&&draft.details,updated:new Date().toISOString()};
   else delete all[date];
  }
  try{set(DRAFT_KEY,all);$('#draft-status').textContent=all[date]?'Other unfinished answers kept on this device':'Check-in saved'}catch(e){$('#draft-status').textContent='Saved check-in; unfinished answers could not be stored'}
