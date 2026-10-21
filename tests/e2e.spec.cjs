@@ -13,9 +13,8 @@ test('partial save names missing medication, preserves entry and still permits c
  await expect(page.locator('#ko')).toContainText('Saved');
  let initial=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
  expect(initial).toHaveLength(1);expect(initial[0].medication_today).toBe('Not recorded');expect(initial[0].getting_started).toBe('2');
- await expect(page.locator('[data-g=medtoday]').locator('xpath=..')).toHaveClass(/needs-answer/);
- await expect(page.locator('[data-g=medtoday] .c').first()).toBeFocused();
  await page.locator('#ke .missing-jump').click();
+ await expect(page.locator('[data-g=medtoday]').locator('xpath=..')).toHaveClass(/needs-answer/);
  await expect(page.locator('[data-g=medtoday] .c').first()).toBeFocused();
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  await expect(page.locator('#ke')).toBeHidden();
@@ -345,7 +344,7 @@ test('save feedback is visible at button position for success, update and valida
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
  await page.locator('#sk').click();
  await expect(page.locator('#save-toast')).toBeVisible();
- await expect(page.locator('#save-toast')).toContainText('Check-in saved on this device');
+ await expect(page.locator('#save-toast')).toContainText('Check-in updated on this device');
  await page.locator('#sk').click();
  await expect(page.locator('#save-toast')).toContainText('Check-in updated');
  await page.locator('#pt').click();
