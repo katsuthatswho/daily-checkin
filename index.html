@@ -287,15 +287,33 @@ function captureDraft(){return {groups:Object.fromEntries(draftGroups.map(g=>[g,
 function draftHasContent(d){return Object.values(d.groups).some(Boolean)||Object.values(d.fields).some(Boolean)||Object.values(d.multi).some(v=>v.length)}
 function saveDraftNow(){if(draftRestoring||!loadedDraftDate||!draftDirty)return;clearTimeout(draftTimer);const d=captureDraft(),all=get(DRAFT_KEY,{});if(draftHasContent(d))all[loadedDraftDate]=d;else delete all[loadedDraftDate];try{set(DRAFT_KEY,all);draftDirty=false;$('#draft-status').textContent=draftHasContent(d)?'Draft kept on this device':'No unsaved draft'}catch(e){$('#draft-status').textContent='Draft not stored. Save your check-in before leaving.'}}
 function scheduleDraft(){if(draftRestoring)return;draftDirty=true;saveDraftNow()}
-function restoreDraft(date){const d=get(DRAFT_KEY,{})[date];if(!d)return false;const saved=[...get(K,[]),...get(P,[])].filter(r=>r.date===date).map(r=>Date.parse(r.timestamp)||0);if(saved.length&&Date.parse(d.updated)<Math.max(...saved))return false;draftRestoring=true;try{
- Object.entries(d.groups||{}).forEach(([g,v])=>{if(v){$$('[data-g="'+g+'"] .c').forEach(b=>b.classList.toggle('sel',b.dataset.v===String(v)))}});
- Object.entries(d.fields||{}).forEach(([id,v])=>{const el=$('#'+id);if(el&&v!==''&&v!=null)el.value=v});
- Object.entries(d.multi||{}).forEach(([id,v])=>restoreMulti('#'+id,v));
- if(d.details)$('#more-details').open=true;
- restoreMedTime();toggleMedication();toggleDropoff();toggleEffects();progress();
- $('#draft-status').textContent='Unsaved draft restored · '+new Date(d.updated).toLocaleString();
- return true
- }finally{draftRestoring=false}}
+function restoreDraft(date){
+ const d=get(DRAFT_KEY,{})[date];if(!d)return false;
+ const mine=get(K,[]).find(r=>r.date===date),partner=get(P,[]).find(r=>r.date===date);
+ const newer=(record)=>record&&Date.parse(record.timestamp||'')>=Date.parse(d.updated||'');
+ const selfGroups=new Set(['medtoday','sleep','start','attention','sidequests','finish','switching','regulation','crowd','dropoff','side']);
+ const partnerGroups=new Set(['self',...qs.map(([g])=>g)]);
+ const selfFields=new Set(['medtime','tn','kn','droptime','appetite','lifequality','quick-self']);
+ const partnerFields=new Set(['pn','quick-partner']);
+ const selfStale=newer(mine),partnerStale=newer(partner);
+ draftRestoring=true;
+ try{
+  Object.entries(d.groups||{}).forEach(([g,v])=>{
+   if(!v||(selfStale&&selfGroups.has(g))||(partnerStale&&partnerGroups.has(g)))return;
+   $$('[data-g="'+g+'"] .c').forEach(b=>b.classList.toggle('sel',b.dataset.v===String(v)));
+  });
+  Object.entries(d.fields||{}).forEach(([id,v])=>{
+   if((selfStale&&selfFields.has(id))||(partnerStale&&partnerFields.has(id)))return;
+   const el=$('#'+id);if(el&&v!==''&&v!=null)el.value=v;
+  });
+  Object.entries(d.multi||{}).forEach(([id,v])=>{if(!selfStale)restoreMulti('#'+id,v)});
+  if(d.details&&!selfStale)$('#more-details').open=true;
+  if($('#quick-self').value&&!$('#kn').value)$('#kn').value=$('#quick-self').value;
+  restoreMedTime();toggleMedication();toggleDropoff();toggleEffects();progress();
+  $('#draft-status').textContent='Unfinished answers restored on this device';
+  return true;
+ }finally{draftRestoring=false}
+}
 function clearDraftFor(date,who){
  clearTimeout(draftTimer);draftDirty=false;
  const all=get(DRAFT_KEY,{}),draft=all[date];
@@ -329,7 +347,7 @@ $('#medtime-quick').addEventListener('change',()=>{syncMedTime();scheduleDraft()
 function loadSelectedDate(){
  $$('[data-g] .c.sel,#wins .sel,#drops .sel,#effects .sel').forEach(b=>b.classList.remove('sel'));
  ['#medtime','#tn','#kn','#droptime','#pn','#appetite','#lifequality','#quick-self','#quick-partner'].forEach(id=>$(id).value='');
- $('#medtime-quick').value='';$('#medtime').classList.add('hide');$('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;$('#quick-self-status').replaceChildren();$('#quick-partner-status').replaceChildren();['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
+ $('#medtime-quick').value='';$('#medtime').classList.add('hide');$('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;$('#quick-self-status').replaceChildren();$('#quick-partner-status').replaceChildren();$('#k details.card,#k details.treatment-extra').forEach(el=>el.open=false);['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
  const mine=get(K,[]).find(r=>r.date===selectedDay());
  if(mine){
   if(mine.life_quality||mine.appetite||mine.life_outside_work?.length||mine.work_crowding||mine.dropoff||mine.side_effect_severity||mine.treatment_notes)$('#more-details').open=true;
