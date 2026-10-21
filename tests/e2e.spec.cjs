@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v70');
+ expect(result.keys).toContain('daily-checkin-offline-v71');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -287,9 +287,10 @@ test('new-day notes carry forward visibly, remain editable, and never overwrite 
  const today=await page.evaluate(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
  await page.locator('#entrydate').fill(today);
  await expect(page.locator('#personal-carry')).toBeVisible();
- await expect(page.locator('#kn')).toHaveValue('Keep this in mind tomorrow');
- await expect(page.locator('#tn')).toHaveValue('Treatment context from yesterday');
- await page.locator('#personal-carry .carry-clear').click();
+ await expect(page.locator('#kn')).toHaveValue('');
+ await expect(page.locator('#tn')).toHaveValue('');
+ await expect(page.locator('#personal-carry')).toContainText('Keep this in mind tomorrow');
+ await expect(page.locator('#treatment-carry')).toContainText('Treatment context from yesterday');
  await expect(page.locator('#kn')).toHaveValue('');
  await page.locator('#entrydate').fill(yesterday);
  await expect(page.locator('#kn')).toHaveValue('Keep this in mind tomorrow');
