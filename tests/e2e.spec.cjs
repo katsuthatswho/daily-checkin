@@ -335,7 +335,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
  await page.locator('#pt').click();await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();
  await page.locator('#it').click();
  await expect(page.locator('#insight-body')).toContainText('1');
- await expect(page.locator('#insight-body')).toContainText('<img src=x');
+ await expect(page.locator('#journal-list')).toHaveCount(0); // Raw note belongs in Journal, not Patterns
  await expect(page.locator('#insight-body img')).toHaveCount(0);
  await page.locator('[data-period="7"]').click();
  const result=await page.evaluate(()=>insightFacts());
@@ -445,10 +445,11 @@ test('Insights gives all six dimensions, trend marks and original dated notes',a
  await page.locator('#quick-self').fill('A distinct original observation');
  await page.locator('#sk').click();
  await page.locator('#it').click();
- await expect(page.locator('.insight-dim')).toHaveCount(6);
+ await expect(page.locator('.insight-dim')).toHaveCount(0);
  await expect(page.locator('.trend-row')).toHaveCount(6);
  await expect(page.locator('.trend-dot')).toHaveCount(6);
- await expect(page.locator('#insight-body')).toContainText('A distinct original observation');
+ await expect(page.locator('#insight-body')).not.toContainText('A distinct original observation');
+ await page.locator('#jt').click();await expect(page.locator('#journal-list')).toContainText('A distinct original observation');
  await expect(page.locator('#insight-body')).toContainText('not a diagnosis');
 });
 
