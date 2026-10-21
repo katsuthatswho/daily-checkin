@@ -3,6 +3,25 @@ const path=require('path');
 test.use({viewport:{width:375,height:812},isMobile:true,hasTouch:true,serviceWorkers:'allow'});
 test.beforeEach(async({page})=>{await page.goto('http://127.0.0.1:8765/');await page.evaluate(()=>localStorage.clear());await page.reload();await page.locator('#k > .quick-capture').evaluate(el=>el.open=true);});
 
+
+test('day navigation and progress preserve dated entries',async({page})=>{
+ await expect(page.locator('#next-day')).toBeDisabled();
+ const today=await page.locator('#entrydate').inputValue();
+ await page.locator('#previous-day').click();
+ const yesterday=await page.locator('#entrydate').inputValue();
+ expect(yesterday).not.toBe(today);
+ await expect(page.locator('#next-day')).toBeEnabled();
+ await page.locator('[data-g=medtoday] [data-v=No]').click();
+ await expect(page.locator('.completion-track')).toHaveAttribute('aria-valuenow','1');
+ await page.locator('#sk').click();
+ await page.locator('#next-day').click();
+ await expect(page.locator('#entrydate')).toHaveValue(today);
+ await expect(page.locator('.completion-track')).toHaveAttribute('aria-valuenow','0');
+ await page.locator('#previous-day').click();
+ await expect(page.locator('[data-g=medtoday] [data-v=No]')).toHaveClass(/sel/);
+ await expect(page.locator('.completion-track')).toHaveAttribute('aria-valuenow','1');
+ await page.screenshot({path:'test-results/ritual-checkin-dated.png',fullPage:true});
+});
 test('mobile product screenshots and first-screen hierarchy for every tab',async({page})=>{
  const capture=page.locator('#k > .quick-capture');
  await capture.evaluate(el=>el.open=false);
