@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v66');
+ expect(result.keys).toContain('daily-checkin-offline-v67');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -458,7 +458,24 @@ test('four destinations keep check-in, strategies, insights and records distinct
 });
 
 test('quick notes require explicit save and keep partner and self separate',async({page})=>{
- await page.locator('#quick-self').fill('Started one small task');await page.locator('#quick-self-apply').click();await expect(page.locator('#kn')).toHaveValue('Started one small task');await expect(page.locator('#quick-self-status')).toContainText('unsaved draft');
+ await page.locator('#quick-self').fill('Started one small task');await page.locator('#quick-self-apply').click();await expect(page.locator('#kn')).toHaveValue('Started one small task');await expect(page.locator('#quick-self-status')).toContainText('Original note kept in your draft');
  await page.locator('#pt').click();await page.locator('#quick-partner').fill('Seemed more settled');await page.locator('#quick-partner-apply').click();await expect(page.locator('#pn')).toHaveValue('Seemed more settled');
  await expect(page.locator('#kn')).toHaveValue('Started one small task');
+});
+
+test('saving directly from daily note preserves original words',async({page})=>{
+ await page.locator('#quick-self').fill('Took Vyvanse and slept well. Started easily.');
+ await page.locator('[data-g=medtoday] [data-v=Yes]').click();
+ for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
+ await page.locator('#sk').click();
+ await page.reload();
+ await expect(page.locator('#kn')).toHaveValue('Took Vyvanse and slept well. Started easily.');
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')||'[]'));
+ expect(saved.some(x=>x.note==='Took Vyvanse and slept well. Started easily.')).toBe(true);
+});
+test('unsent daily note survives reload and is not lost by tab navigation',async({page})=>{
+ await page.locator('#quick-self').fill('Unfinished private thought');
+ await page.locator('#wt').click();await page.locator('#kt').click();
+ await page.reload();
+ await expect(page.locator('#quick-self')).toHaveValue('Unfinished private thought');
 });
