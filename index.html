@@ -361,10 +361,11 @@ function render(){
  $('#kh').innerHTML=k.length?k.map(r=>'<div class="hist"><b>'+htmlSafe(r.date)+'</b> · '+htmlSafe(r.medication_today==='Yes'?(r.medication||'Medication'):'No medication')+'<br><span class="muted">Start '+frac(r.getting_started)+' · Attention '+frac(r.attention_control)+' · Side quests '+frac(r.side_quest_control)+' · Finish '+frac(r.finishing)+'</span></div>').join(''):'<p class="muted">No entries yet.</p>';
  let p=get(P,[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,7);$('#ph').innerHTML=p.length?p.map(r=>'<div class="hist"><b>'+htmlSafe(r.date)+'</b><br><span class="muted">Start: '+htmlSafe(r.start_obs||'—')+' · Finish: '+htmlSafe(r.finish_obs||'—')+' · Life: '+htmlSafe(r.life_obs||'—')+' · Themselves: '+htmlSafe(r.still_themselves||r.still_herself||'—')+'</span></div>').join(''):'<p class="muted">No entries yet.</p>'
 }
+const dated=r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date||'');
 render();
 
 let activeView='k',insightPeriod='30',journalFilter='both';
-const dated=r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date||'');
+
 function periodRows(rows){const all=rows.filter(dated).slice().sort((a,b)=>a.date.localeCompare(b.date));if(insightPeriod==='all')return all;const d=new Date(localDay()+'T12:00:00');d.setDate(d.getDate()-Number(insightPeriod)+1);const floor=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');return all.filter(r=>r.date>=floor&&r.date<=localDay())}
 function insightData(){const mine=periodRows(get(K,[])),partner=periodRows(get(P,[]));return {mine,partner,shared:mine.filter(m=>partner.some(p=>p.date===m.date))}}
 function scores(rows,key){return rows.map(r=>r[key]).filter(v=>v!==''&&v!==undefined&&v!==null&&Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=4).map(Number)}
