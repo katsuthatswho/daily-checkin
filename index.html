@@ -332,13 +332,13 @@ function loadSelectedDate(){
  $('#medtime-quick').value='';$('#medtime').classList.add('hide');$('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;$('#quick-self-status').replaceChildren();$('#quick-partner-status').replaceChildren();['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
  const mine=get(K,[]).find(r=>r.date===selectedDay());
  if(mine){
-  if(mine.life_quality||mine.appetite||mine.life_outside_work?.length||mine.work_crowding||mine.dropoff||mine.side_effect_severity||mine.note||mine.treatment_notes)$('#more-details').open=true;
+  if(mine.life_quality||mine.appetite||mine.life_outside_work?.length||mine.work_crowding||mine.dropoff||mine.side_effect_severity||mine.treatment_notes)$('#more-details').open=true;
   [['medtoday','medication_today'],['sleep','sleep'],['start','getting_started'],['attention','attention_control'],['sidequests','side_quest_control'],['finish','finishing'],['switching','switching'],['regulation','impulse_restlessness_control'],['crowd','work_crowding'],['dropoff','dropoff'],['side','side_effect_severity']].forEach(([g,k])=>restoreGroup(g,mine[k]));
   if(mine.medication&&doses[mine.medication]){$('#med').value=mine.medication;st.dose=mine.dose||'';fillDoses()}
   else{$('#med').value=st.medication||'';fillDoses()}
   $('#appetite').value=mine.appetite||'';$('#lifequality').value=mine.life_quality||'';$('#medtime').value=mine.time_taken||'';restoreMedTime();$('#tn').value=mine.treatment_notes||'';$('#kn').value=mine.note||'';$('#quick-self').value=mine.note||'';$('#droptime').value=mine.dropoff_time||'';
   restoreMulti('#wins',mine.life_outside_work);restoreMulti('#drops',mine.dropoff_changes);restoreMulti('#effects',mine.side_effects);
- }else{$('#med').value=st.medication||'';fillDoses();carryPrevious(get(K,[]),selectedDay(),'treatment_notes','#tn','#treatment-carry');carryPrevious(get(K,[]),selectedDay(),'note','#kn','#personal-carry');if($('#personal-carry').classList.contains('hide')===false)$('#more-details').open=true}
+ }else{$('#med').value=st.medication||'';fillDoses();carryPrevious(get(K,[]),selectedDay(),'treatment_notes','#tn','#treatment-carry');carryPrevious(get(K,[]),selectedDay(),'note','#kn','#personal-carry');}
  const partner=get(P,[]).find(r=>r.date===selectedDay());
  if(partner){qs.forEach(([g])=>restoreGroup(g,partner[g]));restoreGroup('self',partner.still_themselves||partner.still_herself);$('#pn').value=partner.note||''}else carryPrevious(get(P,[]),selectedDay(),'note','#pn','#partner-carry')
  toggleMedication();toggleDropoff();toggleEffects();progress();dateLabels();restoreDraft(selectedDay());draftDirty=false;
@@ -485,7 +485,6 @@ function previewQuick(source,target,status){
  const old=$(target).value.trim();
  $(target).value=partner?(old&&old!==note?old+'\n'+note:note):note;
  if(partner)$(source).value='';
- if(!partner)$('#more-details').open=true;
  toggleMedication();toggleEffects();progress();scheduleDraft();
  const missing=partner?[]:coreGroups.filter(g=>!val(g));const remaining=missing.length;
  const el=$(status);el.replaceChildren();
