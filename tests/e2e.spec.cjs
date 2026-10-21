@@ -94,7 +94,7 @@ test('service worker uses current cache and removes obsolete cache',async({page}
   return {keys,controlled:!!navigator.serviceWorker.controller};
  });
  expect(result.controlled).toBe(true);
- expect(result.keys).toContain('daily-checkin-offline-v74');
+ expect(result.keys).toContain('daily-checkin-offline-v75');
  // An existing worker only purges obsolete caches during activation, not each update check.
 });
 test('history escapes user-controlled HTML and does not execute it',async({page})=>{
@@ -515,4 +515,13 @@ test('reviewing partner note repeatedly never duplicates the note',async({page})
  await expect(page.locator('#pn')).toHaveValue('A calm afternoon');
  await page.locator('#sp').click();await page.reload();await page.locator('#pt').click();
  await expect(page.locator('#pn')).toHaveValue('A calm afternoon');
+});
+
+test('iOS shortcut references the dedicated PNG icon',async({page})=>{
+ const icon=page.locator('link[rel="apple-touch-icon"]');
+ await expect(icon).toHaveAttribute('href',/home-icon-2026\.png/);
+ const url=await icon.getAttribute('href');
+ const response=await page.request.get(url);
+ expect(response.ok()).toBeTruthy();
+ expect(response.headers()['content-type']).toContain('image/png');
 });
