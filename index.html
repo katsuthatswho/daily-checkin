@@ -59,6 +59,7 @@
 <div id="save-toast" class="save-toast hide" role="status" aria-live="polite" aria-atomic="true"></div><footer>Private to this browser. Entries don't sync between devices.</footer></main><script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='my_daily_v4',P='partner_weekly_v3',S='tracker_settings_v3';
+const EXP_KEY='daily_checkin_experiments_v1';
 const localDay=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 $('#entrydate').max=localDay();$('#entrydate').value=localDay();const selectedDay=()=>$('#entrydate').value;function dateLabels(){const d=selectedDay();$('#datehint').textContent=d===localDay()?'Today. You can also catch up on a past day.':'Viewing '+d+'. Existing answers will load if saved.'}dateLabels();
@@ -431,7 +432,7 @@ function renderInsights(){
  body+='<p class="insight-disclaimer">This is a descriptive record, not a diagnosis or treatment assessment. Missing entries are not zeros. For a full dated record, use Journal.</p>';
  $('#insight-body').innerHTML=body;
 }
-const EXP_KEY='daily_checkin_experiments_v1';
+
 const experimentOptions={
  start:{title:'Make starting easier',step:'Before you finish for the day, write down the first physical step for tomorrow. When it is time, do just that step for five minutes.'},
  switch:{title:'Make stopping easier',step:'Set a stopping time. Ten minutes before it, write down where to pick up again and choose one next action before you leave.'},
