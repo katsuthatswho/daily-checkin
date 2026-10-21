@@ -409,9 +409,13 @@ function renderInsights(){
     if(!values.length)return '<div class="trend-row"><div class="trend-label"><strong>'+htmlSafe(name)+'</strong><span>No answers</span></div></div>';
     const mean=values.reduce((sum,r)=>sum+r.v,0)/values.length;
     const range=values.length>1?'Range '+Math.min(...values.map(r=>r.v))+'–'+Math.max(...values.map(r=>r.v)):'One entry';
+    const recent=values.slice(-3),previous=values.slice(-6,-3);
+    const recentAvg=recent.reduce((sum,r)=>sum+r.v,0)/recent.length;
+    const previousAvg=previous.length?previous.reduce((sum,r)=>sum+r.v,0)/previous.length:null;
+    const shift=previousAvg===null?'Not enough entries to compare':recentAvg-previousAvg>=0.5?'Recent answers higher':previousAvg-recentAvg>=0.5?'Recent answers lower':'Recent answers similar';
     const bars=values.slice(-14).map(r=>'<span class="trend-dot" style="--score:'+r.v+'" title="'+htmlSafe(r.date)+': '+r.v+'/5"></span>').join('');
-    return '<div class="trend-row"><div class="trend-label"><strong>'+htmlSafe(name)+'</strong><span>'+mean.toFixed(1)+'/5 average · '+range+' · '+values.length+' days</span></div><div class="trend-dots" role="img" aria-label="'+htmlSafe(name)+': '+values.slice(-14).map(r=>r.date+' '+r.v+' of 5').join(', ')+'">'+bars+'</div></div>'
-  }).join('')+'</div><p class="insight-foot">Only the latest 14 answered dates are plotted per dimension. Averages describe recorded responses, not a clinical measure.</p></section>';
+    return '<div class="trend-row"><div class="trend-label"><strong>'+htmlSafe(name)+'</strong><span>'+mean.toFixed(1)+'/5 average · '+range+' · '+values.length+' days · '+shift</span></div><div class="trend-dots" role="img" aria-label="'+htmlSafe(name)+': '+values.slice(-14).map(r=>r.date+' '+r.v+' of 5').join(', ')+'">'+bars+'</div></div>'
+  }).join('')+'</div><p class="insight-foot">Each row uses the same 1–5 scale. The comparison uses the latest three answers versus the preceding three when available; higher means less difficulty. Only the latest 14 answered dates are shown. These are descriptive responses, not a clinical measure.</p></section>';
   const life=mine.filter(r=>r.life_quality);if(life.length){const good=life.filter(r=>['Good day','Really good day'].includes(r.life_quality)).length;body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">LIFE OUTSIDE THE SCORES</div><h2>How life felt</h2></div><p class="insight-muted">'+good+' of '+life.length+' answered days were described as good or really good. This is separate from productivity or symptom control.</p></section>'}
   const medication=mine.filter(r=>r.medication_today==='Yes').length;
   const notes=mine.filter(r=>r.note||r.treatment_notes);
