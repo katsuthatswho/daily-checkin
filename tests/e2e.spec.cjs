@@ -107,7 +107,7 @@ test('tabs have consistent hierarchy and partner progress updates',async({page})
  await expect(page.locator('#checkin-title')).toBeVisible();
  await page.locator('#pt').click();
  await expect(page.locator('#entrydate')).toHaveValue(/^\d{4}-\d{2}-\d{2}$/);
- await expect(page.locator('#partnerprogress')).toContainText('Choose any observation');
+ await expect(page.locator('#partnerprogress')).toContainText('Choose what you noticed');
  await expect(page.locator('#p .section-kicker')).toHaveCount(2);
  await page.locator('[data-g=start_obs] [data-v=Same]').click();
  await expect(page.locator('#partnerprogress')).toContainText('1 observations recorded');
@@ -211,7 +211,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
 });
 
 test('headings, date and navigation remain in consistent order across every section',async({page})=>{
- const states=[['k','How was your day?'],['p','What did you notice?'],['insights','What’s changing?'],['journal-view','Your journal.']];
+ const states=[['k','How was your day?'],['p','What did you notice?'],['insights','What’s changing?'],['journal-view','Your saved days.']];
  for(const [view,title] of states){
   if(view==='k')await page.locator('#kt').click();
   else if(view==='p'){await page.locator('#kt').click();await page.locator('#pt').click()}
@@ -253,7 +253,7 @@ test('save feedback is visible at button position for success, update and valida
  await expect(page.locator('#save-toast')).toContainText('Partner check-in saved');
 });
 
-test('iOS home screen icon is PNG and manifest references real PNG',async({page,request})=>{const icon=await request.get('http://127.0.0.1:8765/apple-touch-icon.png');expect(icon.ok()).toBeTruthy();expect(icon.headers()['content-type']).toContain('image/png');const bytes=await icon.body();expect(bytes.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',/apple-touch-icon.png/);const manifest=await (await request.get('http://127.0.0.1:8765/manifest.webmanifest')).json();expect(manifest.icons.some(x=>x.type==='image/png')).toBe(true)});
+test('iOS home screen icon is PNG and manifest references real PNG',async({page,request})=>{const icon=await request.get('http://127.0.0.1:8765/apple-touch-icon.png');expect(icon.ok()).toBeTruthy();expect(icon.headers()['content-type']).toContain('image/png');const bytes=await icon.body();expect(bytes.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',/home-icon-2026.png/);const manifest=await (await request.get('http://127.0.0.1:8765/manifest.webmanifest')).json();expect(manifest.icons.some(x=>x.type==='image/png')).toBe(true)});
 
 test('ADHD-friendly short form, optional details, sticky save and pencil icon',async({page,request})=>{
  await expect(page.locator('#more-details')).not.toHaveAttribute('open','');
@@ -549,6 +549,7 @@ test('primary product navigation works after startup, date changes and reload',a
 });
 
 test('usual medication is reusable with one explicit daily confirmation, never auto-recorded',async({page})=>{
+ await page.locator('[data-g=medtoday] [data-v=Yes]').click();
  await page.locator('#med').selectOption('Vyvanse (lisdexamfetamine)');
  await page.locator('#dose').selectOption({index:1});
  await expect(page.locator('#usual-med-taken')).toBeVisible();
