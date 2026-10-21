@@ -59,6 +59,46 @@ test('a medication time is optional and a partial observation survives reload',a
  expect(updated[0].time_taken).toBe('08:30');
  expect(updated[0].note).toContain('dog park');
 });
+
+test('restore preview imports copied Markdown while keeping existing dates',async({page})=>{
+ const text='# Personal ADHD treatment check-ins\n\n## 2026-10-19\n**Medication:** Vyvanse (lisdexamfetamine) · 20 mg · taken at 09:30\n**Sleep quality:** Great\n\n**Daily functioning**\n- Getting started: 4/5\n- Attention control: 3/5\n- Following through: 2/5\n**Life outside work:** Dog park, Exercise\n\n**Tolerability**\n- Appetite and meals: Ate as usual\n- Side-effect severity: Mild\n- Side effects: Dry mouth / thirst\n**Other observations:** Went to the dog park\n\n---\n\n## 2026-10-20\n**Medication:** Not taken\n**Sleep quality:** Poor\n- Getting started: 2/5\n**Other observations:** Hard night';
+ await page.locator('#jt').click();
+ await page.locator('#restore-panel > summary').click();
+ await page.locator('#restore-paste').fill(text);
+ await page.locator('#restore-preview').click();
+ await expect(page.locator('#restore-preview-result')).toContainText('2 new');
+ await page.locator('#restore-apply').click();
+ let data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(data).toHaveLength(2);
+ expect(data.find(x=>x.date==='2026-10-19').getting_started).toBe('3');
+ expect(data.find(x=>x.date==='2026-10-19').life_outside_work).toContain('Dog park');
+ expect(data.find(x=>x.date==='2026-10-19').note).toContain('dog park');
+ expect(data.find(x=>x.date==='2026-10-20').medication_today).toBe('No');
+ await page.locator('#restore-preview').click();
+ await expect(page.locator('#restore-preview-result')).toContainText('2 already saved');
+ await page.locator('#restore-apply').click();
+ data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(data).toHaveLength(2);
+ await page.reload();
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-list')).toContainText('2026-10-19');
+});
+test('restoring plain clinician report does not duplicate dates or discard notes',async({page})=>{
+ const text='DAILY CHECK-IN — REPORT FOR CLINICIAN\nGenerated: 2026-10-22\n\nDATED RECORDS\n\nPersonal ADHD treatment check-ins\n\n2026-10-19\nMedication: Vyvanse (lisdexamfetamine) · 20 mg · taken at 09:30\nSleep quality: Great\n\nDaily functioning\n- Getting started: 4/5\n- Attention control: 4/5\nOther observations: Slept less than six hours\n\n────────────────────\n\n2026-10-20\nMedication: Not taken\nSleep quality: Poor\n- Getting started: 2/5\nOther observations: Dog park\n\nPartner observations\nNo entries yet.';
+ await page.locator('#jt').click();await page.locator('#restore-panel > summary').click();
+ await page.locator('#restore-paste').fill(text);await page.locator('#restore-preview').click();
+ await expect(page.locator('#restore-preview-result')).toContainText('2 new');
+ await page.locator('#restore-apply').click();
+ const rows=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(rows).toHaveLength(2);expect(rows[0].note).toContain('Slept less than six hours');
+ expect(rows[1].note).toBe('Dog park');
+});
+test('patterns omit duplicated latest-answer and note sections',async({page})=>{
+ await page.locator('#it').click();
+ await expect(page.locator('#insight-body')).not.toContainText('Where you left off');
+ await expect(page.locator('#insight-body')).not.toContainText('Notes worth revisiting');
+});
+
 test('day navigation and progress preserve dated entries',async({page})=>{
  await expect(page.locator('#next-day')).toBeDisabled();
  const today=await page.locator('#entrydate').inputValue();
