@@ -77,10 +77,68 @@
  .quick-capture textarea{min-height:85px;height:85px;margin-top:7px}
  .quick-capture .secondary{min-height:40px;padding:8px;margin-top:6px;font-size:12px}
 }
+
+/* Product design system v5: compact mobile-first hierarchy across all views */
+:root{--page:#f8faf8;--ink:#202e2a;--muted:#64736e;--line:#e1e8e3;--accent:#24654e;--tint:#eaf2ec}
+@media(max-width:600px){
+ body{background:var(--page)}
+ .w{padding:0 18px calc(88px + env(safe-area-inset-bottom,0px));max-width:540px}
+ .app-head{margin:0 -18px 0;padding:13px 18px 9px;gap:8px;min-height:49px}
+ .app-mark{width:25px;height:25px;border-radius:8px;font-size:15px;background:#e8eee8;color:#32664f}
+ .app-name{font-size:12px;font-weight:750;letter-spacing:.01em;color:#61716a}
+ .tabs{margin:0 -18px 20px;padding:0 18px;gap:12px;border:0;border-bottom:1px solid var(--line);background:transparent;border-radius:0}
+ .tabs button{min-height:43px;padding:10px 2px;font-size:13px;font-weight:650;box-shadow:none!important;border:0;border-radius:0;background:transparent!important}
+ .tabs button.on{color:var(--accent);box-shadow:inset 0 -2px var(--accent)!important}
+ #checkin-head{margin:0}
+ #checkin-head h1,#insights h1,#journal-view h1{font-size:clamp(25px,6.7vw,29px);letter-spacing:-.045em;line-height:1.15;margin:0 0 13px}
+ .checkin-switch{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;background:#e9efea;border:0;border-radius:11px;margin:0 0 10px}
+ .checkin-switch button{min-height:41px;padding:7px 3px;font-size:12px;line-height:1.2;border:0!important;border-radius:9px;box-shadow:none!important}
+ .checkin-switch button.on{background:#fff;color:var(--accent);box-shadow:0 1px 4px #173c2710!important}
+ .date-control{display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-bottom:1px solid var(--line);margin:0 0 10px;padding:0 0 10px}
+ .date-control .label{margin:0;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+ .date-control input{width:auto;max-width:190px;min-height:37px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 8px;font-size:14px;text-align:center}
+ .date-control .hint{display:none}
+ #progress,#partnerprogress{font-size:12px;line-height:1.4;margin:0 0 8px!important;font-weight:650}
+ #draft-status:empty{display:none}
+ .quick-capture{border:1px solid var(--line);border-radius:11px;background:#fff;margin:0 0 8px;padding:0;box-shadow:none}
+ .quick-capture summary{display:flex;align-items:center;justify-content:space-between;min-height:43px;padding:9px 12px;font-size:13px;font-weight:700;color:var(--accent);list-style:none;cursor:pointer}
+ .quick-capture summary::-webkit-details-marker{display:none}
+ .quick-capture .capture-chevron{font-size:20px;line-height:1;font-weight:400}
+ .quick-capture[open] .capture-chevron{transform:rotate(45deg)}
+ .quick-capture>p,.quick-capture>textarea,.quick-capture>button,.quick-capture>div{margin-left:12px!important;margin-right:12px!important;width:calc(100% - 24px)}
+ .quick-capture .hint{font-size:12px;margin-top:0;margin-bottom:7px}
+ .quick-capture textarea{height:95px;min-height:95px;padding:10px}
+ .quick-capture .secondary{min-height:41px;margin-top:7px}
+ .quick-capture>div:last-child{margin-bottom:12px}
+ #k>.card,#p>.card{padding:14px 0;border-bottom:1px solid var(--line);margin:0}
+ #k>.card .label,#p>.card .label{font-size:15px;font-weight:750;margin-bottom:9px;line-height:1.3}
+ #k .row[data-g=medtoday] .c,#k .row[data-g=dropoff] .c{min-height:43px}
+ .c{border-radius:10px;font-size:13px}
+ .row[data-g=sleep] .c{min-height:43px;font-size:clamp(10px,2.9vw,13px)}
+ #k .section-kicker,#p .section-kicker{margin:21px 0 3px;font-size:10px}
+ #k .scale5,#p .partner-scale{border-radius:12px}
+ #k .scale5 .c,#p .partner-scale .c{min-height:43px}
+ #insights>.eyebrow,#journal-view>.eyebrow{display:none}
+ #insights>.sub,#journal-view>.sub{font-size:12px;line-height:1.5;margin:0 0 13px}
+ .periods{margin:10px 0 14px;gap:5px}
+ .periods button{min-height:40px;padding:8px 9px;font-size:12px;border-radius:9px}
+ .insight-lead{margin:12px 0 17px;padding:15px;border-radius:14px}
+ .insight-lead-grid strong{font-size:24px}
+ .insight-section{padding:16px 0}
+ .insight-card{padding:15px;margin:10px 0;border-radius:13px}
+ .insight-card h2{font-size:18px}
+ .journal-heading{margin:17px 0 8px;padding-bottom:8px}
+ .journal-heading:first-of-type{margin-top:13px}
+ .journal-item{margin:8px 0;padding:12px;border-radius:11px}
+ .journal-panel{padding:12px!important;border-radius:12px}
+ .optional-panel{margin:16px 0 10px}
+ .optional-panel>summary{min-height:57px;padding:12px 14px}
+ .save{min-height:49px}
+}
 </style></head><body><main class="w"><header class="app-head"><div class="app-mark" aria-hidden="true">✎</div><div><div class="app-name">Daily Check-in</div></div></header><div class="tabs" role="navigation" aria-label="Sections"><button id="kt" class="on" type="button" aria-current="page"><span>Check-in</span></button><button id="it" type="button"><span>Patterns</span></button><button id="jt" type="button"><span>Journal</span></button></div>
 <section id="help-view" class="hide"><div class="eyebrow">TRY SOMETHING</div><h2>One small thing to try</h2><p class="sub">Try a practical adjustment, notice what happens, and decide whether it is worth keeping.</p><section id="experiment-section" class="experiment-section"><div class="insight-kicker">A SMALL EXPERIMENT</div><h2>Start with one change</h2><p class="insight-muted">Pick something that gets in your way, then try a small adjustment. Record what happened, including when it did not help.</p><label for="experiment-type" class="label">What would you like to make easier?</label><select id="experiment-type"><option value="">Choose one</option><option value="start">Getting started</option><option value="switch">Switching off or changing tasks</option><option value="finish">Finishing what I began</option><option value="life">Making room for life outside work</option></select><div id="experiment-plan" class="experiment-plan hide"></div><div id="experiment-active" class="hide"><div class="experiment-active-head"><strong id="experiment-name"></strong><button type="button" class="secondary" id="experiment-stop">Finish experiment</button></div><p id="experiment-step"></p><label class="label" for="experiment-result">How did it go today?</label><select id="experiment-result"><option value="">Not reviewed</option><option value="helped">It helped</option><option value="partly">A little</option><option value="not">Didn't help</option><option value="nottried">Didn't try it</option></select><label class="label" for="experiment-note">What made the difference? (optional)</label><textarea id="experiment-note" placeholder="A specific example is more useful than a perfect answer."></textarea><button type="button" id="experiment-review">Save today's review</button><p id="experiment-feedback" class="hint" role="status"></p><div id="experiment-history"></div></div></section></section><section id="insights" class="hide"><div class="eyebrow">PATTERNS & NEXT STEPS</div><h1>What’s changing?</h1><p class="sub">A clearer view of the days you recorded, with context kept intact.</p><div class="periods" role="group" aria-label="Insights time period"><button data-period="7">7 days</button><button data-period="30" class="on">30 days</button><button data-period="all">All time</button></div><div id="insight-body"></div><button class="secondary" id="insight-journal">Review dated entries</button><button class="secondary" id="insight-copy">Copy summary</button><button class="secondary" id="insight-share">Share summary</button><p id="insight-share-status" class="hint" role="status"></p></section><section id="journal-view" class="hide"><div class="eyebrow">JOURNAL</div><h1>Your saved days.</h1><p class="sub">Review, edit, back up or share your records.</p><div class="periods" role="group" aria-label="Journal entry filter"><button data-jfilter="both" class="on">Both</button><button data-jfilter="mine">Mine</button><button data-jfilter="partner">Partner</button></div><div class="journal-heading"><strong>Saved entries</strong><span>Newest first</span></div><div id="journal-list"></div><div class="journal-heading"><strong>Keep & share</strong><span>Backup and reports</span></div><div id="journal-home"><details id="journal-panel" class="card journal-panel"><summary>Journal backup <span id="journal-status" class="journal-pill">Checking…</span></summary><div class="hint" style="margin-top:10px">Your check-ins are saved on this device. Keep one dated Markdown journal in iCloud Drive as a second copy.</div><p id="journal-detail" class="hint" role="status" aria-live="polite"></p><button type="button" class="secondary" id="journal-export">Save full journal to Files (.md)</button><div style="margin-top:18px;border-top:1px solid var(--line);padding-top:15px"><div class="label">For your doctor</div><div class="hint">Plain-text report with dates and score explanations. No Markdown symbols. Review before sharing.</div><button type="button" class="secondary" id="doctor-copy">Copy readable report</button><button type="button" class="secondary" id="doctor-share">Share report (.txt)</button><div id="doctor-message" class="hint" role="status" aria-live="polite"></div></div><div class="hint" style="margin-top:7px">Choose iCloud Drive in Files and <strong>replace</strong> your previous <code>daily-checkin-journal.md</code>. Each export is a complete, deduplicated snapshot, not an extra set of entries.</div><div id="journal-confirm" class="hide" style="padding:12px 0"><div class="label">Did you replace the existing journal file in Files?</div><div class="hint">Only confirm after checking it was saved. Downloading alone does not back up your data.</div><button type="button" class="secondary" id="journal-done">Yes, the file is saved</button><button type="button" class="secondary" id="journal-cancel">Not yet</button></div><div id="journal-message" class="hint" role="status" aria-live="polite"></div></details></div></section><section id="checkin-head" aria-labelledby="checkin-title"><h1 id="checkin-title">How was your day?</h1><p class="sub" id="checkin-description" hidden></p><div id="checkin-switch" class="checkin-switch" role="group" aria-label="Whose check-in"><button id="self-switch" class="on" type="button" aria-pressed="true">My check-in</button><button id="pt" type="button" aria-pressed="false">Partner observations</button></div><div class="date-control"><label class="label" for="entrydate">Entry date</label><input id="entrydate" type="date"><div class="hint" id="datehint">Today by default. Choose an earlier date to review or edit.</div></div></section><section id="k"><p id="draft-status" class="draft-status" role="status" aria-live="polite"></p><div class="sub" id="progress" style="margin-top:4px">0 of 7 answered</div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
-<details class="quick-capture" open><summary>Describe your day</summary><p class="hint">Write or dictate a note, then review suggested answers.</p><div id="personal-carry" class="carry-note hide"></div><textarea id="quick-self" aria-label="Quick note"></textarea><button type="button" class="secondary speech-trigger" data-speech-target="quick-self">Speak note</button><button type="button" class="secondary" id="quick-self-apply">Review suggested answers</button><div id="quick-self-status" class="hint" role="status" aria-live="polite"></div></details>
+<details class="quick-capture"><summary><span>Write or speak a note</span><span class="capture-chevron" aria-hidden="true">+</span></summary><p class="hint">Write or dictate a note, then review suggested answers.</p><div id="personal-carry" class="carry-note hide"></div><textarea id="quick-self" aria-label="Quick note"></textarea><button type="button" class="secondary speech-trigger" data-speech-target="quick-self">Speak note</button><button type="button" class="secondary" id="quick-self-apply">Review suggested answers</button><div id="quick-self-status" class="hint" role="status" aria-live="polite"></div></details>
 <div class="card"><div class="label">Medication today</div><p id="usual-med-summary" class="hint hide"></p><button id="usual-med-taken" type="button" class="hide" style="width:100%;min-height:48px;margin:8px 0 12px;border:1px solid var(--accent);border-radius:12px;background:var(--tint);color:var(--accent);font-weight:700">Taken as usual</button><div class="row" data-g="medtoday"><button class="c grow" data-v="No">Not taken</button><button class="c grow" data-v="Yes">Taken / changed</button></div>
 <div id="meddetails" class="hide">
 <div style="margin-top:12px"><div class="hint">Medication</div><select id="med"><option value="">Select medication</option><option>Vyvanse (lisdexamfetamine)</option><option>Concerta / long-acting methylphenidate</option><option>Ritalin LA</option><option>Ritalin immediate-release</option><option>Dexamfetamine</option><option>Other</option></select></div>

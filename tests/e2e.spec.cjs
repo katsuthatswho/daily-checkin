@@ -1,7 +1,34 @@
 const {test,expect}=require('@playwright/test');
 const path=require('path');
 test.use({viewport:{width:375,height:812},isMobile:true,hasTouch:true,serviceWorkers:'allow'});
-test.beforeEach(async({page})=>{await page.goto('http://127.0.0.1:8765/');await page.evaluate(()=>localStorage.clear());await page.reload();});
+test.beforeEach(async({page})=>{await page.goto('http://127.0.0.1:8765/');await page.evaluate(()=>localStorage.clear());await page.reload();await page.locator('.quick-capture').evaluate(el=>el.open=true);});
+
+test('mobile product screenshots and first-screen hierarchy for every tab',async({page})=>{
+ const capture=page.locator('.quick-capture');
+ await capture.evaluate(el=>el.open=false);
+ await expect(capture).not.toHaveAttribute('open','');
+ const med=page.locator('[data-g=medtoday]');
+ await expect(med).toBeVisible();
+ const self=await page.evaluate(()=>({questionTop:document.querySelector('[data-g=medtoday]').getBoundingClientRect().top,navBottom:document.querySelector('.tabs').getBoundingClientRect().bottom,bodyWidth:document.body.scrollWidth,viewport:innerWidth}));
+ expect(self.questionTop).toBeLessThan(690);
+ expect(self.bodyWidth).toBeLessThanOrEqual(self.viewport);
+ await page.screenshot({path:'test-results/redesign-checkin-375.png',fullPage:true});
+ await page.locator('#pt').click();
+ await expect(page.locator('#p')).toBeVisible();
+ await page.screenshot({path:'test-results/redesign-partner-375.png',fullPage:true});
+ await page.locator('#it').click();
+ await expect(page.locator('#insights')).toBeVisible();
+ await page.screenshot({path:'test-results/redesign-patterns-375.png',fullPage:true});
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-view')).toBeVisible();
+ await page.screenshot({path:'test-results/redesign-journal-375.png',fullPage:true});
+ await page.setViewportSize({width:320,height:700});
+ for(const tab of ['#kt','#it','#jt']){
+   await page.locator(tab).click();
+   expect(await page.evaluate(()=>document.body.scrollWidth)).toBeLessThanOrEqual(320);
+ }
+ await page.screenshot({path:'test-results/redesign-journal-320.png',fullPage:true});
+});
 test('both tabs share layout, partner is indigo, and every partner scale stays on one row',async({page})=>{
  await expect(page.locator('#k')).toBeVisible();
  const sleep=await page.locator('[data-g=sleep] .c').evaluateAll(bs=>({count:bs.length,rows:new Set(bs.map(b=>Math.round(b.getBoundingClientRect().top))).size,overflow:bs.some(b=>b.scrollWidth>b.clientWidth)}));expect(sleep.count).toBe(5);expect(sleep.rows).toBe(1);expect(sleep.overflow).toBe(false);
