@@ -739,7 +739,8 @@ function parsePastedRecords(raw){
    let capture='';
    for(const ln of lines){
      if(/^[-─]{3,}$/.test(ln))break;
-     const match=ln.match(/^(?:-\s*)?(?:\*\*)?([^:*]+?)(?:\*\*)?:\s*(.*)$/);
+     const cleanLine=ln.replace(/\*\*/g,'');
+     const match=cleanLine.match(/^(?:-\s*)?([^:]+?):\s*(.*)$/);
      if(match){
        const label=match[1].trim(),value=match[2].trim().replace(/\*\*$/,'');
        const key=IMPORT_KEYS[label];
