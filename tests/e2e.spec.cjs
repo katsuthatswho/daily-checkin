@@ -292,6 +292,7 @@ test('ADHD-friendly short form, optional details, sticky save and pencil icon',a
  await expect(page.locator('#progress')).toContainText('Ready to save');
  await page.locator('#sk').click();await expect(page.locator('#save-toast')).toContainText('Check-in saved');
  await page.reload();await expect(page.locator('#progress')).toContainText('Ready to save');
+ await page.locator('#k > .quick-capture').evaluate(el=>el.open=true);
  await expect(page.locator('#quick-self')).toBeVisible();
  await page.locator('#quick-self').fill('Optional entry');await page.locator('#sk').click();
  await page.reload();await expect(page.locator('#quick-self')).toHaveValue('Optional entry');
