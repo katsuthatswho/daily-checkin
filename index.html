@@ -290,7 +290,7 @@ function restoreDraft(date){const d=get(DRAFT_KEY,{})[date];if(!d)return false;c
  Object.entries(d.groups||{}).forEach(([g,v])=>{if(v){$$('[data-g="'+g+'"] .c').forEach(b=>b.classList.toggle('sel',b.dataset.v===String(v)))}});
  Object.entries(d.fields||{}).forEach(([id,v])=>{const el=$('#'+id);if(el&&v!==''&&v!=null)el.value=v});
  Object.entries(d.multi||{}).forEach(([id,v])=>restoreMulti('#'+id,v));
- $('#more-details').open=!!d.details;
+ if(d.details)$('#more-details').open=true;
  restoreMedTime();toggleMedication();toggleDropoff();toggleEffects();progress();
  $('#draft-status').textContent='Unsaved draft restored · '+new Date(d.updated).toLocaleString();
  return true
@@ -301,7 +301,7 @@ function clearDraftFor(date,who){
  if(draft){
   const partnerGroups=new Set(['self',...qs.map(([g])=>g)]);
   const keepGroup=who==='self'?g=>partnerGroups.has(g):g=>!partnerGroups.has(g);
-  const keepField=who==='self'?id=>id==='pn':id=>id!=='pn';
+  const keepField=who==='self'?id=>id==='pn'||id==='quick-partner':id=>id!=='pn'&&id!=='quick-partner';
   const groups=Object.fromEntries(Object.entries(draft.groups||{}).filter(([g,v])=>keepGroup(g)&&v));
   const fields=Object.fromEntries(Object.entries(draft.fields||{}).filter(([id,v])=>keepField(id)&&v));
   const multi=who==='self'?{}:Object.fromEntries(Object.entries(draft.multi||{}).filter(([,v])=>Array.isArray(v)&&v.length));
@@ -319,8 +319,7 @@ function carryPrevious(rows,date,key,field,notice){
  const prev=rows.find(r=>r.date===priorDay(date)),value=prev&&typeof prev[key]==='string'?prev[key].trim():'';
  const banner=$(notice);banner.classList.toggle('hide',!value);
  if(!value)return;
- $(field).value=value;
- banner.innerHTML='<span>Carried from '+htmlSafe(prev.date)+' · Review or edit before saving today.</span> <button type="button" class="carry-clear" data-clearcarry="'+field.slice(1)+'">Clear</button>';
+ banner.innerHTML='<span>Previous entry from '+htmlSafe(prev.date)+' (not copied into today): '+htmlSafe(value.slice(0,180))+(value.length>180?'…':'')+'</span>';
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-clearcarry]');if(!b)return;const field=$('#'+b.dataset.clearcarry);if(field)field.value='';b.closest('.carry-note').classList.add('hide')});
 function syncMedTime(){const q=$('#medtime-quick'),t=$('#medtime');t.classList.toggle('hide',q.value!=='other');if(q.value&&q.value!=='other')t.value=q.value;if(!q.value)t.value=''}
@@ -329,7 +328,7 @@ $('#medtime-quick').addEventListener('change',()=>{syncMedTime();scheduleDraft()
 function loadSelectedDate(){
  $$('[data-g] .c.sel,#wins .sel,#drops .sel,#effects .sel').forEach(b=>b.classList.remove('sel'));
  ['#medtime','#tn','#kn','#droptime','#pn','#appetite','#lifequality','#quick-self','#quick-partner'].forEach(id=>$(id).value='');
- $('#medtime-quick').value='';$('#medtime').classList.add('hide');$('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
+ $('#medtime-quick').value='';$('#medtime').classList.add('hide');$('#ko').style.display='none';$('#po').style.display='none';$('#ke').classList.add('hide');$('#more-details').open=false;$('#quick-self-status').replaceChildren();$('#quick-partner-status').replaceChildren();['#treatment-carry','#personal-carry','#partner-carry'].forEach(id=>{$(id).classList.add('hide');$(id).textContent=''})
  const mine=get(K,[]).find(r=>r.date===selectedDay());
  if(mine){
   if(mine.life_quality||mine.appetite||mine.life_outside_work?.length||mine.work_crowding||mine.dropoff||mine.side_effect_severity||mine.note||mine.treatment_notes)$('#more-details').open=true;
