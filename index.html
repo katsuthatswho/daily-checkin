@@ -282,7 +282,7 @@ function jumpToUnanswered(){
 }
 function showMissingGuidance(){
  const missing=missingRequired(),box=$('#ke');
- if(!missing.length){box.classList.add('hide');$('#k .needs-answer').forEach(el=>el.classList.remove('needs-answer'));return}
+ if(!missing.length){box.classList.add('hide');$$('#k .needs-answer').forEach(el=>el.classList.remove('needs-answer'));return}
  const prefix='Unanswered (you can still save): ';
  box.replaceChildren();
  const message=document.createElement('span');message.textContent=prefix+missing.map(g=>requiredNames[g]).join(', ')+'.';box.append(message);
