@@ -60,6 +60,58 @@ test('a medication time is optional and a partial observation survives reload',a
  expect(updated[0].note).toContain('dog park');
 });
 
+
+test('complete device backup restores personal, partner, drafts, experiments without discarding current dates',async({page})=>{
+ const backup={
+  format:'daily-checkin-device-backup-v2',exported_at:'2026-10-20T10:00:00.000Z',
+  daily_checkins_on_this_device:[{date:'2026-10-19',getting_started:'3',medication_today:'Yes',medication:'Vyvanse (lisdexamfetamine)',dose:'20 mg',note:'Full original notes',life_outside_work:['Dog park']}],
+  partner_checkins_on_this_device:[{date:'2026-10-19',start_obs:'Same',note:'Partner text'}],
+  unfinished_drafts_on_this_device:{'2026-10-19':{text:'Incomplete'}},
+  behavioural_experiments_on_this_device:{active:{type:'start',started:'2026-10-19'},history:[{date:'2026-10-19',started:'2026-10-19',type:'start',result:'helped'}]}
+ };
+ await page.evaluate(()=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-20',note:'Existing safe'}])));
+ await page.locator('#jt').click();
+ await page.locator('#restore-panel > summary').click();
+ await page.locator('#restore-paste').fill(JSON.stringify(backup));
+ await page.locator('#restore-preview').click();
+ await expect(page.locator('#restore-preview-result')).toContainText('1 personal, 1 partner');
+ await page.locator('#restore-apply').click();
+ const state=await page.evaluate(()=>({
+  mine:JSON.parse(localStorage.getItem('my_daily_v4')),partner:JSON.parse(localStorage.getItem('partner_weekly_v3')),
+  drafts:JSON.parse(localStorage.getItem('daily_checkin_drafts_v1')||'{}'),
+  experiments:JSON.parse(localStorage.getItem('daily_checkin_experiments_v1')||'{}')
+ }));
+ expect(state.mine).toHaveLength(2);
+ expect(state.mine.find(x=>x.date==='2026-10-20').note).toBe('Existing safe');
+ expect(state.mine.find(x=>x.date==='2026-10-19').life_outside_work).toContain('Dog park');
+ expect(state.partner[0].note).toBe('Partner text');
+ expect(state.experiments.history[0].result).toBe('helped');
+ const full=await page.evaluate(()=>completeBackup());
+ expect(full.daily_checkins_on_this_device).toHaveLength(2);
+ expect(full.partner_checkins_on_this_device).toHaveLength(1);
+});
+test('text import preserves fields omitted from report when user explicitly replaces matching date',async({page})=>{
+ await page.evaluate(()=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',medication_today:'Yes',medication:'Vyvanse',dose:'20 mg',time_taken:'09:30',sleep:'Great',note:'Old note',side_effects:['Headache']}])));
+ await page.locator('#jt').click();await page.locator('#restore-panel > summary').click();
+ await page.locator('#restore-paste').fill('# Personal ADHD treatment check-ins\n\n## 2026-10-19\n**Sleep quality:** Poor\n**Other observations:** Updated note');
+ await page.locator('#restore-preview').click();
+ await page.locator('#restore-overwrite').check();await page.locator('#restore-apply').click();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
+ expect(saved.sleep).toBe('Poor');expect(saved.note).toBe('Updated note');
+ expect(saved.medication).toBe('Vyvanse');expect(saved.time_taken).toBe('09:30');expect(saved.side_effects).toEqual(['Headache']);
+});
+test('invalid backup is rejected without touching saved entries',async({page})=>{
+ await page.evaluate(()=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',note:'Keep me'}])));
+ await page.locator('#jt').click();await page.locator('#restore-panel > summary').click();
+ const bad={format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:[{date:'2026-10-19',note:'Overwrite'},{date:'2026-10-19',note:'Duplicate'}],partner_checkins_on_this_device:[],unfinished_drafts_on_this_device:{},behavioural_experiments_on_this_device:{history:[]}};
+ await page.locator('#restore-paste').fill(JSON.stringify(bad));
+ await page.locator('#restore-preview').click();
+ await expect(page.locator('#restore-preview-result')).toContainText('duplicate date');
+ await expect(page.locator('#restore-apply')).toBeHidden();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(saved).toHaveLength(1);expect(saved[0].note).toBe('Keep me');
+});
+
 test('restore preview imports copied Markdown while keeping existing dates',async({page})=>{
  const text='# Personal ADHD treatment check-ins\n\n## 2026-10-19\n**Medication:** Vyvanse (lisdexamfetamine) · 20 mg · taken at 09:30\n**Sleep quality:** Great\n\n**Daily functioning**\n- Getting started: 4/5\n- Attention control: 3/5\n- Following through: 2/5\n**Life outside work:** Dog park, Exercise\n\n**Tolerability**\n- Appetite and meals: Ate as usual\n- Side-effect severity: Mild\n- Side effects: Dry mouth / thirst\n**Other observations:** Went to the dog park\n\n---\n\n## 2026-10-20\n**Medication:** Not taken\n**Sleep quality:** Poor\n- Getting started: 2/5\n**Other observations:** Hard night';
  await page.locator('#jt').click();
