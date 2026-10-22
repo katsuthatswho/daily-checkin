@@ -212,7 +212,7 @@ body{font-weight:400;letter-spacing:-.012em}
 #ke{background:#f0f5f0;border:1px solid #d8e6da;color:#456451}#ke .missing-jump{display:block;margin-top:10px;background:#fff;border:1px solid #b87551;color:#784329;border-radius:9px;min-height:44px;padding:9px 13px;font:inherit;font-weight:700;text-align:left}
 #ke .missing-jump:focus-visible{outline:3px solid #b87551;outline-offset:2px}
 .restore-panel textarea{min-height:150px;line-height:1.5}.restore-replace{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5;color:var(--muted);margin:12px 0}.restore-replace input{width:18px;min-width:18px;height:18px;margin:1px 0}.restore-panel #restore-preview-result{font-size:12px;line-height:1.5;color:var(--accent);margin-top:10px}.restore-panel button{min-height:44px}</style></head><body><main class="w"><header class="app-head"><div class="app-mark" aria-hidden="true">✎</div><div><div class="app-name">Daily Check-in</div></div></header><div class="tabs" role="navigation" aria-label="Sections"><button id="kt" class="on" type="button" aria-current="page"><span>Check-in</span></button><button id="it" type="button"><span>Patterns</span></button><button id="jt" type="button"><span>Journal</span></button></div>
-<section id="help-view" class="hide"><div class="eyebrow">TRY SOMETHING</div><h2>One small thing to try</h2><p class="sub">Try a practical adjustment, notice what happens, and decide whether it is worth keeping.</p><section id="experiment-section" class="experiment-section"><div class="insight-kicker">A SMALL EXPERIMENT</div><h2>Start with one change</h2><p class="insight-muted">Pick something that gets in your way, then try a small adjustment. Record what happened, including when it did not help.</p><label for="experiment-type" class="label">What would you like to make easier?</label><select id="experiment-type"><option value="">Choose one</option><option value="start">Getting started</option><option value="switch">Switching off or changing tasks</option><option value="finish">Finishing what I began</option><option value="life">Making room for life outside work</option></select><div id="experiment-plan" class="experiment-plan hide"></div><div id="experiment-active" class="hide"><div class="experiment-active-head"><strong id="experiment-name"></strong><button type="button" class="secondary" id="experiment-stop">Finish experiment</button></div><p id="experiment-step"></p><label class="label" for="experiment-result">How did it go today?</label><select id="experiment-result"><option value="">Not reviewed</option><option value="helped">It helped</option><option value="partly">A little</option><option value="not">Didn't help</option><option value="nottried">Didn't try it</option></select><label class="label" for="experiment-note">What made the difference? (optional)</label><textarea id="experiment-note" placeholder="A specific example is more useful than a perfect answer."></textarea><button type="button" id="experiment-review">Save today's review</button><p id="experiment-feedback" class="hint" role="status"></p><div id="experiment-history"></div></div></section></section><section id="insights" class="hide"><div class="eyebrow">PATTERNS & NEXT STEPS</div><h1>What’s changing?</h1><p class="sub">A clearer view of the days you recorded, with context kept intact.</p><div class="periods" role="group" aria-label="Insights time period"><button data-period="7">7 days</button><button data-period="30" class="on">30 days</button><button data-period="all">All time</button></div><div id="insight-body"></div><button class="secondary" id="insight-journal">Review dated entries</button><button class="secondary" id="insight-copy">Copy summary</button><button class="secondary" id="insight-share">Share summary</button><p id="insight-share-status" class="hint" role="status"></p></section><section id="journal-view" class="hide"><div class="eyebrow">JOURNAL</div><h1>Your saved days.</h1><p class="sub">Review, edit, back up or share your records.</p><div class="periods" role="group" aria-label="Journal entry filter"><button data-jfilter="both" class="on">Both</button><button data-jfilter="mine">Mine</button><button data-jfilter="partner">Partner</button></div><div class="journal-heading"><strong>Saved entries</strong><span>Newest first</span></div><div id="journal-list"></div><div class="journal-heading"><strong>Keep & share</strong><span>Backup and restore</span></div><div id="journal-home"><details id="journal-panel" class="card journal-panel"><summary>Journal backup <span id="journal-status" class="journal-pill">Checking…</span></summary><div class="hint" style="margin-top:10px">Your check-ins are saved on this device. Keep one dated Markdown journal in iCloud Drive as a second copy.</div><p id="journal-detail" class="hint" role="status" aria-live="polite"></p><button type="button" class="secondary" id="journal-export">Save full journal to Files (.md)</button><div style="margin-top:18px;border-top:1px solid var(--line);padding-top:15px"><div class="label">For your doctor</div><div class="hint">Plain-text report with dates and score explanations. No Markdown symbols. Review before sharing.</div><button type="button" class="secondary" id="doctor-copy">Copy readable report</button><button type="button" class="secondary" id="doctor-share">Share report (.txt)</button><div id="doctor-message" class="hint" role="status" aria-live="polite"></div></div><div class="hint" style="margin-top:7px">Choose iCloud Drive in Files and <strong>replace</strong> your previous <code>daily-checkin-journal.md</code>. Each export is a complete, deduplicated snapshot, not an extra set of entries.</div><div id="journal-confirm" class="hide" style="padding:12px 0"><div class="label">Did you replace the existing journal file in Files?</div><div class="hint">Only confirm after checking it was saved. Downloading alone does not back up your data.</div><button type="button" class="secondary" id="journal-done">Yes, the file is saved</button><button type="button" class="secondary" id="journal-cancel">Not yet</button></div><div id="journal-message" class="hint" role="status" aria-live="polite"></div></details><details id="restore-panel" class="card journal-panel restore-panel"><summary>Restore from copied report <span class="journal-pill">Preview first</span></summary><p class="hint">Paste a previous Markdown check-in export or the dated records from your doctor report. We identify entries by date and never delete your current records. Preview before importing.</p><label class="label" for="restore-paste">Paste your saved records</label><textarea id="restore-paste" rows="7" placeholder="# Personal ADHD treatment check-ins&#10;&#10;## 2026-10-21&#10;**Medication:** ..."></textarea><button type="button" class="secondary" id="restore-preview">Preview dates to restore</button><div id="restore-preview-result" role="status" aria-live="polite"></div><label class="restore-replace"><input id="restore-overwrite" type="checkbox"> Replace matching dates with pasted entries (otherwise keep existing dates)</label><button type="button" class="secondary hide" id="restore-apply">Import previewed entries</button><p class="hint">A pasted text report restores its recorded fields and notes. Fields not present in that report cannot be recovered. For a fully faithful backup, use the device-data export.</p></details></div></section><section id="checkin-head" aria-labelledby="checkin-title"><h1 id="checkin-title">How was your day?</h1><p class="sub" id="checkin-description" hidden></p><div id="checkin-switch" class="checkin-switch" role="group" aria-label="Whose check-in"><button id="self-switch" class="on" type="button" aria-pressed="true">My check-in</button><button id="pt" type="button" aria-pressed="false">Partner observations</button></div><div class="date-control"><span class="label">YOUR DAY</span><div class="date-navigation"><button type="button" id="previous-day" aria-label="Previous day">‹</button><input id="entrydate" type="date" aria-label="Entry date"><button type="button" id="next-day" aria-label="Next day">›</button></div><div class="hint" id="datehint">Today by default. Choose an earlier date to review or edit.</div></div></section><section id="k"><p id="draft-status" class="draft-status" role="status" aria-live="polite"></p><div class="sub" id="progress" style="margin-top:4px">0 of 7 answered</div><div class="completion-track" role="progressbar" aria-label="Check-in progress" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"><div id="completion-fill"></div></div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
+<section id="help-view" class="hide"><div class="eyebrow">TRY SOMETHING</div><h2>One small thing to try</h2><p class="sub">Try a practical adjustment, notice what happens, and decide whether it is worth keeping.</p><section id="experiment-section" class="experiment-section"><div class="insight-kicker">A SMALL EXPERIMENT</div><h2>Start with one change</h2><p class="insight-muted">Pick something that gets in your way, then try a small adjustment. Record what happened, including when it did not help.</p><label for="experiment-type" class="label">What would you like to make easier?</label><select id="experiment-type"><option value="">Choose one</option><option value="start">Getting started</option><option value="switch">Switching off or changing tasks</option><option value="finish">Finishing what I began</option><option value="life">Making room for life outside work</option></select><div id="experiment-plan" class="experiment-plan hide"></div><div id="experiment-active" class="hide"><div class="experiment-active-head"><strong id="experiment-name"></strong><button type="button" class="secondary" id="experiment-stop">Finish experiment</button></div><p id="experiment-step"></p><label class="label" for="experiment-result">How did it go today?</label><select id="experiment-result"><option value="">Not reviewed</option><option value="helped">It helped</option><option value="partly">A little</option><option value="not">Didn't help</option><option value="nottried">Didn't try it</option></select><label class="label" for="experiment-note">What made the difference? (optional)</label><textarea id="experiment-note" placeholder="A specific example is more useful than a perfect answer."></textarea><button type="button" id="experiment-review">Save today's review</button><p id="experiment-feedback" class="hint" role="status"></p><div id="experiment-history"></div></div></section></section><section id="insights" class="hide"><div class="eyebrow">PATTERNS & NEXT STEPS</div><h1>What’s changing?</h1><p class="sub">A clearer view of the days you recorded, with context kept intact.</p><div class="periods" role="group" aria-label="Insights time period"><button data-period="7">7 days</button><button data-period="30" class="on">30 days</button><button data-period="all">All time</button></div><div id="insight-body"></div><button class="secondary" id="insight-journal">Review dated entries</button><button class="secondary" id="insight-copy">Copy summary</button><button class="secondary" id="insight-share">Share summary</button><p id="insight-share-status" class="hint" role="status"></p></section><section id="journal-view" class="hide"><div class="eyebrow">JOURNAL</div><h1>Your saved days.</h1><p class="sub">Review, edit, back up or share your records.</p><div class="periods" role="group" aria-label="Journal entry filter"><button data-jfilter="both" class="on">Both</button><button data-jfilter="mine">Mine</button><button data-jfilter="partner">Partner</button></div><div class="journal-heading"><strong>Saved entries</strong><span>Newest first</span></div><div id="journal-list"></div><div class="journal-heading"><strong>Keep & share</strong><span>Backup and restore</span></div><div id="journal-home"><details id="journal-panel" class="card journal-panel"><summary>Journal backup <span id="journal-status" class="journal-pill">Checking…</span></summary><div class="hint" style="margin-top:10px">Your check-ins are saved on this device. Keep one dated Markdown journal in iCloud Drive as a second copy.</div><p id="journal-detail" class="hint" role="status" aria-live="polite"></p><button type="button" class="secondary" id="journal-export">Save full journal to Files (.md)</button><div style="margin-top:18px;border-top:1px solid var(--line);padding-top:15px"><div class="label">For your doctor</div><div class="hint">Plain-text report with dates and score explanations. No Markdown symbols. Review before sharing.</div><button type="button" class="secondary" id="doctor-copy">Copy readable report</button><button type="button" class="secondary" id="doctor-share">Share report (.txt)</button><div id="doctor-message" class="hint" role="status" aria-live="polite"></div></div><div class="hint" style="margin-top:7px">Choose iCloud Drive in Files and <strong>replace</strong> your previous <code>daily-checkin-journal.md</code>. Each export is a complete, deduplicated snapshot, not an extra set of entries.</div><div id="journal-confirm" class="hide" style="padding:12px 0"><div class="label">Did you replace the existing journal file in Files?</div><div class="hint">Only confirm after checking it was saved. Downloading alone does not back up your data.</div><button type="button" class="secondary" id="journal-done">Yes, the file is saved</button><button type="button" class="secondary" id="journal-cancel">Not yet</button></div><div id="journal-message" class="hint" role="status" aria-live="polite"></div></details><details id="restore-panel" class="card journal-panel restore-panel"><summary>Restore from backup or copied report <span class="journal-pill">Preview first</span></summary><p class="hint">Paste a previous Markdown check-in export or the dated records from your doctor report. We identify entries by date and never delete your current records. Preview before importing.</p><div class="restore-backup"><div class="label">Complete device backup</div><p class="hint">Use the JSON file to restore personal check-ins, partner observations, unfinished drafts and experiments together. Preview all changes first.</p><button type="button" class="secondary" id="device-backup-download">Export complete backup (.json)</button><label class="label" for="restore-json-file">Choose an existing backup file</label><input id="restore-json-file" type="file" accept=".json,application/json"><div class="hint">Or paste a complete device-backup JSON below.</div></div><label class="label" for="restore-paste">Paste your saved records</label><textarea id="restore-paste" rows="7" placeholder="Paste your Markdown, doctor report or complete JSON backup"></textarea><button type="button" class="secondary" id="restore-preview">Preview dates to restore</button><div id="restore-preview-result" role="status" aria-live="polite"></div><label class="restore-replace"><input id="restore-overwrite" type="checkbox"> Replace matching dates with imported entries (otherwise keep existing dates)</label><button type="button" class="secondary hide" id="restore-apply">Import previewed entries</button><p class="hint">Complete JSON backups retain all saved fields. Text reports only contain displayed details. Imports never delete existing dates; replacing them requires explicit approval.</p></details></div></section><section id="checkin-head" aria-labelledby="checkin-title"><h1 id="checkin-title">How was your day?</h1><p class="sub" id="checkin-description" hidden></p><div id="checkin-switch" class="checkin-switch" role="group" aria-label="Whose check-in"><button id="self-switch" class="on" type="button" aria-pressed="true">My check-in</button><button id="pt" type="button" aria-pressed="false">Partner observations</button></div><div class="date-control"><span class="label">YOUR DAY</span><div class="date-navigation"><button type="button" id="previous-day" aria-label="Previous day">‹</button><input id="entrydate" type="date" aria-label="Entry date"><button type="button" id="next-day" aria-label="Next day">›</button></div><div class="hint" id="datehint">Today by default. Choose an earlier date to review or edit.</div></div></section><section id="k"><p id="draft-status" class="draft-status" role="status" aria-live="polite"></p><div class="sub" id="progress" style="margin-top:4px">0 of 7 answered</div><div class="completion-track" role="progressbar" aria-label="Check-in progress" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"><div id="completion-fill"></div></div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
 <details class="quick-capture"><summary><span>Write or speak a note</span><span class="capture-chevron" aria-hidden="true">+</span></summary><p class="hint">Write or dictate a note, then review suggested answers.</p><div id="personal-carry" class="carry-note hide"></div><textarea id="quick-self" aria-label="Quick note"></textarea><button type="button" class="secondary speech-trigger" data-speech-target="quick-self">Speak note</button><button type="button" class="secondary" id="quick-self-apply">Review suggested answers</button><div id="quick-self-status" class="hint" role="status" aria-live="polite"></div></details>
 <div class="card"><div class="label">Medication today</div><p id="usual-med-summary" class="hint hide"></p><button id="usual-med-taken" type="button" class="hide" style="width:100%;min-height:48px;margin:8px 0 12px;border:1px solid var(--accent);border-radius:12px;background:var(--tint);color:var(--accent);font-weight:700">Taken as usual</button><div class="row" data-g="medtoday"><button class="c grow" data-v="No">Not taken</button><button class="c grow" data-v="Yes">Taken / changed</button></div>
@@ -392,7 +392,9 @@ $('#sp').onclick=()=>{if($('#quick-partner').value.trim()!==$('#pn').value.trim(
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
 function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
-$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');$('#bk').onclick=()=>dl('daily-checkin-device-data.json',JSON.stringify({exported_at:new Date().toISOString(),format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[]),unfinished_drafts_on_this_device:get(DRAFT_KEY,{}),behavioural_experiments_on_this_device:experimentData()},null,2),'application/json');
+$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');function completeBackup(){return {exported_at:new Date().toISOString(),format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[]),unfinished_drafts_on_this_device:get(DRAFT_KEY,{}),behavioural_experiments_on_this_device:experimentData()}}
+function exportCompleteBackup(){dl('daily-checkin-device-data.json',JSON.stringify(completeBackup(),null,2),'application/json')}
+$('#bk').onclick=exportCompleteBackup;$('#device-backup-download').onclick=exportCompleteBackup;
 
 const htmlSafe=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const frac=v=>v===''||v==null||!Number.isInteger(Number(v))||Number(v)<0||Number(v)>4?'Not recorded':(Number(v)+1)+'/5';
@@ -711,7 +713,8 @@ function renderJournal(){
  $('#journal-list').innerHTML=rows.length?rows.map(r=>'<article class="journal-item"><strong>'+htmlSafe(r.date)+' · '+(r._who==='mine'?'My check-in':'Partner')+'</strong><p>'+htmlSafe(r._who==='mine'?'Getting started '+frac(r.getting_started)+' · Focus '+frac(r.attention_control)+(r.note?' · '+r.note:''):(r.start_obs?'Getting started: '+r.start_obs:'Observation saved')+(r.note?' · '+r.note:''))+'</p><button data-editdate="'+htmlSafe(r.date)+'" data-editwho="'+r._who+'">Review / edit</button> <button type="button" data-deletedate="'+htmlSafe(r.date)+'" data-deletewho="'+r._who+'">Delete</button></article>').join(''):'<p class="hint">No entries in this view yet.</p>';
 }
 
-/* Text report restoration. Dates are the identity; no existing record is silently replaced. */
+
+/* Restore is non-destructive by default. Only a validated preview can be committed. */
 let restorePending=null;
 const IMPORT_KEYS={
  'Getting started':'getting_started','Attention control':'attention_control',
@@ -721,6 +724,27 @@ const IMPORT_KEYS={
  'Later-day dip (not necessarily medication-related)':'dropoff',
  'Appetite and meals':'appetite','Side-effect severity':'side_effect_severity','Side effects':'side_effects'
 };
+function validRestoreDate(date){if(typeof date!=='string'||!/^\d{4}-\d\d-\d\d$/.test(date))return false;const d=new Date(date+'T12:00:00Z');return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===date&&date<=localDay()}
+function safeRestoreRows(value,label){
+ if(!Array.isArray(value)||value.length>20000)throw Error(label+' must be an array of dated entries.');
+ const seen=new Set();
+ return value.map(row=>{
+   if(!row||Array.isArray(row)||typeof row!=='object'||!validRestoreDate(row.date))throw Error(label+' includes an invalid date or entry.');
+   if(seen.has(row.date))throw Error(label+' contains duplicate date '+row.date+'. Resolve duplicate dates in the backup first.');
+   seen.add(row.date);
+   return {...row};
+ });
+}
+function parseDeviceBackup(raw){
+ let data;try{data=JSON.parse(raw)}catch{throw Error('Not valid JSON. Use a complete device-data backup or paste a dated text report.')}
+ if(!data||data.format!=='daily-checkin-device-backup-v2')throw Error('Unsupported backup. Choose a Daily Check-in device backup (v2).');
+ const mine=safeRestoreRows(data.daily_checkins_on_this_device,'Personal check-ins');
+ const partner=safeRestoreRows(data.partner_checkins_on_this_device,'Partner observations');
+ const drafts=data.unfinished_drafts_on_this_device,experiments=data.behavioural_experiments_on_this_device;
+ if(!drafts||typeof drafts!=='object'||Array.isArray(drafts))throw Error('Backup is missing unfinished drafts.');
+ if(!experiments||typeof experiments!=='object'||Array.isArray(experiments)||!Array.isArray(experiments.history))throw Error('Backup is missing behavioural experiments.');
+ return {kind:'device',mine,partner,drafts,experiments};
+}
 function parsePastedRecords(raw){
  const text=raw.replace(/\r\n?/g,'\n').trim();
  if(text.length>300000)throw Error('Report is too large. Paste a shorter dated export.');
@@ -734,7 +758,7 @@ function parsePastedRecords(raw){
    if(!/(?:Medication:|Sleep quality:|Daily functioning|Getting started:)/.test(rawChunk))continue;
    // In plain-text reports, ignore the partner section and secondary summaries.
    const part=rawChunk.split(/(?:\n(?:#{1,3}\s*)?Partner observations|\nBEHAVIOURAL EXPERIMENTS|\nREVIEW AT A GLANCE)/i)[0];
-   const row={date,medication_today:'Not recorded'};
+   const row={date};
    const lines=part.split('\n').map(x=>x.trim()).filter(Boolean);
    let capture='';
    for(const ln of lines){
@@ -777,45 +801,72 @@ function parsePastedRecords(raw){
  }
  return [...found.values()].sort((a,b)=>a.date.localeCompare(b.date));
 }
+
+function mergeByDate(existing,incoming,replace,kind){
+ const map=new Map(existing.map(row=>[row.date,row]));let added=0,updated=0,kept=0;
+ for(const row of incoming){
+   const before=map.get(row.date);
+   if(before){
+     if(replace){map.set(row.date,{...before,...row});updated++}else kept++;
+   }else{map.set(row.date,row);added++}
+ }
+ return {rows:[...map.values()],added,updated,kept};
+}
 function showRestorePreview(){
  const out=$('#restore-preview-result');
  restorePending=null;$('#restore-apply').classList.add('hide');
  try{
-   const rows=parsePastedRecords($('#restore-paste').value);
-   if(!rows.length)throw Error('No valid dated personal entries found. Include the report heading and dated records.');
-   const existing=new Set(get(K,[]).map(x=>x.date));
-   restorePending={text:$('#restore-paste').value,rows};
-   const fresh=rows.filter(x=>!existing.has(x.date));
-   const collision=rows.filter(x=>existing.has(x.date));
-   out.replaceChildren();
-   const p=document.createElement('p');p.textContent=rows.length+' parsed · '+fresh.length+' new · '+collision.length+' already saved. Dates: '+rows.map(x=>x.date).join(', ')+'.';out.append(p);
-   if(collision.length){const warning=document.createElement('p');warning.textContent='Matching dates will be kept unless you explicitly choose replacement. A text report may omit fields from your original check-in.';out.append(warning)}
+   const raw=$('#restore-paste').value.trim();
+   if(raw.length>2000000)throw Error('Backup too large to paste. Use a smaller file.');
+   const parsed=raw.startsWith('{')?parseDeviceBackup(raw):{kind:'text',mine:safeRestoreRows(parsePastedRecords(raw),'Pasted check-ins'),partner:[]};
+   if(!parsed.mine.length&&!parsed.partner.length&&parsed.kind==='text')throw Error('No dated personal entries found in the report.');
+   const mine=mergeByDate(get(K,[]),parsed.mine,false,'mine');
+   const partner=mergeByDate(get(P,[]),parsed.partner,false,'partner');
+   restorePending={text:raw,parsed};
+   const p=document.createElement('p');
+   p.textContent=(parsed.kind==='device'?'Complete backup':'Text report')+': '+parsed.mine.length+' personal, '+parsed.partner.length+' partner entries. New: '+(mine.added+partner.added)+'; matching existing dates: '+(mine.kept+partner.kept)+'.';
+   out.replaceChildren(p);
+   const detail=document.createElement('p');
+   detail.textContent='Dates: '+[...parsed.mine.map(r=>r.date),...parsed.partner.map(r=>r.date)].sort().join(', ')+(parsed.kind==='device'?' · Drafts and experiments included.':' · Only fields present in text can be recovered.');
+   out.append(detail);
+   if(parsed.kind==='device'){
+     const extra=document.createElement('p');extra.textContent='For drafts and experiments, existing data is preserved unless you select replacement. Importing will not clear other saved records.';out.append(extra);
+   }
    $('#restore-apply').classList.remove('hide');
  }catch(e){out.textContent=e.message}
 }
 $('#restore-preview').onclick=showRestorePreview;
+$('#restore-json-file').onchange=async()=>{
+ const file=$('#restore-json-file').files?.[0];if(!file)return;
+ if(file.size>2000000){$('#restore-preview-result').textContent='File exceeds the 2 MB import limit.';return}
+ try{$('#restore-paste').value=await file.text();showRestorePreview()}catch(e){$('#restore-preview-result').textContent='Unable to read the selected file.'}
+};
 $('#restore-apply').onclick=()=>{
- const out=$('#restore-preview-result');
- if(!restorePending||restorePending.text!==$('#restore-paste').value){out.textContent='Paste changed. Preview it again before importing.';return}
- const existing=get(K,[]);
- const replace=$('#restore-overwrite').checked;
- const current=new Map(existing.map(x=>[x.date,x]));
- let newCount=0,replaced=0;
- for(const row of restorePending.rows){
-   if(current.has(row.date)){
-     if(replace){current.set(row.date,{...current.get(row.date),...row,timestamp:new Date().toISOString()});replaced++}
-   }else{current.set(row.date,{...row,timestamp:new Date().toISOString()});newCount++}
- }
+ const out=$('#restore-preview-result'),pending=restorePending;
+ if(!pending||pending.text!==$('#restore-paste').value.trim()){out.textContent='The report changed. Preview it again.';return}
+ const {parsed}=pending,replace=$('#restore-overwrite').checked;
+ const mine=mergeByDate(get(K,[]),parsed.mine,replace,'mine');
+ const partner=mergeByDate(get(P,[]),parsed.partner,replace,'partner');
+ const old={mine:get(K,[]),partner:get(P,[]),drafts:get(DRAFT_KEY,{}),experiments:experimentData()};
+ // Create all prospective values and verify serialization before writing.
+ const nextDrafts=parsed.kind==='device'?(replace?parsed.drafts:{...parsed.drafts,...old.drafts}):old.drafts;
+ const nextExperiments=parsed.kind==='device'?(replace?parsed.experiments:old.experiments):old.experiments;
+ const next={[K]:mine.rows,[P]:partner.rows,[DRAFT_KEY]:nextDrafts,[EXP_KEY]:nextExperiments};
  try{
-   set(K,[...current.values()]);
-   const reread=get(K,[]);
-   if(reread.length!==current.size)throw Error('Save verification failed');
- }catch(e){out.textContent='Restore could not be verified. Current data may still be on this device. Do not delete your pasted copy.';return}
- out.textContent='Restored '+newCount+' new entries'+(replace?' and updated '+replaced+' matching dates':' · '+(restorePending.rows.length-newCount)+' existing dates kept')+'.';
+   const encoded=Object.entries(next).map(([key,val])=>[key,JSON.stringify(val)]);
+   const snapshot=Object.keys(next).map(key=>[key,localStorage.getItem(key)]);
+   try{
+     encoded.forEach(([key,val])=>localStorage.setItem(key,val));
+     if(encoded.some(([key,val])=>localStorage.getItem(key)!==val))throw Error('Verification failed');
+   }catch(e){
+     snapshot.forEach(([key,val])=>{if(val===null)localStorage.removeItem(key);else localStorage.setItem(key,val)});
+     throw e;
+   }
+ }catch(e){out.textContent='Restore failed verification. Your existing records have been retained; keep the original backup.';return}
+ out.textContent='Imported '+(mine.added+partner.added)+' new entries and updated '+(mine.updated+partner.updated)+' matching entries. Kept '+(mine.kept+partner.kept)+' existing entries.';
  restorePending=null;$('#restore-apply').classList.add('hide');
  loadSelectedDate();render();renderJournal();renderInsights();refreshJournalStatus();
 };
-
 function showView(view){
  if(view==='help-view')view='insights';
  activeView=view;['k','p','insights','journal-view'].forEach(id=>$('#'+id).classList.toggle('hide',id!==view));
