@@ -824,7 +824,7 @@ function showRestorePreview(){
    const partner=mergeByDate(get(P,[]),parsed.partner,false,'partner');
    restorePending={text:raw,parsed};
    const p=document.createElement('p');
-   p.textContent=(parsed.kind==='device'?'Complete backup':'Text report')+': '+parsed.mine.length+' personal, '+parsed.partner.length+' partner entries. New: '+(mine.added+partner.added)+'; matching existing dates: '+(mine.kept+partner.kept)+'.';
+   p.textContent=(parsed.kind==='device'?'Complete backup':'Text report')+': '+parsed.mine.length+' personal, '+parsed.partner.length+' partner entries. '+(mine.added+partner.added)+' new; '+(mine.kept+partner.kept)+' already saved (matching dates).';
    out.replaceChildren(p);
    const detail=document.createElement('p');
    detail.textContent='Dates: '+[...parsed.mine.map(r=>r.date),...parsed.partner.map(r=>r.date)].sort().join(', ')+(parsed.kind==='device'?' · Drafts and experiments included.':' · Only fields present in text can be recovered.');
@@ -850,7 +850,11 @@ $('#restore-apply').onclick=()=>{
  const old={mine:get(K,[]),partner:get(P,[]),drafts:get(DRAFT_KEY,{}),experiments:experimentData()};
  // Create all prospective values and verify serialization before writing.
  const nextDrafts=parsed.kind==='device'?(replace?parsed.drafts:{...parsed.drafts,...old.drafts}):old.drafts;
- const nextExperiments=parsed.kind==='device'?(replace?parsed.experiments:old.experiments):old.experiments;
+ const nextExperiments=parsed.kind==='device'?(replace?parsed.experiments:{
+   ...old.experiments,
+   active:old.experiments.active||parsed.experiments.active||null,
+   history:[...new Map([...parsed.experiments.history,...(old.experiments.history||[])].map(r=>[[r.date,r.started,r.type].join('|'),r])).values()]
+ }):old.experiments;
  const next={[K]:mine.rows,[P]:partner.rows,[DRAFT_KEY]:nextDrafts,[EXP_KEY]:nextExperiments};
  try{
    const encoded=Object.entries(next).map(([key,val])=>[key,JSON.stringify(val)]);
