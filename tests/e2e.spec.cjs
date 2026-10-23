@@ -112,6 +112,25 @@ test('invalid backup is rejected without touching saved entries',async({page})=>
  expect(saved).toHaveLength(1);expect(saved[0].note).toBe('Keep me');
 });
 
+
+test('doctor report with matching partner date restores only personal check-in',async({page})=>{
+ const report='DAILY CHECK-IN — REPORT FOR CLINICIAN\nGenerated: 2026-10-22\n\nDATED RECORDS\n\nPersonal ADHD treatment check-ins\n\n2026-10-19\nMedication: Not taken\nSleep quality: Good\n- Getting started: 4/5\nOther observations: Personal original note\n\n────────────────────\n\nPartner observations\n\n2026-10-19\n- Getting started: Worse\n- Staying present: Same\nPartner notes: Partner original note';
+ await page.locator('#jt').click();await page.locator('#restore-panel > summary').click();
+ await page.locator('#restore-paste').fill(report);await page.locator('#restore-preview').click();
+ await expect(page.locator('#restore-preview-result')).toContainText('1 personal, 0 partner');
+ await page.locator('#restore-apply').click();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));
+ expect(saved).toHaveLength(1);
+ expect(saved[0].getting_started).toBe('3');
+ expect(saved[0].note).toBe('Personal original note');
+ expect(saved[0].medication_today).toBe('No');
+});
+test('backup includes text typed immediately before export, without waiting for draft debounce',async({page})=>{
+ await page.locator('#quick-self').fill('Just typed, never saved');
+ const data=await page.evaluate(()=>{saveDraftNow();return completeBackup()});
+ expect(JSON.stringify(data.unfinished_drafts_on_this_device)).toContain('Just typed, never saved');
+});
+
 test('restore preview imports copied Markdown while keeping existing dates',async({page})=>{
  const text='# Personal ADHD treatment check-ins\n\n## 2026-10-19\n**Medication:** Vyvanse (lisdexamfetamine) · 20 mg · taken at 09:30\n**Sleep quality:** Great\n\n**Daily functioning**\n- Getting started: 4/5\n- Attention control: 3/5\n- Following through: 2/5\n**Life outside work:** Dog park, Exercise\n\n**Tolerability**\n- Appetite and meals: Ate as usual\n- Side-effect severity: Mild\n- Side effects: Dry mouth / thirst\n**Other observations:** Went to the dog park\n\n---\n\n## 2026-10-20\n**Medication:** Not taken\n**Sleep quality:** Poor\n- Getting started: 2/5\n**Other observations:** Hard night';
  await page.locator('#jt').click();
