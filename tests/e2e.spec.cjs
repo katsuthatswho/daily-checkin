@@ -151,6 +151,52 @@ test('patterns omit duplicated latest-answer and note sections',async({page})=>{
  await expect(page.locator('#insight-body')).not.toContainText('Notes worth revisiting');
 });
 
+
+test('Patterns gives date-grounded differences with only two recorded entries',async({page})=>{
+ await page.evaluate(()=>{
+ localStorage.setItem('my_daily_v4',JSON.stringify([
+  {date:'2026-10-19',getting_started:'3',attention_control:'3',finishing:'3',note:'private original observation'},
+  {date:'2026-10-20',getting_started:'3',attention_control:'2',finishing:'1',note:'second original note'}
+ ]))});
+ await page.locator('#it').click();
+ await expect(page.locator('#insight-body')).toContainText('What changed between entries?');
+ await expect(page.locator('.signal-item')).toHaveCount(2);
+ await expect(page.locator('.signal-list')).toContainText('2026-10-19');
+ await expect(page.locator('.signal-list')).toContainText('2026-10-20');
+ await expect(page.locator('.signal-list')).toContainText('4/5');
+ await expect(page.locator('.signal-list')).toContainText('2/5');
+ await expect(page.locator('#insight-body')).not.toContainText('private original observation');
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-list')).toContainText('private original observation');
+ await page.screenshot({path:'test-results/patterns-two-days.png',fullPage:true});
+});
+test('restore replacement never deletes existing unfinished drafts or experiment history',async({page})=>{
+ const oldExperiments={active:null,history:[{date:'2026-10-20',started:'2026-10-19',type:'finish',result:'helped'}]};
+ const backup={format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:[{date:'2026-10-20',note:'Pasted note'}],partner_checkins_on_this_device:[],unfinished_drafts_on_this_device:{fromBackup:{note:'Old copy'}},behavioural_experiments_on_this_device:{active:null,history:[{date:'2026-10-19',started:'2026-10-19',type:'start',result:'partly'}]}};
+ await page.evaluate(x=>{
+  localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-20',note:'Current note',attention_control:'3'}]));
+  localStorage.setItem('daily_checkin_drafts_v1',JSON.stringify({currentDraft:{note:'Keep this'}}));
+  localStorage.setItem('daily_checkin_experiments_v1',JSON.stringify(x));
+ },oldExperiments);
+ await page.locator('#jt').click();
+ await page.locator('#restore-panel > summary').click();
+ await page.locator('#restore-paste').fill(JSON.stringify(backup));
+ await page.locator('#restore-preview').click();
+ await expect(page.locator('#restore-preview-result')).toContainText('Matching entries');
+ await page.locator('#restore-overwrite').check();
+ await page.locator('#restore-apply').click();
+ const data=await page.evaluate(()=>({
+  mine:JSON.parse(localStorage.getItem('my_daily_v4')),
+  drafts:JSON.parse(localStorage.getItem('daily_checkin_drafts_v1')),
+  experiments:JSON.parse(localStorage.getItem('daily_checkin_experiments_v1'))
+ }));
+ expect(data.mine[0].note).toBe('Pasted note');
+ expect(data.mine[0].attention_control).toBe('3');
+ expect(data.drafts.currentDraft.note).toBe('Keep this');
+ expect(data.drafts.fromBackup.note).toBe('Old copy');
+ expect(data.experiments.history).toHaveLength(2);
+});
+
 test('day navigation and progress preserve dated entries',async({page})=>{
  await expect(page.locator('#next-day')).toBeDisabled();
  const today=await page.locator('#entrydate').inputValue();
