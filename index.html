@@ -211,7 +211,36 @@ body{font-weight:400;letter-spacing:-.012em}
 #ke{line-height:1.5}
 #ke{background:#f0f5f0;border:1px solid #d8e6da;color:#456451}#ke .missing-jump{display:block;margin-top:10px;background:#fff;border:1px solid #b87551;color:#784329;border-radius:9px;min-height:44px;padding:9px 13px;font:inherit;font-weight:700;text-align:left}
 #ke .missing-jump:focus-visible{outline:3px solid #b87551;outline-offset:2px}
-.restore-panel textarea{min-height:150px;line-height:1.5}.restore-replace{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5;color:var(--muted);margin:12px 0}.restore-replace input{width:18px;min-width:18px;height:18px;margin:1px 0}.restore-panel #restore-preview-result{font-size:12px;line-height:1.5;color:var(--accent);margin-top:10px}.restore-panel button{min-height:44px}</style></head><body><main class="w"><header class="app-head"><div class="app-mark" aria-hidden="true">✎</div><div><div class="app-name">Daily Check-in</div></div></header><div class="tabs" role="navigation" aria-label="Sections"><button id="kt" class="on" type="button" aria-current="page"><span>Check-in</span></button><button id="it" type="button"><span>Patterns</span></button><button id="jt" type="button"><span>Journal</span></button></div>
+.restore-panel textarea{min-height:150px;line-height:1.5}.restore-replace{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5;color:var(--muted);margin:12px 0}.restore-replace input{width:18px;min-width:18px;height:18px;margin:1px 0}.restore-panel #restore-preview-result{font-size:12px;line-height:1.5;color:var(--accent);margin-top:10px}.restore-panel button{min-height:44px}
+/* Mobile product polish: readable editorial rhythm without introducing new workflow steps. */
+@media(max-width:600px){
+ .w{max-width:520px;padding-left:18px;padding-right:18px}
+ .app-head{margin:0 -18px;padding:10px 18px 7px;min-height:40px}
+ .app-name{font-weight:550;font-size:12px;color:#66766c}
+ .tabs{margin:0 -18px 15px;padding:0 18px}
+ .tabs button{min-height:44px;letter-spacing:0;font-size:13px}
+ #checkin-head h1,#insights h1,#journal-view h1{font-family:"Iowan Old Style","Baskerville","New York",Georgia,serif;font-weight:600;font-size:clamp(27px,7.3vw,32px);letter-spacing:-.035em;line-height:1.16;margin-bottom:13px}
+ .checkin-switch{margin-bottom:10px}
+ .checkin-switch button{min-height:44px}
+ .date-control{margin-bottom:10px}
+ .quick-capture{margin-bottom:8px}
+ .signal-list{display:grid;gap:0;margin:12px 0;border-top:1px solid var(--line)}
+ .signal-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line)}
+ .signal-item>div:first-child{display:grid;gap:4px;min-width:0}
+ .signal-item strong{font-size:14px;letter-spacing:-.02em}
+ .signal-item span{color:var(--muted);font-size:11px}
+ .signal-score{white-space:nowrap;font-size:14px;font-weight:700;color:var(--accent)}
+ #insights>.sub,#journal-view>.sub{font-size:13px;line-height:1.55}
+ #journal-list .journal-item{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;box-shadow:none}
+ #journal-list .journal-item p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+ #journal-list .journal-item button{min-height:44px}
+ .insight-lead{border-radius:15px;padding:16px}
+ .insight-section{padding:18px 0}
+ .insight-section h2{font-family:"Iowan Old Style","Baskerville","New York",Georgia,serif;letter-spacing:-.025em}
+ #restore-panel,#journal-panel{margin-bottom:12px}
+}
+@media(prefers-reduced-motion:reduce){.completion-track>div,.tabs button,.checkin-switch button{transition:none!important}}
+</style></head><body><main class="w"><header class="app-head"><div class="app-mark" aria-hidden="true">✎</div><div><div class="app-name">Daily Check-in</div></div></header><div class="tabs" role="navigation" aria-label="Sections"><button id="kt" class="on" type="button" aria-current="page"><span>Check-in</span></button><button id="it" type="button"><span>Patterns</span></button><button id="jt" type="button"><span>Journal</span></button></div>
 <section id="help-view" class="hide"><div class="eyebrow">TRY SOMETHING</div><h2>One small thing to try</h2><p class="sub">Try a practical adjustment, notice what happens, and decide whether it is worth keeping.</p><section id="experiment-section" class="experiment-section"><div class="insight-kicker">A SMALL EXPERIMENT</div><h2>Start with one change</h2><p class="insight-muted">Pick something that gets in your way, then try a small adjustment. Record what happened, including when it did not help.</p><label for="experiment-type" class="label">What would you like to make easier?</label><select id="experiment-type"><option value="">Choose one</option><option value="start">Getting started</option><option value="switch">Switching off or changing tasks</option><option value="finish">Finishing what I began</option><option value="life">Making room for life outside work</option></select><div id="experiment-plan" class="experiment-plan hide"></div><div id="experiment-active" class="hide"><div class="experiment-active-head"><strong id="experiment-name"></strong><button type="button" class="secondary" id="experiment-stop">Finish experiment</button></div><p id="experiment-step"></p><label class="label" for="experiment-result">How did it go today?</label><select id="experiment-result"><option value="">Not reviewed</option><option value="helped">It helped</option><option value="partly">A little</option><option value="not">Didn't help</option><option value="nottried">Didn't try it</option></select><label class="label" for="experiment-note">What made the difference? (optional)</label><textarea id="experiment-note" placeholder="A specific example is more useful than a perfect answer."></textarea><button type="button" id="experiment-review">Save today's review</button><p id="experiment-feedback" class="hint" role="status"></p><div id="experiment-history"></div></div></section></section><section id="insights" class="hide"><div class="eyebrow">PATTERNS & NEXT STEPS</div><h1>What’s changing?</h1><p class="sub">A clearer view of the days you recorded, with context kept intact.</p><div class="periods" role="group" aria-label="Insights time period"><button data-period="7">7 days</button><button data-period="30" class="on">30 days</button><button data-period="all">All time</button></div><div id="insight-body"></div><button class="secondary" id="insight-journal">Review dated entries</button><button class="secondary" id="insight-copy">Copy summary</button><button class="secondary" id="insight-share">Share summary</button><p id="insight-share-status" class="hint" role="status"></p></section><section id="journal-view" class="hide"><div class="eyebrow">JOURNAL</div><h1>Your saved days.</h1><p class="sub">Review, edit, back up or share your records.</p><div class="periods" role="group" aria-label="Journal entry filter"><button data-jfilter="both" class="on">Both</button><button data-jfilter="mine">Mine</button><button data-jfilter="partner">Partner</button></div><div class="journal-heading"><strong>Saved entries</strong><span>Newest first</span></div><div id="journal-list"></div><div class="journal-heading"><strong>Keep & share</strong><span>Backup and restore</span></div><div id="journal-home"><details id="journal-panel" class="card journal-panel"><summary>Journal backup <span id="journal-status" class="journal-pill">Checking…</span></summary><div class="hint" style="margin-top:10px">Your check-ins are saved on this device. Keep one dated Markdown journal in iCloud Drive as a second copy.</div><p id="journal-detail" class="hint" role="status" aria-live="polite"></p><button type="button" class="secondary" id="journal-export">Save full journal to Files (.md)</button><div style="margin-top:18px;border-top:1px solid var(--line);padding-top:15px"><div class="label">For your doctor</div><div class="hint">Plain-text report with dates and score explanations. No Markdown symbols. Review before sharing.</div><button type="button" class="secondary" id="doctor-copy">Copy readable report</button><button type="button" class="secondary" id="doctor-share">Share report (.txt)</button><div id="doctor-message" class="hint" role="status" aria-live="polite"></div></div><div class="hint" style="margin-top:7px">Choose iCloud Drive in Files and <strong>replace</strong> your previous <code>daily-checkin-journal.md</code>. Each export is a complete, deduplicated snapshot, not an extra set of entries.</div><div id="journal-confirm" class="hide" style="padding:12px 0"><div class="label">Did you replace the existing journal file in Files?</div><div class="hint">Only confirm after checking it was saved. Downloading alone does not back up your data.</div><button type="button" class="secondary" id="journal-done">Yes, the file is saved</button><button type="button" class="secondary" id="journal-cancel">Not yet</button></div><div id="journal-message" class="hint" role="status" aria-live="polite"></div></details><details id="restore-panel" class="card journal-panel restore-panel"><summary>Restore from backup or copied report <span class="journal-pill">Preview first</span></summary><p class="hint">Paste a previous Markdown check-in export or the dated records from your doctor report. We identify entries by date and never delete your current records. Preview before importing.</p><div class="restore-backup"><div class="label">Complete device backup</div><p class="hint">Use the JSON file to restore personal check-ins, partner observations, unfinished drafts and experiments together. Preview all changes first.</p><button type="button" class="secondary" id="device-backup-download">Export complete backup (.json)</button><label class="label" for="restore-json-file">Choose an existing backup file</label><input id="restore-json-file" type="file" accept=".json,application/json"><div class="hint">Or paste a complete device-backup JSON below.</div></div><label class="label" for="restore-paste">Paste your saved records</label><textarea id="restore-paste" rows="7" placeholder="Paste your Markdown, doctor report or complete JSON backup"></textarea><button type="button" class="secondary" id="restore-preview">Preview dates to restore</button><div id="restore-preview-result" role="status" aria-live="polite"></div><label class="restore-replace"><input id="restore-overwrite" type="checkbox"> Replace matching dates with imported entries (otherwise keep existing dates)</label><button type="button" class="secondary hide" id="restore-apply">Import previewed entries</button><p class="hint">Complete JSON backups retain all saved fields. Text reports only contain displayed details. Imports never delete existing dates; replacing them requires explicit approval.</p></details></div></section><section id="checkin-head" aria-labelledby="checkin-title"><h1 id="checkin-title">How was your day?</h1><p class="sub" id="checkin-description" hidden></p><div id="checkin-switch" class="checkin-switch" role="group" aria-label="Whose check-in"><button id="self-switch" class="on" type="button" aria-pressed="true">My check-in</button><button id="pt" type="button" aria-pressed="false">Partner observations</button></div><div class="date-control"><span class="label">YOUR DAY</span><div class="date-navigation"><button type="button" id="previous-day" aria-label="Previous day">‹</button><input id="entrydate" type="date" aria-label="Entry date"><button type="button" id="next-day" aria-label="Next day">›</button></div><div class="hint" id="datehint">Today by default. Choose an earlier date to review or edit.</div></div></section><section id="k"><p id="draft-status" class="draft-status" role="status" aria-live="polite"></p><div class="sub" id="progress" style="margin-top:4px">0 of 7 answered</div><div class="completion-track" role="progressbar" aria-label="Check-in progress" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"><div id="completion-fill"></div></div><div class="ok" id="ko">Saved on this device ✓</div><div class="err hide" id="ke"></div>
 
 <details class="quick-capture"><summary><span>Write or speak a note</span><span class="capture-chevron" aria-hidden="true">+</span></summary><p class="hint">Write or dictate a note, then review suggested answers.</p><div id="personal-carry" class="carry-note hide"></div><textarea id="quick-self" aria-label="Quick note"></textarea><button type="button" class="secondary speech-trigger" data-speech-target="quick-self">Speak note</button><button type="button" class="secondary" id="quick-self-apply">Review suggested answers</button><div id="quick-self-status" class="hint" role="status" aria-live="polite"></div></details>
@@ -622,19 +651,22 @@ function insightFacts(){
 }
 function insightCard(kicker,title,body,foot=''){return '<article class="insight-card"><div class="insight-kicker">'+htmlSafe(kicker)+'</div><h2>'+htmlSafe(title)+'</h2><p>'+body+'</p>'+(foot?'<p class="hint">'+htmlSafe(foot)+'</p>':'')+'</article>'}
 function changeSignals(rows,dims){
- const observations=dims.map(([name,key])=>{
-  const v=rows.filter(r=>r[key]!==''&&r[key]!=null&&Number.isInteger(Number(r[key]))&&Number(r[key])>=0&&Number(r[key])<=4).map(r=>Number(r[key])+1);
-  if(v.length<6)return null;
-  const recent=v.slice(-3),earlier=v.slice(-6,-3),avg=a=>a.reduce((s,n)=>s+n,0)/a.length;
-  return {name,delta:avg(recent)-avg(earlier),latest:avg(recent)};
+ const records=rows.slice().sort((a,b)=>a.date.localeCompare(b.date));
+ if(records.length<2)return '<p class="insight-muted">One recorded day is a starting point, not a pattern. Keep checking in when it is useful; there is no streak to maintain.</p>';
+ const signals=dims.map(([name,key])=>{
+  const answered=records.filter(r=>r[key]!==''&&r[key]!=null&&Number.isInteger(Number(r[key]))&&Number(r[key])>=0&&Number(r[key])<=4);
+  if(answered.length<2)return null;
+  const latest=answered[answered.length-1],previous=answered[answered.length-2];
+  return {name,key,latest:Number(latest[key])+1,previous:Number(previous[key])+1,latestDate:latest.date,previousDate:previous.date,
+    change:Number(latest[key])-Number(previous[key]),answered:answered.length};
  }).filter(Boolean);
- if(!observations.length)return '<p class="insight-muted">Once you have six answers in a particular area, this section can compare your latest three with the three before them. No need to fill in missed days.</p>';
- const sorted=observations.slice().sort((a,b)=>a.delta-b.delta),down=sorted.find(x=>x.delta<=-0.65),up=sorted.slice().reverse().find(x=>x.delta>=0.65);
- let parts=[];
- if(down)parts.push('<p><strong>'+htmlSafe(down.name)+'</strong> was lower by '+Math.abs(down.delta).toFixed(1)+' points on average in the latest three answers. It may be worth looking at what changed around those dates.</p>');
- if(up)parts.push('<p><strong>'+htmlSafe(up.name)+'</strong> was higher by '+up.delta.toFixed(1)+' points on average. Check your notes for anything that made those days easier.</p>');
- if(!parts.length)parts.push('<p>There is no clear shift of roughly one point or more across the last two sets of three answers. Individual days still vary.</p>');
- return parts.join('')+'<p class="insight-foot">These are small, descriptive comparisons between answered days, not trends across equal calendar periods or evidence of a treatment effect.</p>';
+ if(!signals.length)return '<p class="insight-muted">Not enough comparable answered days yet. Unanswered fields are excluded rather than counted as zero.</p>';
+ const changed=signals.filter(x=>Math.abs(x.change)>=1).sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
+ const top=changed.slice(0,3);
+ if(!top.length)return '<p class="insight-muted">Your last two recorded answers were the same in the areas measured. That is a comparison of two entries, not evidence of a stable trend.</p><p class="insight-foot">Based only on answered dates. For the full history, see the charts below.</p>';
+ return '<p class="insight-muted">A few differences between your latest two answered dates. Tap a date in Journal for the original context.</p>'+
+  '<div class="signal-list">'+top.map(x=>'<div class="signal-item"><div><strong>'+htmlSafe(x.name)+'</strong><span>'+htmlSafe(x.previousDate)+' → '+htmlSafe(x.latestDate)+'</span></div><div class="signal-score">'+x.previous+'/5 <span aria-hidden="true">→</span> '+x.latest+'/5</div></div>').join('')+'</div>'+
+  '<p class="insight-foot">These are single-day differences, not trends or treatment effects. Missing answers are excluded; higher scores indicate less difficulty.</p>';
 }
 function renderInsights(){
  const {mine,partner,shared}=insightData();
@@ -643,8 +675,8 @@ function renderInsights(){
  let body='<div class="insight-lead"><span class="insight-overline">YOUR RECORD AT A GLANCE</span><div class="insight-lead-grid"><div><strong>'+mine.length+'</strong><span>days checked in</span></div><div><strong>'+partner.length+'</strong><span>partner entries</span></div><div><strong>'+shared.length+'</strong><span>dates together</span></div></div><p>'+ (dayCount?'Within the last '+dayCount+' days.':'Across all saved dates.')+' Unrecorded days are not counted as low scores.</p></div>';
  if(!mine.length&&!partner.length){$('#insight-body').innerHTML=body+insightCard('GET STARTED','Your first check-in makes this useful','Save a check-in to begin seeing your recorded days here. No streaks to maintain.');$('#insight-journal').textContent='Start a check-in';return}$('#insight-journal').textContent='Review dated entries';
  if(mine.length){
-  body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">WHAT STANDS OUT</div><h2>Worth a closer look</h2></div>'+changeSignals(mine,dims)+'</section>';
-  body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">02 / OVER TIME</div><h2>How your days varied</h2></div><p class="insight-muted">Each dot is one recorded answer, in date order. Higher means less difficulty. Gaps are not filled in.</p><div class="trend-list">'+dims.map(([name,key])=>{
+  body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">01 / DAY TO DAY</div><h2>What changed between entries?</h2></div>'+changeSignals(mine,dims)+'</section>';
+  body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">02 / OVER TIME</div><h2>How your days varied</h2></div><p class="insight-muted">Each dot represents one answered date, in order. Higher scores mean less difficulty. Unanswered days are not filled in.</p><div class="trend-list">'+dims.map(([name,key])=>{
     const values=mine.filter(r=>r[key]!==''&&r[key]!=null&&Number.isInteger(Number(r[key]))&&Number(r[key])>=0&&Number(r[key])<=4).map(r=>({date:r.date,v:Number(r[key])+1}));
     if(!values.length)return '<div class="trend-row"><div class="trend-label"><strong>'+htmlSafe(name)+'</strong><span>No answers</span></div></div>';
     const mean=values.reduce((sum,r)=>sum+r.v,0)/values.length;
@@ -828,9 +860,12 @@ function showRestorePreview(){
    out.replaceChildren(p);
    const detail=document.createElement('p');
    detail.textContent='Dates: '+[...parsed.mine.map(r=>r.date),...parsed.partner.map(r=>r.date)].sort().join(', ')+(parsed.kind==='device'?' · Drafts and experiments included.':' · Only fields present in text can be recovered.');
+   const collisionDates=[...parsed.mine.filter(r=>get(K,[]).some(o=>o.date===r.date)).map(r=>'Your check-in '+r.date),...parsed.partner.filter(r=>get(P,[]).some(o=>o.date===r.date)).map(r=>'Partner '+r.date)];
+   if(collisionDates.length){const warning=document.createElement('p');warning.textContent='Matching entries: '+collisionDates.join(', ')+'. Replacement updates only fields present in imported entries; existing notes and other fields remain unless supplied.';out.append(warning)}
+
    out.append(detail);
    if(parsed.kind==='device'){
-     const extra=document.createElement('p');extra.textContent='For drafts and experiments, existing data is preserved unless you select replacement. Importing will not clear other saved records.';out.append(extra);
+     const extra=document.createElement('p');extra.textContent='Unfinished drafts and experiment history are merged without deleting existing work. The replacement checkbox only affects dated check-ins.';out.append(extra);
    }
    $('#restore-apply').classList.remove('hide');
  }catch(e){out.textContent=e.message}
@@ -849,12 +884,12 @@ $('#restore-apply').onclick=()=>{
  const partner=mergeByDate(get(P,[]),parsed.partner,replace,'partner');
  const old={mine:get(K,[]),partner:get(P,[]),drafts:get(DRAFT_KEY,{}),experiments:experimentData()};
  // Create all prospective values and verify serialization before writing.
- const nextDrafts=parsed.kind==='device'?(replace?parsed.drafts:{...parsed.drafts,...old.drafts}):old.drafts;
- const nextExperiments=parsed.kind==='device'?(replace?parsed.experiments:{
-   ...old.experiments,
+ const nextDrafts=parsed.kind==='device'?{...parsed.drafts,...old.drafts}:old.drafts;
+ const nextExperiments=parsed.kind==='device'?{
+   ...parsed.experiments,...old.experiments,
    active:old.experiments.active||parsed.experiments.active||null,
    history:[...new Map([...parsed.experiments.history,...(old.experiments.history||[])].map(r=>[[r.date,r.started,r.type].join('|'),r])).values()]
- }):old.experiments;
+ }:old.experiments;
  const next={[K]:mine.rows,[P]:partner.rows,[DRAFT_KEY]:nextDrafts,[EXP_KEY]:nextExperiments};
  try{
    const encoded=Object.entries(next).map(([key,val])=>[key,JSON.stringify(val)]);
