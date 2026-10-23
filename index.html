@@ -422,7 +422,7 @@ function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').repla
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
 function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
 $('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');function completeBackup(){return {exported_at:new Date().toISOString(),format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[]),unfinished_drafts_on_this_device:get(DRAFT_KEY,{}),behavioural_experiments_on_this_device:experimentData()}}
-function exportCompleteBackup(){dl('daily-checkin-device-data.json',JSON.stringify(completeBackup(),null,2),'application/json')}
+function exportCompleteBackup(){if(typeof saveDraftNow==='function')saveDraftNow();dl('daily-checkin-device-data.json',JSON.stringify(completeBackup(),null,2),'application/json')}
 $('#bk').onclick=exportCompleteBackup;$('#device-backup-download').onclick=exportCompleteBackup;
 
 const htmlSafe=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -781,7 +781,13 @@ function parsePastedRecords(raw){
  const text=raw.replace(/\r\n?/g,'\n').trim();
  if(text.length>300000)throw Error('Report is too large. Paste a shorter dated export.');
  if(!/(?:Personal ADHD treatment check-ins|DAILY CHECK-IN — REPORT FOR CLINICIAN|Daily Check-in Journal)/i.test(text))throw Error('Paste a Daily Check-in Markdown export or doctor report.');
- const chunks=text.split(/(?:^|\n)(?:#{2}\s+)?(\d{4}-\d\d-\d\d)\s*\n/g);
+ // Parse only the personal dated section. A partner record may contain the same date and label names.
+ const personalStart=text.search(/(?:^|\n)(?:#\s*)?Personal ADHD treatment check-ins\s*\n/i);
+ if(personalStart<0)throw Error('No personal check-in section found. Use the complete JSON backup to restore partner-only entries.');
+ const afterPersonal=text.slice(personalStart);
+ const partnerStart=afterPersonal.search(/\n(?:#{1,3}\s*)?Partner observations\s*\n/i);
+ const personalText=partnerStart>=0?afterPersonal.slice(0,partnerStart):afterPersonal;
+ const chunks=personalText.split(/(?:^|\n)(?:#{2}\s+)?(\d{4}-\d\d-\d\d)\s*\n/g);
  const found=new Map();
  const known=new Set(['Medication','Sleep quality','Daily functioning','Life outside work','Tolerability','Treatment notes','Other observations','Partner observations']);
  for(let i=1;i<chunks.length;i+=2){
