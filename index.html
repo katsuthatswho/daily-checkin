@@ -860,9 +860,12 @@ function showRestorePreview(){
    out.replaceChildren(p);
    const detail=document.createElement('p');
    detail.textContent='Dates: '+[...parsed.mine.map(r=>r.date),...parsed.partner.map(r=>r.date)].sort().join(', ')+(parsed.kind==='device'?' · Drafts and experiments included.':' · Only fields present in text can be recovered.');
+   const collisionDates=[...parsed.mine.filter(r=>get(K,[]).some(o=>o.date===r.date)).map(r=>'Your check-in '+r.date),...parsed.partner.filter(r=>get(P,[]).some(o=>o.date===r.date)).map(r=>'Partner '+r.date)];
+   if(collisionDates.length){const warning=document.createElement('p');warning.textContent='Matching entries: '+collisionDates.join(', ')+'. Replacement updates only fields present in imported entries; existing notes and other fields remain unless supplied.';out.append(warning)}
+
    out.append(detail);
    if(parsed.kind==='device'){
-     const extra=document.createElement('p');extra.textContent='For drafts and experiments, existing data is preserved unless you select replacement. Importing will not clear other saved records.';out.append(extra);
+     const extra=document.createElement('p');extra.textContent='Unfinished drafts and experiment history are merged without deleting existing work. The replacement checkbox only affects dated check-ins.';out.append(extra);
    }
    $('#restore-apply').classList.remove('hide');
  }catch(e){out.textContent=e.message}
@@ -881,12 +884,12 @@ $('#restore-apply').onclick=()=>{
  const partner=mergeByDate(get(P,[]),parsed.partner,replace,'partner');
  const old={mine:get(K,[]),partner:get(P,[]),drafts:get(DRAFT_KEY,{}),experiments:experimentData()};
  // Create all prospective values and verify serialization before writing.
- const nextDrafts=parsed.kind==='device'?(replace?parsed.drafts:{...parsed.drafts,...old.drafts}):old.drafts;
- const nextExperiments=parsed.kind==='device'?(replace?parsed.experiments:{
-   ...old.experiments,
+ const nextDrafts=parsed.kind==='device'?{...parsed.drafts,...old.drafts}:old.drafts;
+ const nextExperiments=parsed.kind==='device'?{
+   ...parsed.experiments,...old.experiments,
    active:old.experiments.active||parsed.experiments.active||null,
    history:[...new Map([...parsed.experiments.history,...(old.experiments.history||[])].map(r=>[[r.date,r.started,r.type].join('|'),r])).values()]
- }):old.experiments;
+ }:old.experiments;
  const next={[K]:mine.rows,[P]:partner.rows,[DRAFT_KEY]:nextDrafts,[EXP_KEY]:nextExperiments};
  try{
    const encoded=Object.entries(next).map(([key,val])=>[key,JSON.stringify(val)]);
