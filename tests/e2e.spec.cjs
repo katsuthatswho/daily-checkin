@@ -216,6 +216,42 @@ test('restore replacement never deletes existing unfinished drafts or experiment
  expect(data.experiments.history).toHaveLength(2);
 });
 
+
+test('Other side effect reveals description, saves it, and restores after reload',async({page})=>{
+ await page.locator('#more-details').evaluate(el=>el.open=true);
+ await page.locator('[data-g=side] [data-v=Mild]').click();
+ await page.locator('#effects [data-v=Other]').click();
+ await expect(page.locator('#effect-other-wrap')).toBeVisible();
+ await page.locator('#effect-other').fill('Tense jaw in the afternoon');
+ await page.locator('#sk').click();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
+ expect(saved.side_effects).toContain('Other');
+ expect(saved.side_effect_other).toBe('Tense jaw in the afternoon');
+ expect(await page.evaluate(()=>mdMine(get('my_daily_v4',[])))).toContain('Tense jaw in the afternoon');
+ await page.reload();
+ await expect(page.locator('#effect-other')).toHaveValue('Tense jaw in the afternoon');
+ await page.locator('#effects [data-v=Other]').click();
+ await expect(page.locator('#effect-other-wrap')).toBeHidden();
+ await page.locator('#sk').click();
+ const updated=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
+ expect(updated.side_effect_other).toBe('');
+});
+test('Journal presents three export outcomes and independent restore',async({page})=>{
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-panel')).toBeVisible();
+ await expect(page.locator('#device-backup-download')).toHaveCount(1);
+ await expect(page.locator('#journal-export')).toHaveCount(1);
+ await expect(page.locator('#doctor-copy')).toHaveCount(1);
+ await expect(page.locator('#doctor-share')).toHaveCount(1);
+ await expect(page.locator('#journal-panel')).toContainText('Back up everything');
+ await expect(page.locator('#journal-panel')).toContainText('Readable journal');
+ await expect(page.locator('#journal-panel')).toContainText('For your doctor');
+ await expect(page.locator('#restore-panel')).not.toHaveAttribute('open','');
+ await page.locator('#restore-panel > summary').click();
+ await expect(page.locator('#restore-json-file')).toBeVisible();
+ await page.screenshot({path:'test-results/journal-export-actions-mobile.png',fullPage:true});
+});
+
 test('day navigation and progress preserve dated entries',async({page})=>{
  await expect(page.locator('#next-day')).toBeDisabled();
  const today=await page.locator('#entrydate').inputValue();
