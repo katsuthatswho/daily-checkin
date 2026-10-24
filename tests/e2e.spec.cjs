@@ -441,7 +441,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
  expect(journal).toContain('Partner observation');
  expect(journal).toContain('## '+date);
  expect((journal.match(new RegExp('## '+date,'g'))||[])).toHaveLength(2);
- await page.locator('#jt').click();await page.locator('#journal-panel summary').click();
+ await page.locator('#jt').click();await page.locator('#journal-panel').evaluate(el=>el.open=true);
  await expect(page.locator('#journal-status')).toContainText('Not backed up');
  await page.evaluate(()=>{navigator.share=async()=>{};navigator.canShare=()=>true});
  await page.locator('#journal-export').click();
@@ -458,7 +458,7 @@ test('single journal backup is deduplicated, dated, confirmed and detects edits'
  expect(revised).not.toContain('First journal note');
  expect((revised.match(new RegExp('## '+date,'g'))||[])).toHaveLength(2);
  await page.reload();
- await page.locator('#jt').click();await page.locator('#journal-panel summary').click();
+ await page.locator('#jt').click();await page.locator('#journal-panel').evaluate(el=>el.open=true);
  await expect(page.locator('#journal-status')).toContainText('Changes to back up');
 });
 
