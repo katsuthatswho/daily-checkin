@@ -255,6 +255,8 @@ test('later-day change Other reveals a separate description and persists',async(
 test('P0 Journal has one primary export path, with older formats collapsed',async({page})=>{
  await page.locator('#jt').click();
  await expect(page.locator('#journal-panel')).toBeVisible();
+ await expect(page.locator('#journal-panel')).not.toHaveAttribute('open','');
+ await page.locator('#journal-panel > summary').click();
  await expect(page.locator('#device-backup-download')).toBeVisible();
  await expect(page.locator('#journal-export')).toBeVisible();
  await expect(page.locator('#doctor-copy')).toBeVisible();
@@ -270,6 +272,7 @@ test('P0 journal status never implies JSON drafts are backed up',async({page})=>
  await page.locator('#jt').click();
  await expect(page.locator('#journal-status')).toContainText('Journal: Not backed up');
  await page.evaluate(()=>{navigator.share=async()=>{};navigator.canShare=()=>true});
+ await page.locator('#journal-panel').evaluate(el=>el.open=true);
  await page.locator('#journal-export').click();
  await page.locator('#journal-done').click();
  await expect(page.locator('#journal-status')).toContainText('Journal: Backed up');
@@ -312,6 +315,17 @@ test('P0 editing an imported record preserves fields this form does not recognis
  expect(row.note).toBe('Edited');expect(row.legacy_mood_context).toBe('Must not disappear');
 });
 
+test('Journal starts with entries rather than an expanded export dashboard',async({page})=>{
+ await page.evaluate(()=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',note:'Walked dogs'}])));
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-list')).toContainText('Walked dogs');
+ await expect(page.locator('#journal-panel')).not.toHaveAttribute('open','');
+ await expect(page.locator('#restore-panel')).not.toHaveAttribute('open','');
+ await expect(page.locator('#advanced-formats')).not.toHaveAttribute('open','');
+ await expect(page.locator('#doctor-copy')).toBeHidden();
+ await page.locator('#journal-panel > summary').click();
+ await expect(page.locator('#doctor-copy')).toBeVisible();
+});
 test('Journal presents three export outcomes and independent restore',async({page})=>{
  await page.locator('#jt').click();
  await expect(page.locator('#journal-panel')).toBeVisible();
@@ -319,9 +333,9 @@ test('Journal presents three export outcomes and independent restore',async({pag
  await expect(page.locator('#journal-export')).toHaveCount(1);
  await expect(page.locator('#doctor-copy')).toHaveCount(1);
  await expect(page.locator('#doctor-share')).toHaveCount(1);
- await expect(page.locator('#journal-panel')).toContainText('Back up everything');
- await expect(page.locator('#journal-panel')).toContainText('Readable journal');
- await expect(page.locator('#journal-panel')).toContainText('For your doctor');
+ await expect(page.locator('#journal-panel')).toContainText('Complete backup');
+ await expect(page.locator('#journal-panel')).toContainText('Readable copy');
+ await expect(page.locator('#journal-panel')).toContainText('For your clinician');
  await expect(page.locator('#restore-panel')).not.toHaveAttribute('open','');
  await page.locator('#restore-panel > summary').click();
  await expect(page.locator('#restore-json-file')).toBeVisible();
