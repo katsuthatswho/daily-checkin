@@ -948,6 +948,7 @@ $('#restore-apply').onclick=()=>{
  }catch(e){out.textContent='Restore failed verification. Your existing records have been retained; keep the original backup.';return}
  out.textContent='Imported '+(mine.added+partner.added)+' new entries and updated '+(mine.updated+partner.updated)+' matching entries. Kept '+(mine.kept+partner.kept)+' existing entries.';
  restorePending=null;$('#restore-apply').classList.add('hide');
+ st=get(S,{medication:'',dose:''});updateUsualMedication();
  loadSelectedDate();render();renderJournal();renderInsights();refreshJournalStatus();
 };
 function showView(view){
