@@ -304,7 +304,8 @@ test('P0 text report Not recorded never clears a saved answer during replacement
 test('P0 editing an imported record preserves fields this form does not recognise',async({page})=>{
  const day=await page.locator('#entrydate').inputValue();
  await page.evaluate(d=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:d,medication_today:'No',note:'Original',legacy_mood_context:'Must not disappear'}])),day);
- await page.reload();
+ await page.reload({waitUntil:'domcontentloaded'});
+ await page.locator('#k > .quick-capture').evaluate(el=>el.open=true);
  await page.locator('#quick-self').fill('Edited');
  await page.locator('#sk').click();
  const row=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
