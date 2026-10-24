@@ -446,7 +446,7 @@ $('#sp').onclick=()=>{if($('#quick-partner').value.trim()!==$('#pn').value.trim(
 function esc(v){if(Array.isArray(v))v=v.join('|');return '"'+String(v??'').replaceAll('"','""')+'"'}
 function csv(rows){if(!rows.length)return'';let h=[...new Set(rows.flatMap(Object.keys))];return [h.map(esc).join(','),...rows.map(r=>h.map(k=>esc(r[k])).join(','))].join('\n')}
 function dl(n,c,t){let u=URL.createObjectURL(new Blob([c],{type:t})),a=document.createElement('a');a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
-$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');function completeBackup(){return {exported_at:new Date().toISOString(),format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[]),unfinished_drafts_on_this_device:get(DRAFT_KEY,{}),behavioural_experiments_on_this_device:experimentData()}}
+$('#ck').onclick=()=>dl('my-checkins.csv',csv(get(K,[])),'text/csv');$('#cp').onclick=()=>dl('partner-checkins.csv',csv(get(P,[])),'text/csv');function completeBackup(){return {exported_at:new Date().toISOString(),format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:get(K,[]),partner_checkins_on_this_device:get(P,[]),unfinished_drafts_on_this_device:get(DRAFT_KEY,{}),behavioural_experiments_on_this_device:experimentData(),usual_medication_settings_on_this_device:get(S,{})}}
 function exportCompleteBackup(){
  if(typeof saveDraftNow==='function')saveDraftNow();
  try{
@@ -809,7 +809,9 @@ function parseDeviceBackup(raw){
  const drafts=data.unfinished_drafts_on_this_device,experiments=data.behavioural_experiments_on_this_device;
  if(!drafts||typeof drafts!=='object'||Array.isArray(drafts))throw Error('Backup is missing unfinished drafts.');
  if(!experiments||typeof experiments!=='object'||Array.isArray(experiments)||!Array.isArray(experiments.history))throw Error('Backup is missing behavioural experiments.');
- return {kind:'device',mine,partner,drafts,experiments};
+ const settings=data.usual_medication_settings_on_this_device;
+ if(settings!==undefined&&(!settings||typeof settings!=='object'||Array.isArray(settings)))throw Error('Backup has invalid medication preferences.');
+ return {kind:'device',mine,partner,drafts,experiments,settings:settings||null};
 }
 function parsePastedRecords(raw){
  const text=raw.replace(/\r\n?/g,'\n').trim();
@@ -845,24 +847,24 @@ function parsePastedRecords(raw){
          else if(!/^Not recorded$/i.test(value)){
            row.medication_today='Yes';
            const parts=value.split(/\s*·\s*/);
-           row.medication=parts[0]==='Medication not specified'?'':parts[0];
-           row.dose=parts[1]&&parts[1]!=='Dose not specified'?parts[1]:'';
+           if(parts[0]!=='Medication not specified')row.medication=parts[0];
+           if(parts[1]&&parts[1]!=='Dose not specified')row.dose=parts[1];
            const tm=value.match(/taken at\s+(\d\d:\d\d)/);
-           row.time_taken=tm?tm[1]:'';
+           if(tm)row.time_taken=tm[1];
          }
-       } else if(label==='Sleep quality')row.sleep=value==='Not recorded'?'':value;
-       else if(label==='Life outside work')row.life_outside_work=value==='Not recorded'?[]:value.split(/,\s*/);
-       else if(label==='Treatment notes'){row.treatment_notes=value;capture='treatment_notes'}
-       else if(label==='Other observations'){row.note=value;capture='note'}
+       } else if(label==='Sleep quality'){if(value!=='Not recorded')row.sleep=value;}
+       else if(label==='Life outside work'){if(value!=='Not recorded')row.life_outside_work=value.split(/,\s*/);}
+       else if(label==='Treatment notes'){if(value!=='Not recorded'){row.treatment_notes=value;capture='treatment_notes'}}
+       else if(label==='Other observations'){if(value!=='Not recorded'){row.note=value;capture='note'}}
        else if(key){
          if(['getting_started','attention_control','side_quest_control','finishing','switching','impulse_restlessness_control','work_crowding'].includes(key)){
            const n=value.match(/^([1-5])\/5$/);if(n)row[key]=String(Number(n[1])-1)
          }else if(key==='dropoff'){
-           row.dropoff=/^(Yes|No|Not sure)\b/.exec(value)?.[1]||'';
-           row.dropoff_time=value.match(/\(at ([^)]+)\)/)?.[1]||'';
-           row.dropoff_changes=value.includes(' · ')?value.split(' · ').slice(1).join(' · ').split(/,\s*/):[];
+           const choice=/^(Yes|No|Not sure)\b/.exec(value)?.[1];if(choice)row.dropoff=choice;
+           const at=value.match(/\(at ([^)]+)\)/)?.[1];if(at)row.dropoff_time=at;
+           if(value.includes(' · '))row.dropoff_changes=value.split(' · ').slice(1).join(' · ').split(/,\s*/);
          }else if(key==='side_effects')row.side_effects=/^(Not specified|None reported)$/i.test(value)?[]:value.split(/,\s*/);
-         else row[key]=value==='Not recorded'?'':value;
+         else if(value!=='Not recorded')row[key]=value;
          capture='';
        }else capture='';
      } else if(capture && !/^#{1,3}\s|^Daily functioning$|^Tolerability$/.test(ln)){
@@ -899,7 +901,7 @@ function showRestorePreview(){
    p.textContent=(parsed.kind==='device'?'Complete backup':'Text report')+': '+parsed.mine.length+' personal, '+parsed.partner.length+' partner entries. '+(mine.added+partner.added)+' new; '+(mine.kept+partner.kept)+' already saved (matching dates).';
    out.replaceChildren(p);
    const detail=document.createElement('p');
-   detail.textContent='Dates: '+[...parsed.mine.map(r=>r.date),...parsed.partner.map(r=>r.date)].sort().join(', ')+(parsed.kind==='device'?' · Drafts and experiments included.':' · Only fields present in text can be recovered.');
+   detail.textContent='Dates: '+[...parsed.mine.map(r=>r.date),...parsed.partner.map(r=>r.date)].sort().join(', ')+(parsed.kind==='device'?' · Drafts, experiments and (where available) preferences included.':' · Only fields present in text can be recovered.');
    const collisionDates=[...parsed.mine.filter(r=>get(K,[]).some(o=>o.date===r.date)).map(r=>'Your check-in '+r.date),...parsed.partner.filter(r=>get(P,[]).some(o=>o.date===r.date)).map(r=>'Partner '+r.date)];
    if(collisionDates.length){const warning=document.createElement('p');warning.textContent='Matching entries: '+collisionDates.join(', ')+'. Replacement updates only fields present in imported entries; existing notes and other fields remain unless supplied.';out.append(warning)}
 
@@ -930,7 +932,9 @@ $('#restore-apply').onclick=()=>{
    active:old.experiments.active||parsed.experiments.active||null,
    history:[...new Map([...parsed.experiments.history,...(old.experiments.history||[])].map(r=>[[r.date,r.started,r.type].join('|'),r])).values()]
  }:old.experiments;
- const next={[K]:mine.rows,[P]:partner.rows,[DRAFT_KEY]:nextDrafts,[EXP_KEY]:nextExperiments};
+ // Retain this device's preferences; recover from backup only on a device with no preference record.
+ const nextSettings=parsed.kind==='device'&&parsed.settings&&localStorage.getItem(S)===null?parsed.settings:get(S,{});
+ const next={[K]:mine.rows,[P]:partner.rows,[DRAFT_KEY]:nextDrafts,[EXP_KEY]:nextExperiments,[S]:nextSettings};
  try{
    const encoded=Object.entries(next).map(([key,val])=>[key,JSON.stringify(val)]);
    const snapshot=Object.keys(next).map(key=>[key,localStorage.getItem(key)]);
