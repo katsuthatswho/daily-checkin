@@ -360,8 +360,8 @@ function multi(id){
   }
 }
 multi('#wins'); multi('#effects'); multi('#drops');
-function updateOtherEffect(){const selected=$('#effects .sel').some(x=>x.dataset.v==='Other');$('#effect-other-wrap').classList.toggle('hide',!selected||$('#effectdetails').classList.contains('hide'))}function toggleEffects(){let show=val('side')&&val('side')!=='None';$('#effectdetails').classList.toggle('hide',!show);if(!show){$('#effects .sel').forEach(x=>x.classList.remove('sel'));$('#effect-other').value=''}updateOtherEffect()}
-function updateOtherDropoff(){const chosen=$('#drops .sel').some(x=>x.dataset.v==='Other');$('#drop-other-wrap').classList.toggle('hide',!chosen||$('#dropdetails').classList.contains('hide'))}function toggleDropoff(){let yes=val('dropoff')==='Yes';$('#dropdetails').classList.toggle('hide',!yes);if(!yes){$('#droptime').value='';$('#drop-other').value='';$('#drops .sel').forEach(x=>x.classList.remove('sel'))}updateOtherDropoff()}
+function updateOtherEffect(){const selected=$$('#effects .sel').some(x=>x.dataset.v==='Other');$('#effect-other-wrap').classList.toggle('hide',!selected||$('#effectdetails').classList.contains('hide'))}function toggleEffects(){let show=val('side')&&val('side')!=='None';$('#effectdetails').classList.toggle('hide',!show);if(!show){$$('#effects .sel').forEach(x=>x.classList.remove('sel'));$('#effect-other').value=''}updateOtherEffect()}
+function updateOtherDropoff(){const chosen=$$('#drops .sel').some(x=>x.dataset.v==='Other');$('#drop-other-wrap').classList.toggle('hide',!chosen||$('#dropdetails').classList.contains('hide'))}function toggleDropoff(){let yes=val('dropoff')==='Yes';$('#dropdetails').classList.toggle('hide',!yes);if(!yes){$('#droptime').value='';$('#drop-other').value='';$$('#drops .sel').forEach(x=>x.classList.remove('sel'))}updateOtherDropoff()}
 
 const doses={
 'Vyvanse (lisdexamfetamine)':['20 mg','30 mg','40 mg','50 mg','60 mg','70 mg'],
@@ -432,8 +432,8 @@ $('#sk').onclick=()=>{
   getting_started:val('start'),attention_control:val('attention'),side_quest_control:val('sidequests'),
   finishing:val('finish'),switching:val('switching'),impulse_restlessness_control:val('regulation'),
   life_outside_work:$$('#wins .sel').map(x=>x.dataset.v),work_crowding:val('crowd'),
-  dropoff:val('dropoff'),dropoff_time:val('dropoff')==='Yes'?$('#droptime').value:'',dropoff_changes:val('dropoff')==='Yes'?$('#drops .sel').map(x=>x.dataset.v):[],dropoff_other:val('dropoff')==='Yes'&&$('#drops .sel').some(x=>x.dataset.v==='Other')?$('#drop-other').value.trim():'',
-  side_effect_severity:val('side'),side_effects:$('#effects .sel').map(x=>x.dataset.v),side_effect_other:$('#effects .sel').some(x=>x.dataset.v==='Other')?$('#effect-other').value.trim():'',
+  dropoff:val('dropoff'),dropoff_time:val('dropoff')==='Yes'?$('#droptime').value:'',dropoff_changes:val('dropoff')==='Yes'?$$('#drops .sel').map(x=>x.dataset.v):[],dropoff_other:val('dropoff')==='Yes'&&$$('#drops .sel').some(x=>x.dataset.v==='Other')?$('#drop-other').value.trim():'',
+  side_effect_severity:val('side'),side_effects:$$('#effects .sel').map(x=>x.dataset.v),side_effect_other:$$('#effects .sel').some(x=>x.dataset.v==='Other')?$('#effect-other').value.trim():'',
   note:$('#quick-self').value.trim()
  };
  let a=get(K,[]),i=a.findIndex(x=>x.date===r.date);if(i>=0)a[i]=r;else a.push(r);try{set(K,a);if(!get(K,[]).some(x=>x.date===r.date&&x.note===r.note))throw Error('Read-back failed')}catch(e){notifySave('Could not verify save. Keep your note and export a backup.',true);return}clearDraftFor(r.date,'self');$('#ko').textContent=(i>=0?'Check-in updated':'Saved')+' ✓ · '+(missing.length?missing.length+' unanswered · edit any time':a.length+' check-in'+(a.length===1?'':'s')+' saved');flash('#ko');notifySave((i>=0?'Check-in updated':'Check-in saved')+' on this device ✓'+(missing.length?' · '+missing.length+' unanswered (optional)':''));
