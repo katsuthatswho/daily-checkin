@@ -222,6 +222,7 @@ test('Other side effect reveals description, saves it, and restores after reload
  await page.locator('[data-g=side] [data-v=Mild]').click();
  await page.locator('#effects [data-v=Other]').click();
  await expect(page.locator('#effect-other-wrap')).toBeVisible();
+ await expect(page.locator('#effect-other-wrap')).toBeInViewport();
  await page.locator('#effect-other').fill('Tense jaw in the afternoon');
  await page.locator('#sk').click();
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
@@ -235,6 +236,20 @@ test('Other side effect reveals description, saves it, and restores after reload
  await page.locator('#sk').click();
  const updated=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
  expect(updated.side_effect_other).toBe('');
+});
+
+test('later-day change Other reveals a separate description and persists',async({page})=>{
+ await page.locator('#more-details').evaluate(el=>el.open=true);
+ await page.locator('[data-g=dropoff] [data-v=Yes]').click();
+ await page.locator('#drops [data-v=Other]').click();
+ await expect(page.locator('#drop-other-wrap')).toBeVisible();
+ await page.locator('#drop-other').fill('Felt unusually impatient');
+ await page.locator('#sk').click();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
+ expect(saved.dropoff_changes).toContain('Other');
+ expect(saved.dropoff_other).toBe('Felt unusually impatient');
+ await page.reload();
+ await expect(page.locator('#drop-other')).toHaveValue('Felt unusually impatient');
 });
 test('Journal presents three export outcomes and independent restore',async({page})=>{
  await page.locator('#jt').click();
