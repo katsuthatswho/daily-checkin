@@ -251,6 +251,66 @@ test('later-day change Other reveals a separate description and persists',async(
  await page.reload();
  await expect(page.locator('#drop-other')).toHaveValue('Felt unusually impatient');
 });
+
+test('P0 Journal has one primary export path, with older formats collapsed',async({page})=>{
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-panel')).toBeVisible();
+ await expect(page.locator('#device-backup-download')).toBeVisible();
+ await expect(page.locator('#journal-export')).toBeVisible();
+ await expect(page.locator('#doctor-copy')).toBeVisible();
+ await expect(page.locator('#advanced-formats')).not.toHaveAttribute('open','');
+ await expect(page.locator('#ck')).toBeHidden();
+ await expect(page.locator('#cp')).toBeHidden();
+ await expect(page.locator('#full-backup-status')).toContainText('not verified');
+ await page.locator('#advanced-formats > summary').click();
+ await expect(page.locator('#advanced-formats')).toHaveAttribute('open','');
+});
+test('P0 journal status never implies JSON drafts are backed up',async({page})=>{
+ await page.evaluate(()=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',note:'Sample'}])));
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-status')).toContainText('Journal: Not backed up');
+ await page.evaluate(()=>{navigator.share=async()=>{};navigator.canShare=()=>true});
+ await page.locator('#journal-export').click();
+ await page.locator('#journal-done').click();
+ await expect(page.locator('#journal-status')).toContainText('Journal: Backed up');
+ await expect(page.locator('#journal-detail')).toContainText('Full JSON recovery backup is separate');
+ await expect(page.locator('#full-backup-status')).toContainText('not verified');
+});
+test('P0 backed-up medication preferences restore only on devices without preferences',async({page})=>{
+ const source={
+ format:'daily-checkin-device-backup-v2',daily_checkins_on_this_device:[],partner_checkins_on_this_device:[],
+ unfinished_drafts_on_this_device:{},behavioural_experiments_on_this_device:{active:null,history:[]},
+ usual_medication_settings_on_this_device:{medication:'Vyvanse (lisdexamfetamine)',dose:'20 mg'}
+ };
+ await page.locator('#jt').click();await page.locator('#restore-panel > summary').click();
+ await page.locator('#restore-paste').fill(JSON.stringify(source));await page.locator('#restore-preview').click();
+ await page.locator('#restore-apply').click();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('tracker_settings_v3')));
+ expect(saved.dose).toBe('20 mg');
+ const full=await page.evaluate(()=>completeBackup());
+ expect(full.usual_medication_settings_on_this_device).toEqual(saved);
+ await page.evaluate(()=>localStorage.setItem('tracker_settings_v3',JSON.stringify({medication:'Other',dose:'Other'})));
+ await page.locator('#restore-paste').fill(JSON.stringify(source));await page.locator('#restore-preview').click();await page.locator('#restore-apply').click();
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('tracker_settings_v3')).medication)).toBe('Other');
+});
+test('P0 text report Not recorded never clears a saved answer during replacement',async({page})=>{
+ await page.evaluate(()=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',medication_today:'Yes',medication:'Vyvanse',dose:'20 mg',sleep:'Great',life_outside_work:['Dog park'],appetite:'Ate as usual',note:'Keep original note'}])));
+ await page.locator('#jt').click();await page.locator('#restore-panel > summary').click();
+ await page.locator('#restore-paste').fill('# Personal ADHD treatment check-ins\n\n## 2026-10-19\n**Medication:** Not recorded\n**Sleep quality:** Not recorded\n**Life outside work:** Not recorded\n- Appetite and meals: Not recorded\n**Other observations:** New note');
+ await page.locator('#restore-preview').click();await page.locator('#restore-overwrite').check();await page.locator('#restore-apply').click();
+ const row=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
+ expect(row.sleep).toBe('Great');expect(row.medication).toBe('Vyvanse');expect(row.appetite).toBe('Ate as usual');expect(row.life_outside_work).toEqual(['Dog park']);expect(row.note).toBe('New note');
+});
+test('P0 editing an imported record preserves fields this form does not recognise',async({page})=>{
+ const day=await page.locator('#entrydate').inputValue();
+ await page.evaluate(d=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:d,medication_today:'No',note:'Original',legacy_mood_context:'Must not disappear'}])),day);
+ await page.reload();
+ await page.locator('#quick-self').fill('Edited');
+ await page.locator('#sk').click();
+ const row=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4'))[0]);
+ expect(row.note).toBe('Edited');expect(row.legacy_mood_context).toBe('Must not disappear');
+});
+
 test('Journal presents three export outcomes and independent restore',async({page})=>{
  await page.locator('#jt').click();
  await expect(page.locator('#journal-panel')).toBeVisible();
@@ -335,7 +395,7 @@ test('self form conditional controls, validation, save, update, history and expo
  let data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(data).toHaveLength(1);expect(data[0].getting_started).toBe('0');expect(data[0].side_effects).toEqual([]);
  await page.locator('[data-g=medtoday] [data-v=No]').click();for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="4"]').click();await page.locator('#sk').click();
  data=await page.evaluate(()=>JSON.parse(localStorage.getItem('my_daily_v4')));expect(data).toHaveLength(1);expect(data[0].getting_started).toBe('4');
- await page.locator('#jt').click();await page.locator('#kh').locator('xpath=..').locator('summary').click();await expect(page.locator('#kh')).toContainText('Start 5/5');
+ await page.locator('#jt').click();await page.locator('#advanced-formats > summary').click();await page.locator('#kh').locator('xpath=..').locator('summary').click();await expect(page.locator('#kh')).toContainText('Start 5/5');
  const [file]=await Promise.all([page.waitForEvent('download'),page.locator('#ck').click()]);expect(file.suggestedFilename()).toBe('my-checkins.csv');expect(errors).toEqual([]);
 });
 test('partner observation, uncertainty, save, update and export',async({page})=>{
@@ -347,7 +407,7 @@ test('partner observation, uncertainty, save, update and export',async({page})=>
  await page.locator('[data-g=start_obs] [data-v="A little better"]').click();await page.locator('#sp').click();
  let data=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(data).toHaveLength(1);expect(data[0].start_obs).toBe('A little better');
  await page.locator('[data-g=start_obs] [data-v=Same]').click();await page.locator('#sp').click();data=await page.evaluate(()=>JSON.parse(localStorage.getItem('partner_weekly_v3')));expect(data).toHaveLength(1);expect(data[0].start_obs).toBe('Same');
- await page.locator('#jt').click();await page.locator('#ph').locator('xpath=..').locator('summary').click();await expect(page.locator('#ph')).toContainText('Same');
+ await page.locator('#jt').click();await page.locator('#advanced-formats > summary').click();await page.locator('#ph').locator('xpath=..').locator('summary').click();await expect(page.locator('#ph')).toContainText('Same');
  const [file]=await Promise.all([page.waitForEvent('download'),page.locator('#cp').click()]);expect(file.suggestedFilename()).toBe('partner-checkins.csv');expect(errors).toEqual([]);
 });
 test('offline shell works after initial online load',async({page,context})=>{
@@ -729,7 +789,7 @@ test('full device backup includes unfinished drafts and behavioural experiments'
   return {drafts,day:document.querySelector('#entrydate').value};
  });
  expect(result.drafts[result.day].fields.kn).toBe('Unfinished backup note');
- await page.locator('#bk').evaluate(el=>el.closest('details').open=true);
+ await page.locator('#bk').evaluate(el=>{el.closest('details').open=true;document.querySelector('#advanced-formats').open=true});
  const captured=await page.evaluate(()=>{let raw='';const original=URL.createObjectURL;URL.createObjectURL=blob=>{window.__backupBlob=blob;return original.call(URL,blob)};return true});
  await page.locator('#bk').evaluate(el=>el.click());
  const backupText=await page.evaluate(async()=>window.__backupBlob?await window.__backupBlob.text():null);
