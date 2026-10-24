@@ -356,7 +356,7 @@ function multi(id){
     let b=e.target.closest('.c');if(!b)return;
     if(b.dataset.v==='None'){$$(id+' .c').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')}
     else{let n=$(id+' [data-v="None"]');if(n)n.classList.remove('sel');b.classList.toggle('sel')}
-    if(id==='#effects')updateOtherEffect();if(id==='#drops')updateOtherDropoff();scheduleDraft();
+    if(id==='#effects')updateOtherEffect();if(id==='#drops')updateOtherDropoff();if(b.dataset.v==='Other'&&b.classList.contains('sel')){const field=id==='#effects'?$('#effect-other-wrap'):id==='#drops'?$('#drop-other-wrap'):null;if(field)field.scrollIntoView({block:'nearest',behavior:'smooth'})}scheduleDraft();
   }
 }
 multi('#wins'); multi('#effects'); multi('#drops');
