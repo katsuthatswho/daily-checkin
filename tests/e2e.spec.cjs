@@ -595,7 +595,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
 });
 
 test('headings, date and navigation remain in consistent order across every section',async({page})=>{
- const states=[['k','How was your day?'],['p','What did you notice?'],['insights','What’s changing?'],['journal-view','Your saved days.']];
+ const states=[['k','How was your day?'],['p','What did you notice?'],['insights','What’s changing?'],['journal-view','Your journal.']];
  for(const [view,title] of states){
   if(view==='k')await page.locator('#kt').click();
   else if(view==='p'){await page.locator('#kt').click();await page.locator('#pt').click()}
