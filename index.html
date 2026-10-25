@@ -285,6 +285,7 @@ body{font-weight:400;letter-spacing:-.012em}
 #pattern-sharing .export-actions{margin-top:5px}
 .detailed-patterns .insight-section{padding:0;margin:0}
 #k>.quiet-progress{font-size:12px;color:var(--muted);margin:6px 0 0}
+.pattern-context{font-size:12px;color:var(--muted);margin:12px 0 16px}
 #journal-view .periods.hide{display:none}
 @media(prefers-reduced-motion:reduce){.supporting-actions *{scroll-behavior:auto!important}}
 </style></head><body><main class="w"><header class="app-head"><div class="app-mark" aria-hidden="true">✎</div><div><div class="app-name">Daily Check-in</div></div></header><div class="tabs" role="navigation" aria-label="Sections"><button id="kt" class="on" type="button" aria-current="page"><span>Check-in</span></button><button id="it" type="button"><span>Patterns</span></button><button id="jt" type="button"><span>Journal</span></button></div>
@@ -737,7 +738,7 @@ function renderInsights(){
  const {mine,partner,shared}=insightData();
  const dims=[['Getting started','getting_started'],['Staying focused','attention_control'],['Staying on track','side_quest_control'],['Following through','finishing'],['Switching gears','switching'],['Pausing & regulating','impulse_restlessness_control']];
  const dayCount=insightPeriod==='all'?null:Number(insightPeriod);
- let body='<div class="insight-lead"><span class="insight-overline">YOUR RECORD AT A GLANCE</span><div class="insight-lead-grid"><div><strong>'+mine.length+'</strong><span>days checked in</span></div><div><strong>'+partner.length+'</strong><span>partner entries</span></div><div><strong>'+shared.length+'</strong><span>dates together</span></div></div><p>'+ (dayCount?'Within the last '+dayCount+' days.':'Across all saved dates.')+' Unrecorded days are not counted as low scores.</p></div>';
+ let body='<p class="pattern-context">'+mine.length+' personal '+(mine.length===1?'entry':'entries')+(partner.length?' · '+partner.length+' partner '+(partner.length===1?'entry':'entries'):'')+' · '+(dayCount?'Last '+dayCount+' days':'All saved dates')+'. Missing days are not scored.</p>';
  if(!mine.length&&!partner.length){$('#insight-body').innerHTML=body+insightCard('GET STARTED','Your first check-in makes this useful','Your saved days will appear here as you record them.');$('#insight-journal').textContent='Start a check-in';return}$('#insight-journal').textContent='Review dated entries';
  if(mine.length){
   body+='<section class="insight-section"><div class="insight-section-heading"><div class="insight-kicker">01 / DAY TO DAY</div><h2>What changed between entries?</h2></div>'+changeSignals(mine,dims)+'</section>';
@@ -811,7 +812,9 @@ $('#experiment-review').onclick=()=>{
 };
 function deleteJournalEntry(date,who){const label=who==='mine'?'your':'partner';if(!confirm('Delete '+label+' entry for '+date+'? This cannot be undone. Export a backup first if needed.'))return;const key=who==='mine'?K:P;try{set(key,get(key,[]).filter(r=>r.date!==date))}catch(e){alert('Could not delete entry.');return}renderJournal();renderInsights();if(selectedDay()===date)loadSelectedDate()}
 function renderJournal(){
- $('#journal-view .periods').classList.toggle('hide',get(P,[]).filter(dated).length===0);
+ const hasPartner=get(P,[]).some(dated);
+ if(!hasPartner&&journalFilter==='partner')journalFilter='both';
+ $('#journal-view .periods').classList.toggle('hide',!hasPartner);
  const mine=get(K,[]).filter(dated).map(r=>({...r,_who:'mine'})),partner=get(P,[]).filter(dated).map(r=>({...r,_who:'partner'}));
  const rows=[...(journalFilter==='partner'?[]:mine),...(journalFilter==='mine'?[]:partner)].sort((a,b)=>b.date.localeCompare(a.date)||a._who.localeCompare(b._who));
  $('#journal-list').innerHTML=rows.length?rows.map(r=>'<article class="journal-item"><strong>'+htmlSafe(r.date)+' · '+(r._who==='mine'?'My check-in':'Partner')+'</strong><p>'+htmlSafe(r._who==='mine'?'Getting started '+frac(r.getting_started)+' · Focus '+frac(r.attention_control)+(r.note?' · '+r.note:''):(r.start_obs?'Getting started: '+r.start_obs:'Observation saved')+(r.note?' · '+r.note:''))+'</p><button data-editdate="'+htmlSafe(r.date)+'" data-editwho="'+r._who+'">Open entry</button> <details class="entry-more"><summary>More</summary><button type="button" data-deletedate="'+htmlSafe(r.date)+'" data-deletewho="'+r._who+'">Delete this entry</button></details></article>').join(''):'<p class="hint">No entries in this view yet.</p>';
