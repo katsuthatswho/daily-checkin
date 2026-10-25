@@ -315,6 +315,43 @@ test('P0 editing an imported record preserves fields this form does not recognis
  expect(row.note).toBe('Edited');expect(row.legacy_mood_context).toBe('Must not disappear');
 });
 
+
+test('Product defaults to one useful purpose per destination with advanced actions collapsed',async({page})=>{
+ await expect(page.locator('#checkin-title')).toContainText('How was your day?');
+ await expect(page.locator('#more-details')).not.toHaveAttribute('open','');
+ await page.locator('#it').click();
+ await expect(page.locator('#insights h1')).toContainText('What are you noticing?');
+ await expect(page.locator('#patterns-experiments')).not.toHaveAttribute('open','');
+ await expect(page.locator('#pattern-sharing')).not.toHaveAttribute('open','');
+ await expect(page.locator('#experiment-type')).toBeHidden();
+ await page.locator('#patterns-experiments > summary').click();
+ await expect(page.locator('#experiment-type')).toBeVisible();
+ await page.locator('#pattern-sharing > summary').click();
+ await expect(page.locator('#insight-copy')).toBeVisible();
+ await page.locator('#jt').click();
+ await expect(page.locator('#journal-panel')).not.toHaveAttribute('open','');
+ await expect(page.locator('#restore-panel')).not.toHaveAttribute('open','');
+});
+test('Patterns keeps trends accessible without placing six charts on first view',async({page})=>{
+ await page.evaluate(()=>localStorage.setItem('my_daily_v4',JSON.stringify([
+  {date:'2026-10-19',getting_started:'1',attention_control:'2'},
+  {date:'2026-10-20',getting_started:'3',attention_control:'1'}
+ ])));
+ await page.locator('#it').click();
+ await expect(page.locator('#insight-body')).toContainText('What changed between entries?');
+ await expect(page.locator('.detailed-patterns')).not.toHaveAttribute('open','');
+ await expect(page.locator('.trend-row')).toHaveCount(6);
+ await expect(page.locator('.trend-row').first()).toBeHidden();
+ await page.locator('.detailed-patterns > summary').click();
+ await expect(page.locator('.trend-row').first()).toBeVisible();
+});
+test('Active behavioural experiment opens its own panel rather than hiding the ongoing review',async({page})=>{
+ await page.evaluate(()=>localStorage.setItem('daily_checkin_experiments_v1',JSON.stringify({active:{type:'start',started:'2026-10-19'},history:[]})));
+ await page.locator('#it').click();
+ await expect(page.locator('#patterns-experiments')).toHaveAttribute('open','');
+ await expect(page.locator('#experiment-active')).toBeVisible();
+});
+
 test('Journal starts with entries rather than an expanded export dashboard',async({page})=>{
  await page.evaluate(()=>localStorage.setItem('my_daily_v4',JSON.stringify([{date:'2026-10-19',note:'Walked dogs'}])));
  await page.locator('#jt').click();
@@ -595,7 +632,7 @@ test('unified navigation, factual insights, journal edit and XSS safety',async({
 });
 
 test('headings, date and navigation remain in consistent order across every section',async({page})=>{
- const states=[['k','How was your day?'],['p','What did you notice?'],['insights','What’s changing?'],['journal-view','Your journal.']];
+ const states=[['k','How was your day?'],['p','What did you notice?'],['insights','What are you noticing?'],['journal-view','Your journal.']];
  for(const [view,title] of states){
   if(view==='k')await page.locator('#kt').click();
   else if(view==='p'){await page.locator('#kt').click();await page.locator('#pt').click()}
@@ -647,9 +684,9 @@ test('ADHD-friendly short form, optional details, sticky save and pencil icon',a
  const before=await page.locator('#sk').boundingBox();expect(before.height).toBeGreaterThan(30);
  await page.locator('[data-g=medtoday] [data-v=No]').click();
  for(const g of ['start','attention','sidequests','finish','switching','regulation'])await page.locator('[data-g='+g+'] [data-v="2"]').click();
- await expect(page.locator('#progress')).toContainText('Ready to save');
+ await expect(page.locator('#progress')).toContainText('All core answers recorded');
  await page.locator('#sk').click();await expect(page.locator('#save-toast')).toContainText('Check-in saved');
- await page.reload();await expect(page.locator('#progress')).toContainText('Ready to save');
+ await page.reload();await expect(page.locator('#progress')).toContainText('All core answers recorded');
  await page.locator('#k > .quick-capture').evaluate(el=>el.open=true);
  await expect(page.locator('#quick-self')).toBeVisible();
  await page.locator('#quick-self').fill('Optional entry');await page.locator('#sk').click();
@@ -716,6 +753,7 @@ test('unsaved notes survive changing dates, reload and navigation',async({page})
 
 test('one active experiment, daily review and clinician export persist',async({page})=>{
  await page.locator('#it').click();
+ await page.locator('#patterns-experiments').evaluate(el=>el.open=true);
  await page.locator('#experiment-type').selectOption('start');
  await expect(page.locator('#experiment-plan')).toContainText('first physical step');
  await page.locator('#experiment-start').click();
@@ -820,7 +858,7 @@ test('app script parses and navigation initializes without browser errors',async
  await page.reload();
  expect(errors).toEqual([]);
  await page.locator('#it').click();
- await expect(page.locator('#help-view')).toBeVisible();
+ await expect(page.locator('#patterns-experiments')).toBeVisible();
  await page.locator('#it').click();
  await expect(page.locator('#insights')).toBeVisible();
 });
@@ -832,7 +870,8 @@ test('three destinations keep check-in, patterns with strategies, and records di
  await expect(page.locator('#jt')).toContainText('Journal');
  await page.locator('#it').click();
  await expect(page.locator('#insights')).toBeVisible();
- await expect(page.locator('#help-view')).toBeVisible();
+ await expect(page.locator('#patterns-experiments')).toBeVisible();
+ await page.locator('#patterns-experiments').evaluate(el=>el.open=true);
  await expect(page.locator('#experiment-type')).toBeVisible();
  await page.locator('#jt').click();
  await expect(page.locator('#journal-view')).toBeVisible();
@@ -920,7 +959,7 @@ test('primary product navigation works after startup, date changes and reload',a
  await expect(page.locator('#k')).toBeVisible();
  await page.locator('#it').click();
  await expect(page.locator('#insights')).toBeVisible();
- await expect(page.locator('#help-view')).toBeVisible();
+ await expect(page.locator('#patterns-experiments')).toBeVisible();
  await page.locator('#jt').click();
  await expect(page.locator('#journal-view')).toBeVisible();
  await page.locator('#kt').click();
