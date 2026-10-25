@@ -763,7 +763,7 @@ function renderInsights(){
  }else if(partner.length)body+='<section class="insight-section"><div class="insight-kicker">04 / TWO PERSPECTIVES</div><h2>Partner observations saved</h2><p class="insight-muted">No dates overlap in this period yet. You can review each entry in Journal.</p></section>';
  body+='<p class="insight-disclaimer">This is a descriptive record, not a diagnosis or treatment assessment. Missing entries are not zeros. For a full dated record, use Journal.</p>';
  $('#insight-body').innerHTML=body;
- const detailed=$('#insight-body .insight-section').find(section=>section.textContent.includes('How your days varied'));
+ const detailed=$$('#insight-body .insight-section').find(section=>section.textContent.includes('How your days varied'));
  if(detailed){
   const wrapper=document.createElement('details');wrapper.className='supporting-actions detailed-patterns';wrapper.innerHTML='<summary>Detailed score history</summary>';
   detailed.replaceWith(wrapper);wrapper.appendChild(detailed);
