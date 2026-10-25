@@ -528,10 +528,10 @@ test('tabs have consistent hierarchy and partner progress updates',async({page})
  await expect(page.locator('#checkin-title')).toBeVisible();
  await page.locator('#pt').click();
  await expect(page.locator('#entrydate')).toHaveValue(/^\d{4}-\d{2}-\d{2}$/);
- await expect(page.locator('#partnerprogress')).toContainText('Choose any observation');
+ await expect(page.locator('#partnerprogress')).toContainText('Answer only what you noticed');
  await expect(page.locator('#p .section-kicker')).toHaveCount(2);
  await page.locator('[data-g=start_obs] [data-v=Same]').click();
- await expect(page.locator('#partnerprogress')).toContainText('1 observations recorded');
+ await expect(page.locator('#partnerprogress')).toContainText('1 answered');
  await expect(page.locator('#p .save')).toHaveCount(1);
  await page.locator('#kt').click();
  await expect(page.locator('#k .section-kicker')).toHaveCount(3);
